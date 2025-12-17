@@ -82,6 +82,18 @@ st.markdown("""
         margin-bottom: 20px !important;
     }
 
+    /* [수정] 라벨만 2포인트 키우고 볼드 처리 강화 */
+    [data-testid="stMetricLabel"] p { 
+        font-size: 1.6rem !important; /* 기존보다 2pt 추가 상향 */
+        color: #FFFFFF !important; /* 가독성을 위해 화이트로 조정 */
+        font-weight: 900 !important; /* 가장 굵게 처리 */
+    }
+    [data-testid="stMetricValue"] { 
+        font-size: 2.0rem !important; /* 수치는 이전 크기 유지 */
+        color: #4a5fcc !important; 
+        font-weight: 700 !important; 
+    }
+
     /* 문법 카드 디자인 */
     .analysis-card {
         border-left: 4px solid #2a3f88;
@@ -92,7 +104,6 @@ st.markdown("""
         border: 1px solid rgba(45, 53, 72, 0.5);
     }
     
-    /* [수정] 품사 제목 폰트 2포인트 상향 (기존 1.1rem -> 1.3rem) */
     .pos-title { 
         font-size: 1.3rem !important; 
         font-weight: 800 !important; 
@@ -100,7 +111,6 @@ st.markdown("""
         margin-bottom: 10px; 
     }
     
-    /* 핵심 설명 폰트 (상향 유지) */
     .pos-desc { 
         font-size: 1.05rem !important; 
         color: #8b92b2; 
@@ -108,7 +118,6 @@ st.markdown("""
         line-height: 1.6; 
     }
 
-    /* 데이터 영역 폰트 통일 */
     .data-row {
         display: flex; 
         align-items: baseline; 
