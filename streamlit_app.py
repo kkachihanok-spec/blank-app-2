@@ -129,27 +129,6 @@ st.markdown("""
     .data-row { display: flex; align-items: baseline; border-top: 1px solid rgba(141, 146, 178, 0.2); padding-top: 12px; }
     .card-word { font-weight: 700 !important; color: #FFFFFF; } 
     .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } 
-
-    /* --- [수정] 퀴즈 라디오 버튼 및 박스 스타일 --- */
-    .quiz-selection-box {
-        background: rgba(74, 95, 204, 0.1); 
-        border: 1px solid rgba(74, 95, 204, 0.4); 
-        padding: 25px; 
-        border-radius: 15px;
-    }
-
-    /* "정답을 골라보세요!" 안내 문구 크기 20% 확대 */
-    [data-testid="stWidgetLabel"] p {
-        font-size: 1.2rem !important; 
-        color: #FFFFFF !important;
-        font-weight: 700 !important;
-        margin-bottom: 15px !important;
-    }
-    /* 라디오 버튼 선택지(명사, 동사 등) 글자 크기 20% 확대 */
-    div[data-testid="stMarkdownContainer"] p {
-        font-size: 1.2rem !important; 
-        font-weight: 500 !important;
-    }
     
     .lyrics-card::-webkit-scrollbar { width: 6px; }
     .lyrics-card::-webkit-scrollbar-thumb { background: #2a3f88; border-radius: 10px; }
@@ -195,7 +174,7 @@ if st.session_state.analyzed:
         m3.metric("최빈 단어", f"→ {df_counts.iloc[0]['단어']}")
         m4.metric("주요 품사", f"→ {df_counts.iloc[0]['품사']}")
 
-        # 2. 번역 및 데이터 표 (생략 없이 유지)
+        # 2. 번역 및 데이터 표
         st.divider()
         c_l, c_r = st.columns([1.2, 1])
         with c_l:
@@ -237,29 +216,35 @@ if st.session_state.analyzed:
                     top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                     st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div style="color:#8b92b2; margin-bottom:14px;">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-        # 5. [수정 완료] 퀴즈 섹션 
+        # 5. [최종] 퀴즈 섹션 (가로폭 100% 및 텍스트 20% 축소)
         st.divider()
         st.markdown("### 📝 오늘의 가사 퀴즈")
         with st.container():
             top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
             
-            # 질문: 박스를 빼고 깔끔한 텍스트로만 표시
+            # 박스 스타일: 가로폭 100% (block 기본값)
+            # 텍스트 스타일: font-size 1.2rem (기본 대비 약 20% 축소)
             st.markdown(f"""
-                <div style="margin-bottom: 25px; padding: 5px 0;">
-                    <span style="color: #4a5fcc; font-weight: 800; font-size: 1.3rem;">Q.</span>
-                    <span style="color: white; font-size: 1.2rem; font-weight: 600; line-height: 1.5;">
-                        이 가사에서 가장 많이 사용된 단어는 '{top_word}'입니다. 이 단어의 품사는 무엇일까요?
-                    </span>
+                <div style="
+                    background: rgba(74, 95, 204, 0.1); 
+                    border: 1px solid #4a5fcc; 
+                    padding: 20px 25px; 
+                    border-radius: 12px; 
+                    margin-bottom: 20px;
+                ">
+                    <div style="
+                        color: white; 
+                        font-size: 1.2rem; 
+                        font-weight: 600; 
+                        line-height: 1.5;
+                    ">
+                        Q. 이 가사에서 가장 많이 사용된 단어는 '{top_word}'입니다. 이 단어의 품사는 무엇일까요?
+                    </div>
                 </div>
             """, unsafe_allow_html=True)
             
-            # 선택지: 박스(quiz-selection-box) 안에 라디오 버튼 배치
-            st.markdown('<div class="quiz-selection-box">', unsafe_allow_html=True)
-            user_choice = st.radio("정답을 골라보세요!", ["명사", "동사", "형용사", "부사"], index=None, key="quiz_final_scaled")
-            st.markdown('</div>', unsafe_allow_html=True)
-            
+            user_choice = st.radio("정답을 골라보세요!", ["명사", "동사", "형용사", "부사"], index=None, key="quiz_final_full")
             if user_choice:
-                st.write("") # 간격 조절
                 if user_choice == top_pos:
                     st.success(f"정답입니다! 🎉 '{top_word}'은(는) **{top_pos}**입니다.")
                     st.balloons()
