@@ -7,7 +7,7 @@ import plotly.express as px
 # 1. 페이지 설정
 st.set_page_config(page_title="K-POP INSIGHT", layout="wide", page_icon="🎧")
 
-# 2. 커스텀 CSS (메트릭 텍스트 크기 및 굵기 상향)
+# 2. 커스텀 CSS (라벨은 강조, 데이터값은 보통 굵기로)
 st.markdown("""
     <style>
     .stApp {
@@ -24,7 +24,6 @@ st.markdown("""
         text-align: left;
     }
     
-    /* 섹션 헤더 (h3) */
     h3 {
         font-size: 1.8rem !important;
         color: #FFFFFF !important;
@@ -32,33 +31,32 @@ st.markdown("""
         margin-bottom: 1.5rem !important;
     }
 
-    /* 메트릭 라벨 (전체 단어, 고유 단어 등) - 2포인트 상향 및 굵게 */
+    /* [요청사항] 메트릭 라벨은 굵게 */
     [data-testid="stMetricLabel"] p {
-        font-size: 1.3rem !important; /* 약 1.1rem에서 1.3rem으로 상향 */
-        font-weight: 800 !important;   /* 아주 굵게 */
-        color: #FFFFFF !important;    /* 흰색으로 강조 */
+        font-size: 1.3rem !important;
+        font-weight: 800 !important;
+        color: #FFFFFF !important;
     }
     
-    /* 메트릭 값 (숫자 및 결과 단어) */
+    /* [요청사항] 메트릭 실제 값(숫자, 단어)은 보통 굵기로 */
     [data-testid="stMetricValue"] {
         font-size: 2.2rem !important;
-        font-weight: 900 !important;
+        font-weight: 400 !important; /* 900 -> 400 (보통 굵기) */
         color: #1DB954 !important;
     }
 
-    /* 가사 입력 레이블 */
     .stTextArea label p {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
-        margin-bottom: 15px !important;
     }
 
-    .stTextArea textarea {
-        background-color: #282828 !important;
-        color: #FFFFFF !important;
-        border-radius: 12px !important;
-        border: 1px solid #404040 !important;
+    /* 품사 카드 내 분석 단어 굵기 조정 */
+    .card-word {
+        font-size: 1.4rem !important;
+        font-weight: 400 !important; /* 700 -> 400 (보통 굵기) */
+        color: #FFFFFF;
+        margin-right: 8px;
     }
 
     .analysis-card {
@@ -80,20 +78,6 @@ st.markdown("""
         font-size: 0.85rem;
         color: #B3B3B3;
         margin-bottom: 10px;
-        line-height: 1.4;
-    }
-
-    .card-word {
-        font-size: 1.4rem !important;
-        font-weight: 700;
-        color: #FFFFFF;
-        margin-right: 8px;
-    }
-
-    .card-count {
-        font-size: 1rem;
-        color: #1DB954;
-        font-weight: 500;
     }
 
     .stButton>button {
@@ -104,7 +88,6 @@ st.markdown("""
         color: white !important;
         font-weight: 700;
         height: 3rem;
-        border: none;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -137,7 +120,7 @@ if analyze_btn:
         if not df_all.empty:
             df_counts = df_all.groupby(['단어', '품사']).size().reset_index(name='횟수').sort_values(by='횟수', ascending=False)
 
-            # 요약 대시보드 (디자인 강화됨)
+            # 요약 대시보드
             st.write("")
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("전체 단어", f"{len(all_words)}")
@@ -186,10 +169,8 @@ if analyze_btn:
                                 <div class="pos-desc">{info['desc']}</div>
                                 <div style="display: flex; align-items: baseline;">
                                     <span class="card-word">{top_w}</span>
-                                    <span class="card-count">{cnt}회 등장</span>
+                                    <span style="font-size: 1rem; color: #1DB954;">{cnt}회 등장</span>
                                     <a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.75rem; margin-left:8px; color:#1DB954; text-decoration:none;">사전 보기 →</a>
                                 </div>
                             </div>
                             """, unsafe_allow_html=True)
-                    else:
-                        st.caption(f"{info['icon']} {name} 데이터가 없습니다.")
