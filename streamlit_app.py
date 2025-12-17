@@ -2,41 +2,25 @@ import streamlit as st
 from konlpy.tag import Okt
 import pandas as pd
 from googletrans import Translator
-from collections import Counter
+import plotly.express as px  # 그래프를 위해 추가
 
 # 페이지 설정
 st.set_page_config(page_title="K-Pop 가사 분석기", layout="wide", page_icon="🎵")
 
-# --- 캐시된 리소스: 형태소 분석기 및 번역기 ---
+# 형태소 분석기 및 번역기 초기화
 @st.cache_resource
-def get_okt():
-    return Okt()
+def get_resources():
+    return Okt(), Translator()
 
-@st.cache_resource
-def get_translator():
-    return Translator()
-
-@st.cache_data
-def translate_text(text: str, dest: str) -> str:
-    try:
-        translator = get_translator()
-        return translator.translate(text, dest=dest).text
-    except Exception:
-        return ""  # 호출 오류 시 빈 문자열 반환
-
-@st.cache_data
-def analyze_morphs(text: str):
-    okt = get_okt()
-    return okt.pos(text, stem=True)
+okt, translator = get_resources()
 
 # --- 메인 영역 ---
-st.title("🎵 한국어 노래 가사 분석 & 번역기")
-st.write("가사를 입력하면 **전체 번역**과 **단어별 품사 분석**을 수행합니다.")
+st.title("🎵 K-Pop 가사 분석 & 스마트 사전")
+st.write("가사를 분석하고 단어의 빈도와 뜻을 바로 확인하세요.")
 
-# 가사 입력 창
-lyrics_input = st.text_area("노래 가사를 입력하세요:", height=250, placeholder="여기에 한국어 가사를 붙여넣으세요...")
+lyrics_input = st.text_area("노래 가사를 입력하세요:", height=200, placeholder="여기에 한국어 가사를 붙여넣으세요...")
 
-if st.button("분석 및 번역 시작"):
+if st.button("🚀 분석 및 번역 시작"):
     if lyrics_input.strip():
         # 레이아웃 나누기 (왼쪽: 번역, 오른쪽: 단어 분석)
         col1, col2 = st.columns(2)
