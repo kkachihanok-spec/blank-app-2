@@ -57,19 +57,21 @@ st.markdown("""
         border: 1px solid #2d3548 !important;
     }
 
-    /* [수정] 분석 버튼 디자인: 텍스트 20% 확대, 왼쪽 정렬, 문구 변경 대응 */
+    /* [수정] 분석 버튼 디자인: 가로폭을 텍스트 길이에 맞춤(width: auto) */
     .stButton>button {
         background-color: #2a3f88 !important;
         color: #FFFFFF !important;
         font-weight: 700;
-        width: 300px !important;      /* 문구가 길어져서 너비를 좀 더 넓혔습니다 */
+        width: auto !important;        /* 가로폭 자동 조절 */
+        min-width: 150px !important;   /* 최소 폭 유지 */
         height: 3.84rem !important;   
-        font-size: 1.44rem !important; /* 기존 1.2rem에서 20% 추가 확대 */
+        font-size: 1.44rem !important; 
         border: none;
         margin-top: 20px !important;  
         display: flex !important;
-        justify-content: flex-start !important; /* 왼쪽 정렬 */
-        padding-left: 25px !important;          /* 왼쪽 여백 */
+        justify-content: flex-start !important; 
+        padding-left: 30px !important;  /* 왼쪽 여백 */
+        padding-right: 30px !important; /* 오른쪽 여백 추가로 텍스트에 맞게 확장 */
         align-items: center !important;
         transition: all 0.3s ease;
     }
@@ -148,7 +150,7 @@ lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분�
 
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
-    # [수정] 버튼 문구 변경
+    # 버튼 문구 유지
     analyze_btn = st.button("🚀 분석을 실행해줘!")
 
 # --- 분석 결과 로직 ---
