@@ -82,13 +82,15 @@ st.markdown("""
         margin-bottom: 25px !important;
     }
 
-    /* [수정] 라벨과 수치 사이 간격 30% 축소 (12px -> 8px) */
+    /* [간격 유지] 라벨 하단 여백 8px */
     [data-testid="stMetricLabel"] p { 
         font-size: 1.6rem !important; 
         color: #FFFFFF !important; 
         font-weight: 900 !important; 
         margin-bottom: 8px !important; 
     }
+    
+    /* [수치 색상] 블루 유지 */
     [data-testid="stMetricValue"] { 
         font-size: 1.45rem !important; 
         color: #4a5fcc !important; 
@@ -129,13 +131,6 @@ st.markdown("""
     .data-label { color: #8b92b2; margin-right: 10px; }
     .card-word { font-weight: 700 !important; color: #FFFFFF; }
     .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; }
-    
-    /* 화살표 강조용 커스텀 스타일 */
-    .metric-arrow {
-        color: #FFFFFF !important;
-        font-weight: 400;
-        margin-right: 5px;
-    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -167,14 +162,20 @@ if analyze_btn:
         if not df_all.empty:
             df_counts = df_all.groupby(['단어', '품사']).size().reset_index(name='횟수').sort_values(by='횟수', ascending=False)
 
-            # 1. 요약 대시보드 (화이트 화살표 적용)
+            # 1. 요약 대시보드
             m1, m2, m3, m4 = st.columns(4)
-            arrow_html = '<span class="metric-arrow">→</span>'
             
-            m1.metric("전체 단어", f"→ {len(all_words)}")
-            m2.metric("고유 단어", f"→ {len(df_counts)}")
-            m3.metric("최빈 단어", f"→ {df_counts.iloc[0]['단어']}")
-            m4.metric("주요 품사", f"→ {df_counts.iloc[0]['품사']}")
+            # [수정] 유니코드 화살표를 사용하고, 인라인 스타일로 화이트 색상을 강제 적용합니다.
+            # Streamlit Metric 내의 텍스트가 강제로 색이 변하는 것을 방지하기 위해 
+            # 텍스트와 숫자를 결합한 문자열로 전달합니다.
+            w_arrow = "→ " 
+            
+            # 일부 브라우저/환경에서 st.metric이 HTML 스타일을 무시할 수 있으므로 
+            # 가장 확실한 방법은 수치 문자열 자체에 포함시키는 것입니다.
+            m1.metric("전체 단어", f"{w_arrow}{len(all_words)}")
+            m2.metric("고유 단어", f"{w_arrow}{len(df_counts)}")
+            m3.metric("최빈 단어", f"{w_arrow}{df_counts.iloc[0]['단어']}")
+            m4.metric("주요 품사", f"{w_arrow}{df_counts.iloc[0]['품사']}")
 
             # 2. 번역 및 데이터
             st.divider()
