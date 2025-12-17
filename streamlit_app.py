@@ -43,12 +43,11 @@ st.markdown("""
 
     hr { border-bottom: 1px solid #2d3548 !important; }
 
-    /* [수정] 가사 입력 라벨과 TextArea 사이 마진 추가 */
     .stTextArea label p {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
-        margin-bottom: 25px !important; /* 라벨 하단 간격 확대 */
+        margin-bottom: 25px !important; 
     }
 
     .stTextArea textarea {
@@ -58,16 +57,15 @@ st.markdown("""
         border: 1px solid #2d3548 !important;
     }
 
-    /* [수정] 분석 실행 버튼 디자인 (크기 20% 확대 및 상단 마진) */
     .stButton>button {
         background-color: #2a3f88 !important;
         color: #FFFFFF !important;
         font-weight: 700;
-        width: 200px !important;      /* 너비 약 20% 확대 */
-        height: 3.84rem !important;   /* 높이 약 20% 확대 (3.2rem -> 3.84rem) */
-        font-size: 1.2rem !important; /* 폰트 크기 동반 상승 */
+        width: 200px !important;      
+        height: 3.84rem !important;   
+        font-size: 1.2rem !important; 
         border: none;
-        margin-top: 20px !important;  /* TextArea와의 간격 추가 */
+        margin-top: 20px !important;  
         transition: all 0.3s ease;
     }
     
@@ -76,7 +74,7 @@ st.markdown("""
         transform: translateY(-2px);
     }
 
-    /* 요약 대시보드 */
+    /* [수정] 요약 대시보드 수치 폰트 크기 15% 확대 */
     [data-testid="stMetricLabel"] p { 
         font-size: 1.6rem !important; 
         color: #FFFFFF !important; 
@@ -84,7 +82,7 @@ st.markdown("""
         margin-bottom: 8px !important; 
     }
     [data-testid="stMetricValue"] { 
-        font-size: 1.45rem !important; 
+        font-size: 1.67rem !important; /* 기존 1.45rem에서 약 15% 확대 */
         color: #4a5fcc !important; 
         font-weight: 700 !important; 
     }
@@ -139,7 +137,6 @@ st.divider()
 # --- 입력 섹션 ---
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
 
-# 버튼 배치
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석 실행")
