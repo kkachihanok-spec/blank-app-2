@@ -43,7 +43,6 @@ st.markdown("""
         color: #1DB954 !important;
     }
 
-    /* 가사 입력 레이블 스타일 */
     .stTextArea label p {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
@@ -57,7 +56,6 @@ st.markdown("""
         border: 1px solid #404040 !important;
     }
 
-    /* 스퀘어 버튼 스타일 */
     .stButton>button {
         width: auto !important;
         min-width: 160px;
@@ -111,24 +109,24 @@ st.markdown('<h1 class="main-title">K-POP INSIGHT</h1>', unsafe_allow_html=True)
 st.markdown('<p style="color:#1DB954; font-weight:600; margin-bottom:2rem;">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
 
 # --- 입력 섹션 ---
-# 1. 레이블과 입력창 사이 여백 (위젯 호출 전 여백)
-st.write("") 
-
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
 
-# 2. 입력창과 분석 실행 버튼 사이 여백
+# [수정] 가사 입력창 밑에 스페이스를 더 추가
+st.write("") 
+st.write("") 
 st.write("") 
 
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석 실행")
 
-# 3. 버튼과 결과창 사이 여백
+# 결과창 전 여백
 st.write("") 
 st.write("") 
 
 if analyze_btn:
     if lyrics_input.strip():
+        # ... (이후 데이터 분석 로직 동일)
         with st.spinner('데이터 분석 중...'):
             morphs = okt.pos(lyrics_input, stem=True)
             target_pos_map = {'Noun': '명사', 'Verb': '동사', 'Adjective': '형용사', 'Adverb': '부사'}
@@ -139,14 +137,12 @@ if analyze_btn:
             df_counts = df_all.groupby(['단어', '품사']).size().reset_index(name='횟수').sort_values(by='횟수', ascending=False)
 
             # 요약 대시보드
-            st.write("")
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("전체 단어", f"{len(all_words)}")
             m2.metric("고유 단어", f"{len(df_counts)}")
             m3.metric("최빈 단어", df_counts.iloc[0]['단어'])
             m4.metric("주요 품사", df_counts.iloc[0]['품사'])
 
-            # 결과 섹션
             st.divider()
             c_l, c_r = st.columns([1, 1.2])
             with c_l:
@@ -162,18 +158,15 @@ if analyze_btn:
                 df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
                 st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True)
 
-            # 문법 가이드
             st.divider()
             st.markdown("### 📚 가사 속 문법 학습")
             p1, p2 = st.columns(2)
-            
             pos_info = {
                 "명사": {"icon": "💎", "desc": "사람, 사물, 장소 등의 이름을 나타내는 핵심 주제어입니다."},
                 "동사": {"icon": "⚡", "desc": "주인공의 움직임이나 역동적인 동작을 설명합니다."},
                 "형용사": {"icon": "🎨", "desc": "가사의 분위기와 감정 상태를 풍부하게 묘사합니다."},
                 "부사": {"icon": "🎬", "desc": "의미를 세밀하게 꾸며주는 양념 같은 역할입니다."}
             }
-
             for i, (name, info) in enumerate(pos_info.items()):
                 target_col = p1 if i < 2 else p2
                 with target_col:
