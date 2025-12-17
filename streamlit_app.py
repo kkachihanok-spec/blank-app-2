@@ -7,7 +7,7 @@ import plotly.express as px
 # 1. 페이지 설정
 st.set_page_config(page_title="K-POP INSIGHT", layout="wide", page_icon="🎧")
 
-# 2. 커스텀 CSS (레이블 크기 상향 및 위계 조정)
+# 2. 커스텀 CSS (메트릭 텍스트 크기 및 굵기 상향)
 st.markdown("""
     <style>
     .stApp {
@@ -32,9 +32,23 @@ st.markdown("""
         margin-bottom: 1.5rem !important;
     }
 
-    /* 가사 입력 레이블 - 2포인트 상향 조정 */
+    /* 메트릭 라벨 (전체 단어, 고유 단어 등) - 2포인트 상향 및 굵게 */
+    [data-testid="stMetricLabel"] p {
+        font-size: 1.3rem !important; /* 약 1.1rem에서 1.3rem으로 상향 */
+        font-weight: 800 !important;   /* 아주 굵게 */
+        color: #FFFFFF !important;    /* 흰색으로 강조 */
+    }
+    
+    /* 메트릭 값 (숫자 및 결과 단어) */
+    [data-testid="stMetricValue"] {
+        font-size: 2.2rem !important;
+        font-weight: 900 !important;
+        color: #1DB954 !important;
+    }
+
+    /* 가사 입력 레이블 */
     .stTextArea label p {
-        font-size: 1.7rem !important; /* 기존 약 1.5rem에서 1.7rem으로 상향 */
+        font-size: 1.7rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
         margin-bottom: 15px !important;
@@ -107,7 +121,6 @@ st.markdown('<h1 class="main-title">K-POP INSIGHT</h1>', unsafe_allow_html=True)
 st.markdown('<p style="color:#1DB954; font-weight:600; margin-bottom:2rem;">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
 
 # --- 입력 ---
-# 레이블 텍스트 크기는 상단 CSS에서 상향 조정됨
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
@@ -124,7 +137,7 @@ if analyze_btn:
         if not df_all.empty:
             df_counts = df_all.groupby(['단어', '품사']).size().reset_index(name='횟수').sort_values(by='횟수', ascending=False)
 
-            # 요약 대시보드
+            # 요약 대시보드 (디자인 강화됨)
             st.write("")
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("전체 단어", f"{len(all_words)}")
@@ -180,5 +193,3 @@ if analyze_btn:
                             """, unsafe_allow_html=True)
                     else:
                         st.caption(f"{info['icon']} {name} 데이터가 없습니다.")
-        else:
-            st.warning("분석할 단어가 없습니다.")
