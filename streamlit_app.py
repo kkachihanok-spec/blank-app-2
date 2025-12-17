@@ -86,13 +86,14 @@ st.markdown("""
         font-weight: 700 !important; 
     }
 
+    /* 가사 대조 번역 카드 - 높이 520px 고정 */
     .lyrics-card {
         border-left: 4px solid #4a5fcc;
         padding: 24px;
         background: rgba(45, 53, 72, 0.25);
         border-radius: 0 12px 12px 0;
         border: 1px solid rgba(45, 53, 72, 0.5);
-        max-height: 520px;
+        height: 520px;
         overflow-y: auto;
     }
     
@@ -118,16 +119,15 @@ st.markdown("""
     .pos-title { font-size: 1.3rem !important; font-weight: 800 !important; color: #7d8dec; margin-bottom: 10px; }
     .pos-desc { font-size: 1.05rem !important; color: #8b92b2; margin-bottom: 14px; line-height: 1.6; }
     
-    /* [수정] data-row 내부 텍스트 폰트 크기 통일 */
     .data-row { 
         display: flex; 
         align-items: baseline; 
         border-top: 1px solid rgba(141, 146, 178, 0.2); 
         padding-top: 12px; 
-        font-size: 1.1rem !important; /* 전체 줄의 기본 크기 설정 */
+        font-size: 1.1rem !important; 
     }
-    .card-word { font-weight: 700 !important; color: #FFFFFF; } /* 개별 폰트 크기 제거하여 부모에 맞춤 */
-    .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } /* 개별 폰트 크기 제거 */
+    .card-word { font-weight: 700 !important; color: #FFFFFF; } 
+    .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } 
     
     .lyrics-card::-webkit-scrollbar { width: 6px; }
     .lyrics-card::-webkit-scrollbar-thumb { background: #2a3f88; border-radius: 10px; }
@@ -169,7 +169,7 @@ if analyze_btn:
             m3.metric("최빈 단어", f"{w_arrow}{df_counts.iloc[0]['단어']}")
             m4.metric("주요 품사", f"{w_arrow}{df_counts.iloc[0]['품사']}")
 
-            # 2. 번역 및 데이터 시각화
+            # 2. 번역 및 데이터 시각화 (높이 맞춤 작업)
             st.divider()
             c_l, c_r = st.columns([1.2, 1])
             
@@ -195,7 +195,15 @@ if analyze_btn:
                 st.markdown("### 📊 분석 데이터")
                 df_display = df_counts.copy()
                 df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
-                st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True, use_container_width=True)
+                
+                # [수정] 표의 높이를 왼쪽 가사 카드와 동일하게 520px로 설정
+                st.data_editor(
+                    df_display, 
+                    column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, 
+                    hide_index=True, 
+                    use_container_width=True,
+                    height=520 
+                )
 
             # 3. 문법 학습 섹션
             st.divider()
