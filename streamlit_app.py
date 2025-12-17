@@ -7,7 +7,7 @@ import plotly.express as px
 # 1. 페이지 설정
 st.set_page_config(page_title="K-POP INSIGHT", layout="wide", page_icon="🎧")
 
-# 2. 커스텀 CSS (텍스트 크기 밸런스 조정)
+# 2. 커스텀 CSS (레이블 크기 상향 및 위계 조정)
 st.markdown("""
     <style>
     .stApp {
@@ -24,15 +24,29 @@ st.markdown("""
         text-align: left;
     }
     
-    /* 섹션 헤더 (가사 속 문법 학습 등) */
+    /* 섹션 헤더 (h3) */
     h3 {
-        font-size: 1.8rem !important; /* 헤더 크기 고정 */
+        font-size: 1.8rem !important;
         color: #FFFFFF !important;
         font-weight: 800 !important;
         margin-bottom: 1.5rem !important;
     }
 
-    /* 품사 카드 내부 스타일 */
+    /* 가사 입력 레이블 - 2포인트 상향 조정 */
+    .stTextArea label p {
+        font-size: 1.7rem !important; /* 기존 약 1.5rem에서 1.7rem으로 상향 */
+        font-weight: 800 !important;
+        color: #FFFFFF !important;
+        margin-bottom: 15px !important;
+    }
+
+    .stTextArea textarea {
+        background-color: #282828 !important;
+        color: #FFFFFF !important;
+        border-radius: 12px !important;
+        border: 1px solid #404040 !important;
+    }
+
     .analysis-card {
         border-left: 3px solid #1DB954;
         padding: 12px 18px;
@@ -55,9 +69,8 @@ st.markdown("""
         line-height: 1.4;
     }
 
-    /* 분석된 단어 (날, 멋지다 등) - 헤더보다 작게 조정 */
     .card-word {
-        font-size: 1.4rem !important; /* 1.8rem에서 1.4rem으로 축소 */
+        font-size: 1.4rem !important;
         font-weight: 700;
         color: #FFFFFF;
         margin-right: 8px;
@@ -94,6 +107,7 @@ st.markdown('<h1 class="main-title">K-POP INSIGHT</h1>', unsafe_allow_html=True)
 st.markdown('<p style="color:#1DB954; font-weight:600; margin-bottom:2rem;">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
 
 # --- 입력 ---
+# 레이블 텍스트 크기는 상단 CSS에서 상향 조정됨
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
@@ -134,7 +148,7 @@ if analyze_btn:
                 df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
                 st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True)
 
-            # 문법 가이드 (단어 크기 조정 완료)
+            # 문법 가이드
             st.divider()
             st.markdown("### 📚 가사 속 문법 학습")
             p1, p2 = st.columns(2)
