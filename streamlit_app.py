@@ -7,7 +7,7 @@ import plotly.express as px
 # 1. 페이지 설정
 st.set_page_config(page_title="K-POP INSIGHT", layout="wide", page_icon="🎧")
 
-# 2. 커스텀 CSS (버튼 r값 제거 및 스퀘어 디자인 적용)
+# 2. 커스텀 CSS
 st.markdown("""
     <style>
     .stApp {
@@ -43,17 +43,30 @@ st.markdown("""
         color: #1DB954 !important;
     }
 
+    /* 가사 입력 레이블 스타일 */
     .stTextArea label p {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
     }
 
-    .card-word {
-        font-size: 1.2rem !important;
-        font-weight: 400 !important;
-        color: #FFFFFF;
-        margin-right: 8px;
+    .stTextArea textarea {
+        background-color: #282828 !important;
+        color: #FFFFFF !important;
+        border-radius: 12px !important;
+        border: 1px solid #404040 !important;
+    }
+
+    /* 스퀘어 버튼 스타일 */
+    .stButton>button {
+        width: auto !important;
+        min-width: 160px;
+        border-radius: 4px !important;
+        background-color: #1DB954 !important;
+        color: white !important;
+        font-weight: 700;
+        height: 3.2rem;
+        border: none;
     }
 
     .analysis-card {
@@ -77,21 +90,11 @@ st.markdown("""
         margin-bottom: 10px;
     }
 
-    /* [수정] 버튼 스타일: 둥근 모서리 제거 (r값 최소화) */
-    .stButton>button {
-        width: auto !important;
-        min-width: 160px;
-        border-radius: 4px !important; /* 50px -> 4px (스퀘어 스타일) */
-        background-color: #1DB954 !important;
-        color: white !important;
-        font-weight: 700;
-        height: 3.2rem;
-        border: none;
-        transition: all 0.2s ease;
-    }
-    .stButton>button:hover {
-        background-color: #1ED760 !important;
-        filter: brightness(1.1);
+    .card-word {
+        font-size: 1.2rem !important;
+        font-weight: 400 !important;
+        color: #FFFFFF;
+        margin-right: 8px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -107,13 +110,20 @@ okt, translator = get_resources()
 st.markdown('<h1 class="main-title">K-POP INSIGHT</h1>', unsafe_allow_html=True)
 st.markdown('<p style="color:#1DB954; font-weight:600; margin-bottom:2rem;">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
 
-# --- 입력 ---
+# --- 입력 섹션 ---
+# 1. 레이블과 입력창 사이 여백 (위젯 호출 전 여백)
+st.write("") 
+
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
+
+# 2. 입력창과 분석 실행 버튼 사이 여백
+st.write("") 
+
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석 실행")
 
-# 버튼 아래 여백
+# 3. 버튼과 결과창 사이 여백
 st.write("") 
 st.write("") 
 
