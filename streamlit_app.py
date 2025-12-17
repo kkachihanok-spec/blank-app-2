@@ -2,7 +2,7 @@ import streamlit as st
 from konlpy.tag import Okt
 import pandas as pd
 from googletrans import Translator
-import plotly.express as px  # 그래프 시각화를 위한 라이브러리 추가
+import plotly.express as px
 
 # 1. 페이지 설정
 st.set_page_config(page_title="K-POP INSIGHT", layout="wide", page_icon="🎧")
@@ -175,22 +175,18 @@ if analyze_btn:
             m3.metric("최빈 단어", f"{w_arrow}{df_counts.iloc[0]['단어']}")
             m4.metric("주요 품사", f"{w_arrow}{df_counts.iloc[0]['품사']}")
 
-            # 2. 번역 및 데이터 시각화
+            # 2. 번역 및 데이터 섹션
             st.divider()
             c_l, c_r = st.columns([1.2, 1])
             
             with c_l:
                 st.markdown("### 🌍 가사 대조 번역")
                 lines = [line.strip() for line in lyrics_input.split('\n') if line.strip()]
-                
                 html_output = '<div class="lyrics-card">'
                 for line in lines:
                     try:
                         translated = translator.translate(line, dest='en').text
-                        line_html = f'<div class="lyrics-line-pair">'
-                        line_html += f'<span class="kr-txt">{line}</span>'
-                        line_html += f'<span class="en-txt">{translated}</span>'
-                        line_html += '</div>'
+                        line_html = f'<div class="lyrics-line-pair"><span class="kr-txt">{line}</span><span class="en-txt">{translated}</span></div>'
                         html_output += line_html
                     except:
                         html_output += f'<div class="lyrics-line-pair"><span class="kr-txt">{line}</span></div>'
@@ -201,43 +197,39 @@ if analyze_btn:
                 st.markdown("### 📊 분석 데이터")
                 df_display = df_counts.copy()
                 df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
-                
-                # 표 출력
                 st.data_editor(
                     df_display, 
                     column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, 
                     hide_index=True, 
                     use_container_width=True,
-                    height=250 # 그래프 추가를 위해 표 높이 조정
+                    height=520 # 다시 520px로 높이 복구하여 대칭 맞춤
                 )
-                
-                # [추가] 단어 빈도 시각화 그래프
-                st.markdown("#### 📈 TOP 10 단어 빈도")
-                top_10 = df_counts.head(10)
-                fig = px.bar(
-                    top_10, 
-                    x='횟수', 
-                    y='단어', 
-                    orientation='h',
-                    color='품사',
-                    color_discrete_map={'명사': '#7d8dec', '동사': '#4a5fcc', '형용사': '#2a3f88', '부사': '#8b92b2'},
-                    template='plotly_dark'
-                )
-                fig.update_layout(
-                    height=230,
-                    margin=dict(l=0, r=0, t=0, b=0),
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    showlegend=False,
-                    xaxis=dict(showgrid=False),
-                    yaxis=dict(autorange="reversed") # 빈도 높은 순으로 위에서부터
-                )
-                st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-            # 3. 문법 학습 섹션
+            # 3. [수정] 그래프 독립 섹션
+            st.divider()
+            st.markdown("### 📈 단어 빈도 시각화")
+            top_20 = df_counts.head(20) # 공간이 넓어졌으므로 TOP 20까지 보여줍니다.
+            fig = px.bar(
+                top_20, 
+                x='단어', 
+                y='횟수', 
+                color='품사',
+                color_discrete_map={'명사': '#7d8dec', '동사': '#4a5fcc', '형용사': '#2a3f88', '부사': '#8b92b2'},
+                template='plotly_dark'
+            )
+            fig.update_layout(
+                height=400,
+                margin=dict(l=20, r=20, t=20, b=20),
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                xaxis=dict(showgrid=False, title=""),
+                yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)', title="빈도수")
+            )
+            st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+
+            # 4. 문법 학습 섹션
             st.divider()
             st.markdown("### 📚 가사 속 문법 학습")
-            # (이하 문법 학습 섹션 로직 동일...)
             pos_info = {
                 "명사": {"icon": "💎", "desc": "사물이나 개념의 이름입니다."},
                 "동사": {"icon": "⚡", "desc": "동작이나 움직임을 나타냅니다."},
