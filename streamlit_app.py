@@ -57,15 +57,20 @@ st.markdown("""
         border: 1px solid #2d3548 !important;
     }
 
+    /* [수정] 분석 버튼 디자인: 텍스트 20% 확대, 왼쪽 정렬, 문구 변경 대응 */
     .stButton>button {
         background-color: #2a3f88 !important;
         color: #FFFFFF !important;
         font-weight: 700;
-        width: 200px !important;      
+        width: 300px !important;      /* 문구가 길어져서 너비를 좀 더 넓혔습니다 */
         height: 3.84rem !important;   
-        font-size: 1.2rem !important; 
+        font-size: 1.44rem !important; /* 기존 1.2rem에서 20% 추가 확대 */
         border: none;
         margin-top: 20px !important;  
+        display: flex !important;
+        justify-content: flex-start !important; /* 왼쪽 정렬 */
+        padding-left: 25px !important;          /* 왼쪽 여백 */
+        align-items: center !important;
         transition: all 0.3s ease;
     }
     
@@ -86,7 +91,6 @@ st.markdown("""
         font-weight: 700 !important; 
     }
 
-    /* 가사 대조 번역 카드 - 높이 520px 고정 */
     .lyrics-card {
         border-left: 4px solid #4a5fcc;
         padding: 24px;
@@ -144,7 +148,8 @@ lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분�
 
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
-    analyze_btn = st.button("🚀 분석 실행")
+    # [수정] 버튼 문구 변경
+    analyze_btn = st.button("🚀 분석을 실행해줘!")
 
 # --- 분석 결과 로직 ---
 if analyze_btn:
@@ -169,7 +174,7 @@ if analyze_btn:
             m3.metric("최빈 단어", f"{w_arrow}{df_counts.iloc[0]['단어']}")
             m4.metric("주요 품사", f"{w_arrow}{df_counts.iloc[0]['품사']}")
 
-            # 2. 번역 및 데이터 시각화 (높이 맞춤 작업)
+            # 2. 번역 및 데이터 시각화
             st.divider()
             c_l, c_r = st.columns([1.2, 1])
             
@@ -196,7 +201,6 @@ if analyze_btn:
                 df_display = df_counts.copy()
                 df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
                 
-                # [수정] 표의 높이를 왼쪽 가사 카드와 동일하게 520px로 설정
                 st.data_editor(
                     df_display, 
                     column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, 
