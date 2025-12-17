@@ -108,25 +108,22 @@ okt, translator = get_resources()
 st.markdown('<h1 class="main-title">K-POP INSIGHT</h1>', unsafe_allow_html=True)
 st.markdown('<p style="color:#1DB954; font-weight:600; margin-bottom:2rem;">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
 
-# --- 입력 섹션 ---
+# --- 입력 섹션 (레이블 밑 여백 제거) ---
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
 
-# [수정] 가사 입력창 밑에 스페이스를 더 추가
-st.write("") 
-st.write("") 
+# 입력창과 버튼 사이에는 약간의 여백만 유지
 st.write("") 
 
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석 실행")
 
-# 결과창 전 여백
+# 분석 결과 전 여백 유지
 st.write("") 
 st.write("") 
 
 if analyze_btn:
     if lyrics_input.strip():
-        # ... (이후 데이터 분석 로직 동일)
         with st.spinner('데이터 분석 중...'):
             morphs = okt.pos(lyrics_input, stem=True)
             target_pos_map = {'Noun': '명사', 'Verb': '동사', 'Adjective': '형용사', 'Adverb': '부사'}
