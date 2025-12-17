@@ -16,13 +16,11 @@ okt, translator = get_resources()
 # 3. 커스텀 CSS
 st.markdown("""
     <style>
-    /* [배경 설정] */
     .stApp {
         background: linear-gradient(to bottom, #0a0e1a 0%, #141b2d 30%, #050505 100%) !important;
         color: #FFFFFF !important;
     }
     
-    /* [메인 제목] */
     .main-product-title {
         font-family: 'Inter', sans-serif;
         font-size: 4rem !important; 
@@ -54,7 +52,7 @@ st.markdown("""
         font-weight: 700 !important; 
     }
 
-    /* [수정] 번역 카드 레이아웃 - 문법 카드와 통일 */
+    /* 가사 대조 번역 카드 */
     .lyrics-card {
         border-left: 4px solid #4a5fcc;
         padding: 24px;
@@ -72,8 +70,8 @@ st.markdown("""
     }
     .lyrics-line-pair:last-child { border-bottom: none; }
     
-    .kr-txt { font-size: 1.15rem; color: #FFFFFF; font-weight: 600; display: block; margin-bottom: 4px; }
-    .en-txt { font-size: 1rem; color: #8b92b2; font-weight: 400; display: block; font-style: italic; }
+    .kr-txt { font-size: 1.1rem; color: #FFFFFF; font-weight: 600; display: block; margin-bottom: 4px; }
+    .en-txt { font-size: 0.95rem; color: #8b92b2; font-weight: 400; display: block; font-style: italic; }
 
     /* 문법 카드 디자인 */
     .analysis-card {
@@ -92,11 +90,10 @@ st.markdown("""
         align-items: baseline; 
         border-top: 1px solid rgba(141, 146, 178, 0.2); 
         padding-top: 12px; 
-        font-size: 1.1rem !important; 
     }
-    .data-label { color: #8b92b2; margin-right: 10px; }
-    .card-word { font-weight: 700 !important; color: #FFFFFF; }
-    .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; }
+    .data-label { color: #8b92b2; margin-right: 10px; font-size: 0.95rem; }
+    .card-word { font-weight: 700 !important; color: #FFFFFF; font-size: 1.1rem; }
+    .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; font-size: 1rem; }
 
     /* 스크롤바 커스텀 */
     .lyrics-card::-webkit-scrollbar { width: 6px; }
@@ -104,7 +101,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 헤더 및 입력 ---
+# --- 메인 인터페이스 ---
 st.markdown('<h1 class="main-product-title">&lt;K-POP INSIGHT&gt;</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
 st.divider()
@@ -119,7 +116,7 @@ if analyze_btn:
         st.divider()
         st.markdown('<div class="result-header">📊 분석 결과</div>', unsafe_allow_html=True)
 
-        # 분석 로직
+        # 1. 데이터 처리
         morphs = okt.pos(lyrics_input, stem=True)
         target_pos_map = {'Noun': '명사', 'Verb': '동사', 'Adjective': '형용사', 'Adverb': '부사'}
         all_words = [{'단어': w, '품사': target_pos_map[p]} for w, p in morphs if p in target_pos_map and len(w) >= 1]
@@ -128,7 +125,7 @@ if analyze_btn:
         if not df_all.empty:
             df_counts = df_all.groupby(['단어', '품사']).size().reset_index(name='횟수').sort_values(by='횟수', ascending=False)
 
-            # 1. 요약 대시보드
+            # 2. 요약 대시보드
             m1, m2, m3, m4 = st.columns(4)
             arrow = "→ "
             m1.metric("전체 단어", f"{arrow}{len(all_words)}")
@@ -136,7 +133,7 @@ if analyze_btn:
             m3.metric("최빈 단어", f"{arrow}{df_counts.iloc[0]['단어']}")
             m4.metric("주요 품사", f"{arrow}{df_counts.iloc[0]['품사']}")
 
-            # 2. 번역 및 데이터 (카드 형태 적용)
+            # 3. 번역 및 데이터 (가로 배치)
             st.divider()
             c_l, c_r = st.columns([1.2, 1])
             
@@ -144,21 +141,23 @@ if analyze_btn:
                 st.markdown("### 🌍 가사 대조 번역")
                 lines = [line.strip() for line in lyrics_input.split('\n') if line.strip()]
                 
-                # 가사 대조 카드 시작
-                html_content = '<div class="lyrics-card">'
+                # HTML 문자열 생성
+                html_card = '<div class="lyrics-card">'
                 for line in lines:
                     try:
                         translated = translator.translate(line, dest='en').text
-                        html_content += f"""
+                        html_card += f'''
                             <div class="lyrics-line-pair">
                                 <span class="kr-txt">{line}</span>
                                 <span class="en-txt">{translated}</span>
                             </div>
-                        """
+                        '''
                     except:
-                        html_content += f'<div class="lyrics-line-pair"><span class="kr-txt">{line}</span></div>'
-                html_content += '</div>'
-                st.markdown(html_content, unsafe_allow_html=True)
+                        html_card += f'<div class="lyrics-line-pair"><span class="kr-txt">{line}</span></div>'
+                html_card += '</div>'
+                
+                # 최종 렌더링 (반드시 unsafe_allow_html=True)
+                st.markdown(html_card, unsafe_allow_html=True)
 
             with c_r:
                 st.markdown("### 📊 분석 데이터")
@@ -166,14 +165,14 @@ if analyze_btn:
                 df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
                 st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True, use_container_width=True)
 
-            # 3. 문법 학습 섹션
+            # 4. 문법 학습 섹션
             st.divider()
             st.markdown("### 📚 가사 속 문법 학습")
             pos_info = {
-                "명사": {"icon": "💎", "desc": "사람, 사물, 장소나 추상적인 개념의 이름을 나타냅니다. 가사에서 핵심 소재가 됩니다."},
-                "동사": {"icon": "⚡", "desc": "주어의 동작이나 움직임을 나타냅니다. 생동감 있는 표현을 담당합니다."},
-                "형용사": {"icon": "🎨", "desc": "성질이나 상태를 나타냅니다. 감정선이나 분위기를 풍부하게 꾸며줍니다."},
-                "부사": {"icon": "🎬", "desc": "의미를 더 세밀하게 만듭니다. '어떻게' 수행되는지를 설명하는 양념 역할입니다."}
+                "명사": {"icon": "💎", "desc": "사물의 명칭이나 핵심 소재를 나타냅니다."},
+                "동사": {"icon": "⚡", "desc": "동작이나 움직임을 생동감 있게 표현합니다."},
+                "형용사": {"icon": "🎨", "desc": "성질이나 상태를 나타내며 감정을 꾸며줍니다."},
+                "부사": {"icon": "🎬", "desc": "어떻게 행동하는지 세밀하게 설명합니다."}
             }
 
             p1, p2 = st.columns(2)
