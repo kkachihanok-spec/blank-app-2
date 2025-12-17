@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (기존 스타일 유지 + 퀴즈 박스 최적화)
+# 3. 커스텀 CSS (기존 스타일 유지 + 퀴즈 박스 텍스트 축소 및 마진 추가)
 st.markdown("""
     <style>
     .stApp {
@@ -139,26 +139,27 @@ st.markdown("""
     .card-word { font-weight: 700 !important; color: #FFFFFF; } 
     .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } 
 
-    /* 퀴즈 박스 높이 최적화 */
+    /* 퀴즈 박스 디자인 최적화 */
     .quiz-outer-box {
         background: rgba(45, 53, 72, 0.15);
         border: 1px solid rgba(74, 95, 204, 0.3);
         border-radius: 12px;
-        padding: 20px 25px; /* 세로 패딩 축소 */
+        padding: 18px 22px; 
         margin-top: 5px;
+        margin-bottom: 30px; /* 박스 아래 마진 추가 */
     }
     
     /* 퀴즈 박스 내 라디오 버튼 여백 제거 */
     div[data-testid="stRadio"] > div {
-        gap: 0px !important;
-        margin-top: -10px !important;
+        gap: 2px !important;
+        margin-top: -8px !important;
     }
     
     [data-testid="stWidgetLabel"] { display: none; }
     div[data-testid="stRadio"] label {
         color: white !important;
-        font-size: 1.05rem !important;
-        padding: 4px 0px !important; /* 선택지 간격 최적화 */
+        font-size: 1.0rem !important; /* 선택지 텍스트 약간 축소 */
+        padding: 2px 0px !important; 
     }
     
     .lyrics-card::-webkit-scrollbar { width: 6px; }
@@ -259,7 +260,7 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # 5. [최종 최적화] 퀴즈 박스 (높이 축소 버전)
+    # 5. [수정] 텍스트 크기 축소 및 마진 적용 퀴즈 박스
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     
@@ -267,9 +268,9 @@ if st.session_state.analyzed_data:
     
     st.markdown(f"""
         <div class="quiz-outer-box">
-            <div style="line-height: 1.4; margin-bottom: 12px;">
-                <span style="color: #7d8dec; font-weight: 900; font-size: 1.6rem;">Q.</span> 
-                <span style="color: white; font-size: 1.45rem; font-weight: 700;">
+            <div style="line-height: 1.4; margin-bottom: 10px;">
+                <span style="color: #7d8dec; font-weight: 900; font-size: 1.3rem;">Q.</span> 
+                <span style="color: white; font-size: 1.15rem; font-weight: 700;">
                     이 가사에서 가장 많이 사용된 단어는 '{top_word}'입니다. 이 단어의 품사는 무엇일까요?
                 </span>
             </div>
@@ -277,16 +278,15 @@ if st.session_state.analyzed_data:
     
     user_choice = st.radio(
         "정답 선택", ["명사", "동사", "형용사", "부사"], 
-        index=None, key="quiz_slim_box", label_visibility="collapsed"
+        index=None, key="quiz_final_style", label_visibility="collapsed"
     )
     
     st.markdown("</div>", unsafe_allow_html=True)
     
     if user_choice:
-        st.markdown('<div style="margin-top: 15px;">', unsafe_allow_html=True)
+        # 박스와의 간격을 위해 여백 추가
         if user_choice == top_pos:
             st.success(f"정답입니다! 🎉 '{top_word}'은(는) **{top_pos}**입니다.")
             st.balloons()
         else:
             st.error("아쉬워요! 위쪽 분석 데이터를 다시 확인해 보세요. 🧐")
-        st.markdown('</div>', unsafe_allow_html=True)
