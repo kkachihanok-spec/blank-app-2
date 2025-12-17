@@ -64,7 +64,6 @@ st.markdown("""
         border: 1px solid #2d3548 !important;
     }
 
-    /* 가로폭 자동 조절 버튼 */
     .stButton>button {
         background-color: #2a3f88 !important;
         color: #FFFFFF !important;
@@ -217,18 +216,36 @@ if st.session_state.analyzed:
                     top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                     st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div style="color:#8b92b2; margin-bottom:14px;">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-        # 5. [수정 완료] 퀴즈 섹션 (유령 박스 제거 버전)
+        # 5. [최종 수정] 퀴즈 섹션 (텍스트 크기 -20% 및 가변형 박스)
         st.divider()
         st.markdown("### 📝 오늘의 가사 퀴즈")
         with st.container():
             top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
+            
+            # display: inline-block을 통해 텍스트 길이에 맞춰 박스가 생성되도록 함
+            # font-size: 1.2rem으로 조절하여 시각적으로 20% 정도 작아지도록 세팅
             st.markdown(f"""
-                <div style="background: rgba(74, 95, 204, 0.1); border: 1px solid #4a5fcc; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
-                    <h4 style="margin:0; color: white;">Q. 이 가사에서 가장 많이 사용된 단어는 '{top_word}'입니다. 이 단어의 품사는 무엇일까요?</h4>
+                <div style="
+                    background: rgba(74, 95, 204, 0.1); 
+                    border: 1px solid #4a5fcc; 
+                    padding: 15px 25px; 
+                    border-radius: 12px; 
+                    display: inline-block; 
+                    margin-bottom: 20px;
+                ">
+                    <span style="
+                        margin: 0; 
+                        color: white; 
+                        font-size: 1.2rem; 
+                        font-weight: 600; 
+                        line-height: 1.5;
+                    ">
+                        Q. 이 가사에서 가장 많이 사용된 단어는 '{top_word}'입니다. 이 단어의 품사는 무엇일까요?
+                    </span>
                 </div>
             """, unsafe_allow_html=True)
             
-            user_choice = st.radio("정답을 골라보세요!", ["명사", "동사", "형용사", "부사"], index=None, key="quiz_final")
+            user_choice = st.radio("정답을 골라보세요!", ["명사", "동사", "형용사", "부사"], index=None, key="quiz_final_v2")
             if user_choice:
                 if user_choice == top_pos:
                     st.success(f"정답입니다! 🎉 '{top_word}'은(는) **{top_pos}**입니다.")
