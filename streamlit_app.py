@@ -135,12 +135,13 @@ st.markdown("""
     .card-word { font-weight: 700 !important; color: #FFFFFF; } 
     .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } 
 
-    /* --- [추가] 퀴즈 선택지 전용 박스 스타일 --- */
+    /* 퀴즈 선택지 전용 박스 스타일 */
     .quiz-selection-box {
         background: rgba(74, 95, 204, 0.1); 
         border: 1px solid rgba(74, 95, 204, 0.4); 
         padding: 25px; 
         border-radius: 15px;
+        margin-top: 10px;
     }
 
     [data-testid="stWidgetLabel"] p {
@@ -276,34 +277,32 @@ if analyze_btn:
                         '''
                         st.markdown(card_html, unsafe_allow_html=True)
 
-            # 5. [수정됨] 퀴즈 섹션 (박스 제거 및 레이아웃 조정)
+            # 5. [수정 완료] 퀴즈 섹션 (잔상 박스 완벽 제거 버전)
             st.divider()
             st.markdown("### 📝 오늘의 가사 퀴즈")
             
             top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
             
-            # 질문: 박스를 빼고 텍스트로 노출
+            # 질문: 별도의 빈 div 없이 깔끔하게 텍스트만 배치
             st.markdown(f"""
-                <div style="margin-bottom: 25px; padding-left: 5px;">
-                    <span style="color: #4a5fcc; font-weight: 800; font-size: 1.35rem;">Q.</span> 
-                    <span style="color: white; font-size: 1.25rem; font-weight: 600;">
-                        이 가사에서 가장 많이 사용된 단어는 '{top_word}'입니다. 이 단어의 품사는 무엇일까요?
-                    </span>
-                </div>
+                <p style="margin: 20px 0 10px 5px; font-size: 1.25rem; font-weight: 600;">
+                    <span style="color: #4a5fcc; font-weight: 800;">Q.</span> 
+                    이 가사에서 가장 많이 사용된 단어는 '{top_word}'입니다. 이 단어의 품사는 무엇일까요?
+                </p>
             """, unsafe_allow_html=True)
             
-            # 정답 선택지: 박스 안에 넣어 가시성 확보
+            # 선택지: 오직 라디오 버튼 영역만 박스로 감쌈
             st.markdown('<div class="quiz-selection-box">', unsafe_allow_html=True)
             user_choice = st.radio(
                 "정답을 골라보세요!", 
                 ["명사", "동사", "형용사", "부사"], 
                 index=None, 
-                key="quiz_final"
+                key="quiz_final_session"
             )
             st.markdown('</div>', unsafe_allow_html=True)
             
             if user_choice:
-                st.write("") # 간격용
+                st.write("") 
                 if user_choice == top_pos:
                     st.success(f"정답입니다! 🎉 '{top_word}'은(는) **{top_pos}**입니다.")
                     st.balloons()
