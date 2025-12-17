@@ -13,7 +13,7 @@ def get_resources():
 
 okt, translator = get_resources()
 
-# 3. 커스텀 CSS (textarea 상향 조정 및 타이틀 크기 축소 통합)
+# 3. 커스텀 CSS (잘림 현상 방지를 위해 여백 수치 정밀 조정)
 st.markdown("""
     <style>
     /* 기본 배경 및 텍스트 설정 */
@@ -22,7 +22,7 @@ st.markdown("""
         color: #E0E0E0 !important;
     }
     
-    /* [메인 제목] 4rem 축소 버전 */
+    /* [메인 제목] 4rem (잘림 방지를 위해 line-height와 margin 확보) */
     .main-product-title {
         font-family: 'Inter', sans-serif;
         font-size: 4rem !important; 
@@ -31,29 +31,27 @@ st.markdown("""
         background: linear-gradient(135deg, #1DB954 0%, #1ED760 50%, #81EEA3 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 0px !important; /* 하단 여백 제거하여 위로 밀착 */
-        line-height: 1.1;
+        margin-bottom: 0.5rem !important;
+        line-height: 1.2 !important; /* 글자 잘림 방지를 위해 높이 확보 */
+        padding-top: 1rem;
     }
     
-    /* [서브 타이틀] 1.2rem 축소 버전 */
+    /* [서브 타이틀] 1.2rem (간격을 최소화하되 글자는 안 겹치게) */
     .sub-text {
         color: #1DB954 !important;
         font-size: 1.2rem !important; 
         font-weight: 600;
-        margin-bottom: 1.0rem !important; /* 여백 대폭 축소 (2.5rem -> 1.0rem) */
+        margin-bottom: 2rem !important; 
         opacity: 0.95;
     }
 
-    /* [가사 입력 섹션] textarea 및 레이블 상향 조정 */
-    .stTextArea {
-        margin-top: -20px !important; /* 입력 섹션 전체를 위로 끌어올림 */
-    }
-
+    /* [가사 입력 섹션] 레이블과 입력창 사이 여백 최적화 */
     .stTextArea label p {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
-        margin-bottom: 25px !important; /* 입력창과의 여백 적정 수준 유지 */
+        margin-bottom: 15px !important; /* 너무 멀지 않게 조정 */
+        line-height: 1.4 !important;
     }
 
     .stTextArea textarea {
@@ -63,9 +61,9 @@ st.markdown("""
         border: 1px solid #404040 !important;
     }
 
-    /* [분석 실행 버튼] 스퀘어 디자인 및 상단 밀착 */
+    /* [분석 실행 버튼] 스퀘어 디자인 및 자연스러운 상단 여백 */
     .stButton {
-        margin-top: -15px !important;
+        padding-top: 0.5rem !important;
     }
     
     .stButton>button {
@@ -77,10 +75,9 @@ st.markdown("""
         font-weight: 700;
         height: 3.2rem;
         border: none;
-        transition: all 0.2s ease;
     }
 
-    /* 메트릭 및 결과 카드 스타일 */
+    /* 결과 관련 스타일 */
     [data-testid="stMetricLabel"] p { font-size: 1.3rem !important; font-weight: 800 !important; color: #FFFFFF !important; }
     [data-testid="stMetricValue"] { font-size: 2.0rem !important; font-weight: 400 !important; color: #1DB954 !important; }
 
@@ -102,9 +99,10 @@ st.markdown("""
 st.markdown('<h1 class="main-product-title">&lt;K-POP INSIGHT&gt;</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
 
-# --- 입력 섹션 (CSS에서 간격이 상향 조정됨) ---
+# --- 입력 섹션 ---
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
 
+# 버튼 위치를 과하게 올리지 않고 자연스럽게 배치
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석 실행")
