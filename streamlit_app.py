@@ -82,14 +82,14 @@ st.markdown("""
         margin-bottom: 20px !important;
     }
 
-    /* [수정] 라벨은 크게 유지, 수치는 2포인트 하향 */
+    /* [수정] 라벨(1.6rem) 대비 수치 크기를 20% 축소 (1.45rem) */
     [data-testid="stMetricLabel"] p { 
         font-size: 1.6rem !important; 
         color: #FFFFFF !important; 
         font-weight: 900 !important; 
     }
     [data-testid="stMetricValue"] { 
-        font-size: 1.8rem !important; /* 기존 2.0rem에서 1.8rem으로 하향 */
+        font-size: 1.45rem !important; /* 기존 1.8rem에서 약 20% 하향 */
         color: #4a5fcc !important; 
         font-weight: 700 !important; 
     }
