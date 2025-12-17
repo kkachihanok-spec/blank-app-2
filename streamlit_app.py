@@ -16,13 +16,11 @@ okt, translator = get_resources()
 # 3. 커스텀 CSS
 st.markdown("""
     <style>
-    /* [배경 설정] 상단 다크네이비에서 하단 블랙으로 흐르는 세로 그라데이션 */
     .stApp {
         background: linear-gradient(to bottom, #0a0e1a 0%, #141b2d 30%, #050505 100%) !important;
         color: #FFFFFF !important;
     }
     
-    /* [메인 제목] */
     .main-product-title {
         font-family: 'Inter', sans-serif;
         font-size: 4rem !important; 
@@ -41,7 +39,6 @@ st.markdown("""
         font-size: 1.2rem !important; 
         font-weight: 600;
         margin-bottom: 1.5rem !important; 
-        opacity: 0.95;
     }
 
     hr {
@@ -66,7 +63,6 @@ st.markdown("""
     .stButton>button {
         width: auto !important;
         min-width: 160px;
-        border-radius: 4px !important;
         background-color: #2a3f88 !important;
         color: #FFFFFF !important;
         font-weight: 700;
@@ -82,20 +78,31 @@ st.markdown("""
         margin-bottom: 25px !important;
     }
 
-    /* [간격 유지] 라벨 하단 여백 8px */
+    /* 요약 대시보드 폰트 설정 */
     [data-testid="stMetricLabel"] p { 
         font-size: 1.6rem !important; 
         color: #FFFFFF !important; 
         font-weight: 900 !important; 
         margin-bottom: 8px !important; 
     }
-    
-    /* [수치 색상] 블루 유지 */
     [data-testid="stMetricValue"] { 
         font-size: 1.45rem !important; 
         color: #4a5fcc !important; 
         font-weight: 700 !important; 
     }
+
+    /* 번역 섹션 스타일링 */
+    .lyrics-container {
+        background: rgba(20, 27, 45, 0.5);
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #2d3548;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    .lyrics-line { margin-bottom: 18px; line-height: 1.6; }
+    .kr-line { font-size: 1.1rem; color: #FFFFFF; font-weight: 600; display: block; }
+    .en-line { font-size: 0.95rem; color: #8b92b2; font-weight: 400; display: block; }
 
     /* 문법 카드 디자인 */
     .analysis-card {
@@ -106,28 +113,9 @@ st.markdown("""
         border-radius: 0 12px 12px 0;
         border: 1px solid rgba(45, 53, 72, 0.5);
     }
-    
-    .pos-title { 
-        font-size: 1.3rem !important; 
-        font-weight: 800 !important; 
-        color: #7d8dec; 
-        margin-bottom: 10px; 
-    }
-    
-    .pos-desc { 
-        font-size: 1.05rem !important; 
-        color: #8b92b2; 
-        margin-bottom: 14px; 
-        line-height: 1.6; 
-    }
-
-    .data-row {
-        display: flex; 
-        align-items: baseline; 
-        border-top: 1px solid rgba(141, 146, 178, 0.2); 
-        padding-top: 12px;
-        font-size: 1.1rem !important; 
-    }
+    .pos-title { font-size: 1.3rem !important; font-weight: 800 !important; color: #7d8dec; margin-bottom: 10px; }
+    .pos-desc { font-size: 1.05rem !important; color: #8b92b2; margin-bottom: 14px; line-height: 1.6; }
+    .data-row { display: flex; align-items: baseline; border-top: 1px solid rgba(141, 146, 178, 0.2); padding-top: 12px; font-size: 1.1rem !important; }
     .data-label { color: #8b92b2; margin-right: 10px; }
     .card-word { font-weight: 700 !important; color: #FFFFFF; }
     .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; }
@@ -137,7 +125,6 @@ st.markdown("""
 # --- 헤더 섹션 ---
 st.markdown('<h1 class="main-product-title">&lt;K-POP INSIGHT&gt;</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
-
 st.divider()
 
 # --- 입력 섹션 ---
@@ -164,35 +151,40 @@ if analyze_btn:
 
             # 1. 요약 대시보드
             m1, m2, m3, m4 = st.columns(4)
-            
-            # [수정] 유니코드 화살표를 사용하고, 인라인 스타일로 화이트 색상을 강제 적용합니다.
-            # Streamlit Metric 내의 텍스트가 강제로 색이 변하는 것을 방지하기 위해 
-            # 텍스트와 숫자를 결합한 문자열로 전달합니다.
-            w_arrow = "→ " 
-            
-            # 일부 브라우저/환경에서 st.metric이 HTML 스타일을 무시할 수 있으므로 
-            # 가장 확실한 방법은 수치 문자열 자체에 포함시키는 것입니다.
-            m1.metric("전체 단어", f"{w_arrow}{len(all_words)}")
-            m2.metric("고유 단어", f"{w_arrow}{len(df_counts)}")
-            m3.metric("최빈 단어", f"{w_arrow}{df_counts.iloc[0]['단어']}")
-            m4.metric("주요 품사", f"{w_arrow}{df_counts.iloc[0]['품사']}")
+            arrow = "→ "
+            m1.metric("전체 단어", f"{arrow}{len(all_words)}")
+            m2.metric("고유 단어", f"{arrow}{len(df_counts)}")
+            m3.metric("최빈 단어", f"{arrow}{df_counts.iloc[0]['단어']}")
+            m4.metric("주요 품사", f"{arrow}{df_counts.iloc[0]['품사']}")
 
-            # 2. 번역 및 데이터
+            # 2. 번역 및 데이터 섹션
             st.divider()
-            c_l, c_r = st.columns([1, 1.2])
+            c_l, c_r = st.columns([1.2, 1])
+            
             with c_l:
-                st.markdown("### 🌍 가사 번역")
-                try:
-                    translation = translator.translate(lyrics_input, dest='en')
-                    st.info(translation.text)
-                except:
-                    st.error("번역 실패")
+                st.markdown("### 🌍 가사 대조 번역")
+                lines = [line.strip() for line in lyrics_input.split('\n') if line.strip()]
+                
+                with st.container():
+                    st.markdown('<div class="lyrics-container">', unsafe_allow_html=True)
+                    for line in lines:
+                        try:
+                            translated = translator.translate(line, dest='en').text
+                            st.markdown(f"""
+                                <div class="lyrics-line">
+                                    <span class="kr-line">{line}</span>
+                                    <span class="en-line">{translated}</span>
+                                </div>
+                            """, unsafe_allow_html=True)
+                        except:
+                            st.markdown(f'<div class="lyrics-line"><span class="kr-line">{line}</span></div>', unsafe_allow_html=True)
+                    st.markdown('</div>', unsafe_allow_html=True)
 
             with c_r:
                 st.markdown("### 📊 분석 데이터")
                 df_display = df_counts.copy()
                 df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
-                st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True)
+                st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True, use_container_width=True)
 
             # 3. 문법 학습 섹션
             st.divider()
