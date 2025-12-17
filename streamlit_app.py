@@ -6,7 +6,7 @@ from googletrans import Translator
 # 1. 페이지 설정
 st.set_page_config(page_title="K-POP INSIGHT", layout="wide", page_icon="🎧")
 
-# 2. 커스텀 CSS (제목 그라데이션 및 크기 상향)
+# 2. 커스텀 CSS (레이블 하단 여백 추가)
 st.markdown("""
     <style>
     .stApp {
@@ -14,10 +14,9 @@ st.markdown("""
         color: #E0E0E0 !important;
     }
     
-    /* [수정] 메인 제목: 크기 확대 및 세련된 그린 그라데이션 */
     .main-product-title {
         font-family: 'Inter', sans-serif;
-        font-size: 5rem !important; /* 더 크게 확대 */
+        font-size: 5rem !important;
         font-weight: 900 !important;
         letter-spacing: -2px;
         background: linear-gradient(135deg, #1DB954 0%, #1ED760 50%, #81EEA3 100%);
@@ -35,29 +34,12 @@ st.markdown("""
         opacity: 0.9;
     }
 
-    h3 {
-        font-size: 1.8rem !important;
-        color: #FFFFFF !important;
-        font-weight: 800 !important;
-        margin-bottom: 1.5rem !important;
-    }
-
-    [data-testid="stMetricLabel"] p {
-        font-size: 1.3rem !important;
-        font-weight: 800 !important;
-        color: #FFFFFF !important;
-    }
-    
-    [data-testid="stMetricValue"] {
-        font-size: 2.0rem !important;
-        font-weight: 400 !important;
-        color: #1DB954 !important;
-    }
-
+    /* [수정] 가사 입력 레이블 아래에 스페이스 추가 */
     .stTextArea label p {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
+        margin-bottom: 25px !important; /* 여백을 25px로 늘려 간격을 확보 */
     }
 
     .stTextArea textarea {
@@ -78,6 +60,18 @@ st.markdown("""
         border: none;
     }
 
+    [data-testid="stMetricLabel"] p {
+        font-size: 1.3rem !important;
+        font-weight: 800 !important;
+        color: #FFFFFF !important;
+    }
+    
+    [data-testid="stMetricValue"] {
+        font-size: 2.0rem !important;
+        font-weight: 400 !important;
+        color: #1DB954 !important;
+    }
+    
     .analysis-card {
         border-left: 3px solid #1DB954;
         padding: 12px 18px;
@@ -96,11 +90,11 @@ def get_resources():
 okt, translator = get_resources()
 
 # --- 헤더 섹션 ---
-# [수정] 요청하신 <K-POP INSIGHT> 형식과 그라데이션 적용
 st.markdown('<h1 class="main-product-title">&lt;K-POP INSIGHT&gt;</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">Advanced Lyrics Analytics & Grammar Engine</p>', unsafe_allow_html=True)
 
 # --- 입력 섹션 ---
+# CSS에서 label p의 margin-bottom을 조정했으므로 위젯만 호출하면 됩니다.
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
 
 st.write("") 
@@ -129,6 +123,6 @@ if analyze_btn:
             m2.metric("고유 단어", f"{len(df_counts)}")
             m3.metric("최빈 단어", df_counts.iloc[0]['단어'])
             m4.metric("주요 품사", df_counts.iloc[0]['품사'])
-
+            
             st.divider()
-            # ... (이하 분석 결과 표시 로직 동일)
+            # ... (이하 로직 생략)
