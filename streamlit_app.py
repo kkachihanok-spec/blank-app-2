@@ -7,7 +7,7 @@ import plotly.express as px
 # 1. 페이지 설정
 st.set_page_config(page_title="K-POP INSIGHT", layout="wide", page_icon="🎧")
 
-# 2. 커스텀 CSS (텍스트 크기는 유지하되 레이아웃은 간결하게)
+# 2. 커스텀 CSS
 st.markdown("""
     <style>
     .stApp {
@@ -39,25 +39,45 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* 분석 결과 카드 스타일 (간결화) */
+    /* 품사 카드 디자인 */
     .analysis-card {
         border-left: 4px solid #1DB954;
-        padding: 12px 18px;
-        margin: 8px 0;
+        padding: 15px 20px;
+        margin-bottom: 15px;
         background: rgba(255, 255, 255, 0.05);
-        border-radius: 0 10px 10px 0;
+        border-radius: 0 15px 15px 0;
+    }
+
+    .pos-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1DB954;
+        margin-bottom: 5px;
+    }
+
+    .pos-desc {
+        font-size: 0.9rem;
+        color: #B3B3B3;
+        margin-bottom: 12px;
+        line-height: 1.4;
+    }
+
+    .result-line {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
     }
 
     .card-word {
-        font-size: 1.6rem !important;
+        font-size: 1.8rem !important;
         font-weight: 800;
-        color: #1DB954;
-        margin-right: 10px;
+        color: #FFFFFF;
     }
 
     .card-count {
         font-size: 1.1rem;
-        color: #B3B3B3;
+        color: #1DB954;
+        font-weight: 600;
     }
 
     .stButton>button {
@@ -86,14 +106,14 @@ st.markdown('<h1 class="main-title">K-POP INSIGHT</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
 
 # --- 입력 ---
-lyrics_input = st.text_area("📝 가사 입력", height=200, placeholder="가사를 붙여넣으세요...", key="lyrics_main")
+lyrics_input = st.text_area("📝 가사 입력", height=200, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
 col_btn, _ = st.columns([1, 3]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석 실행")
 
 if analyze_btn:
     if lyrics_input.strip():
-        with st.spinner('분석 중...'):
+        with st.spinner('AI 분석 중...'):
             morphs = okt.pos(lyrics_input, stem=True)
             target_pos_map = {'Noun': '명사', 'Verb': '동사', 'Adjective': '형용사', 'Adverb': '부사'}
             all_words = [{'단어': w, '품사': target_pos_map[p]} for w, p in morphs if p in target_pos_map and len(w) >= 1]
@@ -102,10 +122,10 @@ if analyze_btn:
         if not df_all.empty:
             df_counts = df_all.groupby(['단어', '품사']).size().reset_index(name='횟수').sort_values(by='횟수', ascending=False)
 
-            # 요약 메트릭
+            # 요약 대시보드
             st.write("")
             m1, m2, m3, m4 = st.columns(4)
-            m1.metric("총 단어", f"{len(all_words)}")
+            m1.metric("전체 단어", f"{len(all_words)}")
             m2.metric("고유 단어", f"{len(df_counts)}")
             m3.metric("최빈 단어", df_counts.iloc[0]['단어'])
             m4.metric("주요 품사", df_counts.iloc[0]['품사'])
@@ -114,25 +134,31 @@ if analyze_btn:
             st.divider()
             c_l, c_r = st.columns([1, 1.2])
             with c_l:
-                st.markdown("### 🌍 번역")
+                st.markdown("### 🌍 가사 번역")
                 try:
                     translation = translator.translate(lyrics_input, dest='en')
                     st.info(translation.text)
-                except: st.error("번역 실패")
+                except: st.error("번역 서버 오류")
 
             with c_r:
-                st.markdown("### 📊 단어 데이터")
+                st.markdown("### 📊 분석 데이터")
                 df_display = df_counts.copy()
                 df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
                 st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True)
 
-            # 문법 가이드 (이 부분이 요청하신 대로 요약된 부분입니다)
+            # 문법 가이드 (설명 유지 + 요약 레이아웃)
             st.divider()
-            st.markdown("### 📚 핵심 문법 요약")
+            st.markdown("### 📚 가사 속 문법 학습")
             p1, p2 = st.columns(2)
-            pos_info = {"명사": "💎", "동사": "⚡", "형용사": "🎨", "부사": "🎬"}
+            
+            pos_info = {
+                "명사": {"icon": "💎", "desc": "사람, 사물, 장소 등의 이름을 나타내는 단어입니다. 가사의 핵심 주제가 됩니다."},
+                "동사": {"icon": "⚡", "desc": "움직임이나 동작을 나타내는 단어입니다. 주인공의 행동을 설명합니다."},
+                "형용사": {"icon": "🎨", "desc": "성질이나 상태를 묘사하는 단어입니다. 가사의 분위기를 풍부하게 만듭니다."},
+                "부사": {"icon": "🎬", "desc": "다른 말을 꾸며주는 양념 역할입니다. 감정의 정도를 세밀하게 표현합니다."}
+            }
 
-            for i, (name, icon) in enumerate(pos_info.items()):
+            for i, (name, info) in enumerate(pos_info.items()):
                 target_col = p1 if i < 2 else p2
                 with target_col:
                     spec_df = df_counts[df_counts['품사'] == name]
@@ -141,13 +167,16 @@ if analyze_btn:
                         cnt = spec_df.iloc[0]['횟수']
                         st.markdown(f"""
                             <div class="analysis-card">
-                                <span style="color:#B3B3B3; font-size:0.9rem;">{icon} {name}</span><br>
-                                <span class="card-word">{top_w}</span>
-                                <span class="card-count">({cnt}회)</span>
-                                <a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="margin-left:10px; font-size:0.8rem;">[사전]</a>
+                                <div class="pos-title">{info['icon']} {name} (Part of Speech)</div>
+                                <div class="pos-desc">{info['desc']}</div>
+                                <div class="result-line">
+                                    <span class="card-word">{top_w}</span>
+                                    <span class="card-count">{cnt}회 등장</span>
+                                    <a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:5px;">사전 보기 →</a>
+                                </div>
                             </div>
                             """, unsafe_allow_html=True)
                     else:
-                        st.caption(f"{icon} {name} 데이터 없음")
+                        st.caption(f"{info['icon']} {name} 데이터가 없습니다.")
         else:
             st.warning("분석할 단어가 없습니다.")
