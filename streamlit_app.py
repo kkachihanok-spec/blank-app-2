@@ -39,6 +39,7 @@ st.markdown("""
         font-size: 1.2rem !important; 
         font-weight: 600;
         margin-bottom: 1.5rem !important; 
+        opacity: 0.95;
     }
 
     hr {
@@ -63,6 +64,7 @@ st.markdown("""
     .stButton>button {
         width: auto !important;
         min-width: 160px;
+        border-radius: 4px !important;
         background-color: #2a3f88 !important;
         color: #FFFFFF !important;
         font-weight: 700;
@@ -78,7 +80,7 @@ st.markdown("""
         margin-bottom: 25px !important;
     }
 
-    /* 요약 대시보드 폰트 설정 */
+    /* 요약 대시보드 메트릭 */
     [data-testid="stMetricLabel"] p { 
         font-size: 1.6rem !important; 
         color: #FFFFFF !important; 
@@ -91,20 +93,28 @@ st.markdown("""
         font-weight: 700 !important; 
     }
 
-    /* 번역 섹션 스타일링 */
-    .lyrics-container {
-        background: rgba(20, 27, 45, 0.5);
-        padding: 20px;
-        border-radius: 12px;
-        border: 1px solid #2d3548;
-        max-height: 500px;
+    /* 가사 대조 번역 카드 */
+    .lyrics-card {
+        border-left: 4px solid #4a5fcc;
+        padding: 24px;
+        background: rgba(45, 53, 72, 0.25);
+        border-radius: 0 12px 12px 0;
+        border: 1px solid rgba(45, 53, 72, 0.5);
+        max-height: 520px;
         overflow-y: auto;
     }
-    .lyrics-line { margin-bottom: 18px; line-height: 1.6; }
-    .kr-line { font-size: 1.1rem; color: #FFFFFF; font-weight: 600; display: block; }
-    .en-line { font-size: 0.95rem; color: #8b92b2; font-weight: 400; display: block; }
+    
+    .lyrics-line-pair {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(141, 146, 178, 0.1);
+    }
+    .lyrics-line-pair:last-child { border-bottom: none; }
+    
+    .kr-txt { font-size: 1.1rem; color: #FFFFFF; font-weight: 600; display: block; margin-bottom: 4px; }
+    .en-txt { font-size: 0.95rem; color: #8b92b2; font-weight: 400; display: block; font-style: italic; }
 
-    /* 문법 카드 디자인 */
+    /* 문법 분석 카드 */
     .analysis-card {
         border-left: 4px solid #2a3f88;
         padding: 16px 20px;
@@ -113,23 +123,26 @@ st.markdown("""
         border-radius: 0 12px 12px 0;
         border: 1px solid rgba(45, 53, 72, 0.5);
     }
+    
     .pos-title { font-size: 1.3rem !important; font-weight: 800 !important; color: #7d8dec; margin-bottom: 10px; }
     .pos-desc { font-size: 1.05rem !important; color: #8b92b2; margin-bottom: 14px; line-height: 1.6; }
     .data-row { display: flex; align-items: baseline; border-top: 1px solid rgba(141, 146, 178, 0.2); padding-top: 12px; font-size: 1.1rem !important; }
     .data-label { color: #8b92b2; margin-right: 10px; }
     .card-word { font-weight: 700 !important; color: #FFFFFF; }
     .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; }
+    
+    .lyrics-card::-webkit-scrollbar { width: 6px; }
+    .lyrics-card::-webkit-scrollbar-thumb { background: #2a3f88; border-radius: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 헤더 섹션 ---
+# --- 상단 섹션 ---
 st.markdown('<h1 class="main-product-title">&lt;K-POP INSIGHT&gt;</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
 st.divider()
 
 # --- 입력 섹션 ---
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
-
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석 실행")
@@ -151,34 +164,39 @@ if analyze_btn:
 
             # 1. 요약 대시보드
             m1, m2, m3, m4 = st.columns(4)
-            arrow = "→ "
-            m1.metric("전체 단어", f"{arrow}{len(all_words)}")
-            m2.metric("고유 단어", f"{arrow}{len(df_counts)}")
-            m3.metric("최빈 단어", f"{arrow}{df_counts.iloc[0]['단어']}")
-            m4.metric("주요 품사", f"{arrow}{df_counts.iloc[0]['품사']}")
+            w_arrow = "→ " 
+            m1.metric("전체 단어", f"{w_arrow}{len(all_words)}")
+            m2.metric("고유 단어", f"{w_arrow}{len(df_counts)}")
+            m3.metric("최빈 단어", f"{w_arrow}{df_counts.iloc[0]['단어']}")
+            m4.metric("주요 품사", f"{w_arrow}{df_counts.iloc[0]['품사']}")
 
-            # 2. 번역 및 데이터 섹션
+            # 2. 가사 대조 번역 및 데이터 시각화
             st.divider()
             c_l, c_r = st.columns([1.2, 1])
             
             with c_l:
                 st.markdown("### 🌍 가사 대조 번역")
-                lines = [line.strip() for line in lyrics_input.split('\n') if line.strip()]
+                # [수정된 로직] 공백만 있는 줄을 완전히 걸러내어 불필요한 스퀘어 박스 생성을 막습니다.
+                raw_lines = lyrics_input.split('\n')
+                lines = [line.strip() for line in raw_lines if line.strip()]
                 
-                with st.container():
-                    st.markdown('<div class="lyrics-container">', unsafe_allow_html=True)
+                html_lyrics_card = '<div class="lyrics-card">'
+                if not lines:
+                    html_lyrics_card += '<div style="color:#8b92b2;">표시할 가사 내용이 없습니다.</div>'
+                else:
                     for line in lines:
                         try:
                             translated = translator.translate(line, dest='en').text
-                            st.markdown(f"""
-                                <div class="lyrics-line">
-                                    <span class="kr-line">{line}</span>
-                                    <span class="en-line">{translated}</span>
+                            html_lyrics_card += f'''
+                                <div class="lyrics-line-pair">
+                                    <span class="kr-txt">{line}</span>
+                                    <span class="en-txt">{translated}</span>
                                 </div>
-                            """, unsafe_allow_html=True)
+                            '''
                         except:
-                            st.markdown(f'<div class="lyrics-line"><span class="kr-line">{line}</span></div>', unsafe_allow_html=True)
-                    st.markdown('</div>', unsafe_allow_html=True)
+                            html_lyrics_card += f'<div class="lyrics-line-pair"><span class="kr-txt">{line}</span></div>'
+                html_lyrics_card += '</div>'
+                st.markdown(html_lyrics_card, unsafe_allow_html=True)
 
             with c_r:
                 st.markdown("### 📊 분석 데이터")
@@ -189,12 +207,11 @@ if analyze_btn:
             # 3. 문법 학습 섹션
             st.divider()
             st.markdown("### 📚 가사 속 문법 학습")
-            
             pos_info = {
-                "명사": {"icon": "💎", "desc": "사람, 사물, 장소나 추상적인 개념의 이름을 나타냅니다. 가사에서 주로 '누가', '무엇'에 해당하는 핵심 소재가 됩니다."},
-                "동사": {"icon": "⚡", "desc": "주어의 동작이나 움직임을 나타냅니다. 가사 속 주인공이 현재 어떤 행동을 하고 있는지 생동감 있게 표현합니다."},
-                "형용사": {"icon": "🎨", "desc": "사람이나 사물의 성질이나 상태를 나타냅니다. 가사의 감정선이나 분위기를 풍부하게 꾸며주는 역할을 합니다."},
-                "부사": {"icon": "🎬", "desc": "용언이나 다른 부사를 꾸며주어 의미를 더 세밀하게 만듭니다. '어떻게' 수행되는지를 설명하는 양념 역할을 합니다."}
+                "명사": {"icon": "💎", "desc": "사물이나 개념의 이름을 나타냅니다. 가사의 핵심 소재가 됩니다."},
+                "동사": {"icon": "⚡", "desc": "동작이나 움직임을 나타내어 가사에 생동감을 더합니다."},
+                "형용사": {"icon": "🎨", "desc": "성질이나 상태를 묘사하여 감정선을 풍부하게 만듭니다."},
+                "부사": {"icon": "🎬", "desc": "동작이나 상태를 더 세밀하게 수식해주는 양념 역할을 합니다."}
             }
 
             p1, p2 = st.columns(2)
@@ -220,6 +237,6 @@ if analyze_btn:
                     else:
                         st.caption(f"{info['icon']} {name} 데이터가 없습니다.")
         else:
-            st.warning("분석 데이터 부족")
+            st.warning("분석 데이터가 부족합니다.")
     else:
-        st.error("가사를 입력하세요")
+        st.error("가사를 입력해 주세요.")
