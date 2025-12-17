@@ -82,14 +82,14 @@ st.markdown("""
         margin-bottom: 20px !important;
     }
 
-    /* [수정] 라벨만 2포인트 키우고 볼드 처리 강화 */
+    /* [수정] 라벨은 크게 유지, 수치는 2포인트 하향 */
     [data-testid="stMetricLabel"] p { 
-        font-size: 1.6rem !important; /* 기존보다 2pt 추가 상향 */
-        color: #FFFFFF !important; /* 가독성을 위해 화이트로 조정 */
-        font-weight: 900 !important; /* 가장 굵게 처리 */
+        font-size: 1.6rem !important; 
+        color: #FFFFFF !important; 
+        font-weight: 900 !important; 
     }
     [data-testid="stMetricValue"] { 
-        font-size: 2.0rem !important; /* 수치는 이전 크기 유지 */
+        font-size: 1.8rem !important; /* 기존 2.0rem에서 1.8rem으로 하향 */
         color: #4a5fcc !important; 
         font-weight: 700 !important; 
     }
