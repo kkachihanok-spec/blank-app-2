@@ -13,7 +13,7 @@ def get_resources():
 
 okt, translator = get_resources()
 
-# 3. 커스텀 CSS
+# 3. 커스텀 CSS (디자인 및 박스 제거용)
 st.markdown("""
     <style>
     .stApp {
@@ -39,19 +39,14 @@ st.markdown("""
         font-size: 1.2rem !important; 
         font-weight: 600;
         margin-bottom: 1.5rem !important; 
-        opacity: 0.95;
     }
 
-    hr {
-        margin: 1.5rem 0 !important;
-        border-bottom: 1px solid #2d3548 !important;
-    }
+    hr { border-bottom: 1px solid #2d3548 !important; }
 
     .stTextArea label p {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
-        margin-bottom: 15px !important;
     }
 
     .stTextArea textarea {
@@ -62,9 +57,6 @@ st.markdown("""
     }
 
     .stButton>button {
-        width: auto !important;
-        min-width: 160px;
-        border-radius: 4px !important;
         background-color: #2a3f88 !important;
         color: #FFFFFF !important;
         font-weight: 700;
@@ -72,15 +64,7 @@ st.markdown("""
         border: none;
     }
 
-    .result-header {
-        font-size: 1.7rem !important;
-        font-weight: 800 !important;
-        color: #FFFFFF !important;
-        margin-top: 0.5rem !important;
-        margin-bottom: 25px !important;
-    }
-
-    /* 요약 대시보드 메트릭 */
+    /* 요약 대시보드 */
     [data-testid="stMetricLabel"] p { 
         font-size: 1.6rem !important; 
         color: #FFFFFF !important; 
@@ -126,9 +110,8 @@ st.markdown("""
     
     .pos-title { font-size: 1.3rem !important; font-weight: 800 !important; color: #7d8dec; margin-bottom: 10px; }
     .pos-desc { font-size: 1.05rem !important; color: #8b92b2; margin-bottom: 14px; line-height: 1.6; }
-    .data-row { display: flex; align-items: baseline; border-top: 1px solid rgba(141, 146, 178, 0.2); padding-top: 12px; font-size: 1.1rem !important; }
-    .data-label { color: #8b92b2; margin-right: 10px; }
-    .card-word { font-weight: 700 !important; color: #FFFFFF; }
+    .data-row { display: flex; align-items: baseline; border-top: 1px solid rgba(141, 146, 178, 0.2); padding-top: 12px; }
+    .card-word { font-weight: 700 !important; color: #FFFFFF; font-size: 1.1rem; }
     .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; }
     
     .lyrics-card::-webkit-scrollbar { width: 6px; }
@@ -136,22 +119,22 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 상단 섹션 ---
+# --- 헤더 ---
 st.markdown('<h1 class="main-product-title">&lt;K-POP INSIGHT&gt;</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
 st.divider()
 
-# --- 입력 섹션 ---
+# --- 입력 ---
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석 실행")
 
-# --- 분석 로직 ---
+# --- 분석 결과 ---
 if analyze_btn:
     if lyrics_input.strip():
         st.divider()
-        st.markdown('<div class="result-header">📊 분석 결과</div>', unsafe_allow_html=True)
+        st.markdown('<div class="result-header" style="font-size:1.7rem; font-weight:800; color:white; margin-bottom:25px;">📊 분석 결과</div>', unsafe_allow_html=True)
 
         with st.spinner('데이터 분석 중...'):
             morphs = okt.pos(lyrics_input, stem=True)
@@ -170,33 +153,30 @@ if analyze_btn:
             m3.metric("최빈 단어", f"{w_arrow}{df_counts.iloc[0]['단어']}")
             m4.metric("주요 품사", f"{w_arrow}{df_counts.iloc[0]['품사']}")
 
-            # 2. 가사 대조 번역 및 데이터 시각화
+            # 2. 번역 및 데이터 시각화
             st.divider()
             c_l, c_r = st.columns([1.2, 1])
             
             with c_l:
                 st.markdown("### 🌍 가사 대조 번역")
-                # [수정된 로직] 공백만 있는 줄을 완전히 걸러내어 불필요한 스퀘어 박스 생성을 막습니다.
-                raw_lines = lyrics_input.split('\n')
-                lines = [line.strip() for line in raw_lines if line.strip()]
+                lines = [line.strip() for line in lyrics_input.split('\n') if line.strip()]
                 
-                html_lyrics_card = '<div class="lyrics-card">'
-                if not lines:
-                    html_lyrics_card += '<div style="color:#8b92b2;">표시할 가사 내용이 없습니다.</div>'
-                else:
-                    for line in lines:
-                        try:
-                            translated = translator.translate(line, dest='en').text
-                            html_lyrics_card += f'''
-                                <div class="lyrics-line-pair">
-                                    <span class="kr-txt">{line}</span>
-                                    <span class="en-txt">{translated}</span>
-                                </div>
-                            '''
-                        except:
-                            html_lyrics_card += f'<div class="lyrics-line-pair"><span class="kr-txt">{line}</span></div>'
-                html_lyrics_card += '</div>'
-                st.markdown(html_lyrics_card, unsafe_allow_html=True)
+                # HTML을 빌드할 때 f-string 내의 중괄호 충돌을 피하기 위해 분리해서 처리합니다.
+                html_output = '<div class="lyrics-card">'
+                for line in lines:
+                    try:
+                        translated = translator.translate(line, dest='en').text
+                        line_html = f'<div class="lyrics-line-pair">'
+                        line_html += f'<span class="kr-txt">{line}</span>'
+                        line_html += f'<span class="en-txt">{translated}</span>'
+                        line_html += '</div>'
+                        html_output += line_html
+                    except:
+                        html_output += f'<div class="lyrics-line-pair"><span class="kr-txt">{line}</span></div>'
+                html_output += '</div>'
+                
+                # 반드시 한 번의 마크다운 호출로 렌더링
+                st.markdown(html_output, unsafe_allow_html=True)
 
             with c_r:
                 st.markdown("### 📊 분석 데이터")
@@ -208,10 +188,10 @@ if analyze_btn:
             st.divider()
             st.markdown("### 📚 가사 속 문법 학습")
             pos_info = {
-                "명사": {"icon": "💎", "desc": "사물이나 개념의 이름을 나타냅니다. 가사의 핵심 소재가 됩니다."},
-                "동사": {"icon": "⚡", "desc": "동작이나 움직임을 나타내어 가사에 생동감을 더합니다."},
-                "형용사": {"icon": "🎨", "desc": "성질이나 상태를 묘사하여 감정선을 풍부하게 만듭니다."},
-                "부사": {"icon": "🎬", "desc": "동작이나 상태를 더 세밀하게 수식해주는 양념 역할을 합니다."}
+                "명사": {"icon": "💎", "desc": "사물이나 개념의 이름입니다."},
+                "동사": {"icon": "⚡", "desc": "동작이나 움직임을 나타냅니다."},
+                "형용사": {"icon": "🎨", "desc": "상태나 성질을 묘사합니다."},
+                "부사": {"icon": "🎬", "desc": "행동을 더 세밀하게 꾸며줍니다."}
             }
 
             p1, p2 = st.columns(2)
@@ -222,21 +202,22 @@ if analyze_btn:
                     if not spec_df.empty:
                         top_w = spec_df.iloc[0]['단어']
                         cnt = spec_df.iloc[0]['횟수']
-                        st.markdown(f"""
+                        card_html = f'''
                             <div class="analysis-card">
                                 <div class="pos-title">{info['icon']} {name}</div>
                                 <div class="pos-desc">{info['desc']}</div>
                                 <div class="data-row">
-                                    <span class="data-label">가장 많이 사용된 단어:</span>
+                                    <span style="color:#8b92b2; margin-right:10px;">주요 단어:</span>
                                     <span class="card-word">{top_w}</span>
                                     <span class="card-count">{cnt}회</span>
                                     <a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a>
                                 </div>
                             </div>
-                            """, unsafe_allow_html=True)
+                        '''
+                        st.markdown(card_html, unsafe_allow_html=True)
                     else:
-                        st.caption(f"{info['icon']} {name} 데이터가 없습니다.")
+                        st.caption(f"{info['icon']} {name} 데이터 없음")
         else:
-            st.warning("분석 데이터가 부족합니다.")
+            st.warning("분석 데이터 부족")
     else:
         st.error("가사를 입력해 주세요.")
