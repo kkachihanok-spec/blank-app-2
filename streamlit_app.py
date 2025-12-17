@@ -2,7 +2,10 @@ import streamlit as st
 from konlpy.tag import Okt
 import pandas as pd
 from googletrans import Translator
-import plotly.express as px  # 그래프를 위해 추가
+try:
+    import plotly.express as px  # 그래프를 위해 추가
+except Exception:
+    px = None
 
 # 페이지 설정
 st.set_page_config(page_title="K-Pop 가사 분석기", layout="wide", page_icon="🎵")
