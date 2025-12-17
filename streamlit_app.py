@@ -104,3 +104,5 @@ if st.button("🚀 분석 및 번역 시작", key="analyze_btn"):
             st.warning("분석할 수 있는 단어가 없습니다.")
     else:
         st.error("가사를 입력해 주세요.")
+git add streamlit_app.py
+git commit -m "feat: K-Pop Lyric Insight: UI 개선, CSS 추가, 대시보드 및 번역 기능 강화"
