@@ -7,7 +7,7 @@ import plotly.express as px
 # 1. 페이지 설정
 st.set_page_config(page_title="K-POP INSIGHT", layout="wide", page_icon="🎧")
 
-# 2. 커스텀 CSS (라벨은 강조, 데이터값은 보통 굵기로)
+# 2. 커스텀 CSS (데이터 값 크기 및 굵기 하향 조정)
 st.markdown("""
     <style>
     .stApp {
@@ -31,30 +31,31 @@ st.markdown("""
         margin-bottom: 1.5rem !important;
     }
 
-    /* [요청사항] 메트릭 라벨은 굵게 */
+    /* 메트릭 라벨 (제목) - 굵고 크게 유지 */
     [data-testid="stMetricLabel"] p {
         font-size: 1.3rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
     }
     
-    /* [요청사항] 메트릭 실제 값(숫자, 단어)은 보통 굵기로 */
+    /* [수정] 메트릭 실제 값 (62, 38 등) - 크기 2pt 하향 및 가늘게 */
     [data-testid="stMetricValue"] {
-        font-size: 2.2rem !important;
-        font-weight: 400 !important; /* 900 -> 400 (보통 굵기) */
+        font-size: 2.0rem !important; /* 2.2rem -> 2.0rem */
+        font-weight: 400 !important;
         color: #1DB954 !important;
     }
 
+    /* 가사 입력 레이블 */
     .stTextArea label p {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
     }
 
-    /* 품사 카드 내 분석 단어 굵기 조정 */
+    /* [수정] 품사 카드 내 분석 단어 (날, 멋지다 등) - 크기 하향 및 가늘게 */
     .card-word {
-        font-size: 1.4rem !important;
-        font-weight: 400 !important; /* 700 -> 400 (보통 굵기) */
+        font-size: 1.2rem !important; /* 1.4rem -> 1.2rem */
+        font-weight: 400 !important;
         color: #FFFFFF;
         margin-right: 8px;
     }
@@ -169,7 +170,7 @@ if analyze_btn:
                                 <div class="pos-desc">{info['desc']}</div>
                                 <div style="display: flex; align-items: baseline;">
                                     <span class="card-word">{top_w}</span>
-                                    <span style="font-size: 1rem; color: #1DB954;">{cnt}회 등장</span>
+                                    <span style="font-size: 0.9rem; color: #1DB954;">{cnt}회 등장</span>
                                     <a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.75rem; margin-left:8px; color:#1DB954; text-decoration:none;">사전 보기 →</a>
                                 </div>
                             </div>
