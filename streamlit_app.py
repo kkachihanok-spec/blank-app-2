@@ -7,7 +7,7 @@ import plotly.express as px
 # 1. 페이지 설정
 st.set_page_config(page_title="K-POP INSIGHT", layout="wide", page_icon="🎧")
 
-# 2. 커스텀 CSS
+# 2. 커스텀 CSS (텍스트 크기 밸런스 조정)
 st.markdown("""
     <style>
     .stApp {
@@ -19,76 +19,64 @@ st.markdown("""
         background: linear-gradient(to right, #1DB954, #1ED760);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 3.5rem !important;
+        font-size: 3rem !important;
         font-weight: 900;
         text-align: left;
     }
     
-    .sub-text {
-        text-align: left;
-        color: #1DB954 !important;
-        font-size: 1.2rem !important;
-        font-weight: 600;
-        margin-bottom: 2rem;
-    }
-
-    /* 가사 입력창 레이블 */
-    .stTextArea label p {
-        font-size: 1.5rem !important;
-        font-weight: 800 !important;
+    /* 섹션 헤더 (가사 속 문법 학습 등) */
+    h3 {
+        font-size: 1.8rem !important; /* 헤더 크기 고정 */
         color: #FFFFFF !important;
+        font-weight: 800 !important;
+        margin-bottom: 1.5rem !important;
     }
 
-    /* 품사 카드 디자인 */
+    /* 품사 카드 내부 스타일 */
     .analysis-card {
-        border-left: 4px solid #1DB954;
-        padding: 15px 20px;
-        margin-bottom: 15px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 0 15px 15px 0;
+        border-left: 3px solid #1DB954;
+        padding: 12px 18px;
+        margin-bottom: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 0 12px 12px 0;
     }
 
     .pos-title {
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 700;
         color: #1DB954;
-        margin-bottom: 5px;
+        margin-bottom: 4px;
     }
 
     .pos-desc {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         color: #B3B3B3;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         line-height: 1.4;
     }
 
-    .result-line {
-        display: flex;
-        align-items: baseline;
-        gap: 10px;
-    }
-
+    /* 분석된 단어 (날, 멋지다 등) - 헤더보다 작게 조정 */
     .card-word {
-        font-size: 1.8rem !important;
-        font-weight: 800;
+        font-size: 1.4rem !important; /* 1.8rem에서 1.4rem으로 축소 */
+        font-weight: 700;
         color: #FFFFFF;
+        margin-right: 8px;
     }
 
     .card-count {
-        font-size: 1.1rem;
+        font-size: 1rem;
         color: #1DB954;
-        font-weight: 600;
+        font-weight: 500;
     }
 
     .stButton>button {
         width: auto !important;
-        min-width: 180px;
+        min-width: 160px;
         border-radius: 50px !important;
         background-color: #1DB954 !important;
         color: white !important;
-        font-size: 1.1rem !important;
-        font-weight: 800;
-        height: 3.5rem;
+        font-weight: 700;
+        height: 3rem;
         border: none;
     }
     </style>
@@ -103,17 +91,17 @@ okt, translator = get_resources()
 
 # --- 헤더 ---
 st.markdown('<h1 class="main-title">K-POP INSIGHT</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-text">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
+st.markdown('<p style="color:#1DB954; font-weight:600; margin-bottom:2rem;">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
 
 # --- 입력 ---
-lyrics_input = st.text_area("📝 가사 입력", height=200, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
-col_btn, _ = st.columns([1, 3]) 
+lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
+col_btn, _ = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석 실행")
 
 if analyze_btn:
     if lyrics_input.strip():
-        with st.spinner('AI 분석 중...'):
+        with st.spinner('데이터 분석 중...'):
             morphs = okt.pos(lyrics_input, stem=True)
             target_pos_map = {'Noun': '명사', 'Verb': '동사', 'Adjective': '형용사', 'Adverb': '부사'}
             all_words = [{'단어': w, '품사': target_pos_map[p]} for w, p in morphs if p in target_pos_map and len(w) >= 1]
@@ -138,7 +126,7 @@ if analyze_btn:
                 try:
                     translation = translator.translate(lyrics_input, dest='en')
                     st.info(translation.text)
-                except: st.error("번역 서버 오류")
+                except: st.error("번역 실패")
 
             with c_r:
                 st.markdown("### 📊 분석 데이터")
@@ -146,16 +134,16 @@ if analyze_btn:
                 df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
                 st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True)
 
-            # 문법 가이드 (설명 유지 + 요약 레이아웃)
+            # 문법 가이드 (단어 크기 조정 완료)
             st.divider()
             st.markdown("### 📚 가사 속 문법 학습")
             p1, p2 = st.columns(2)
             
             pos_info = {
-                "명사": {"icon": "💎", "desc": "사람, 사물, 장소 등의 이름을 나타내는 단어입니다. 가사의 핵심 주제가 됩니다."},
-                "동사": {"icon": "⚡", "desc": "움직임이나 동작을 나타내는 단어입니다. 주인공의 행동을 설명합니다."},
-                "형용사": {"icon": "🎨", "desc": "성질이나 상태를 묘사하는 단어입니다. 가사의 분위기를 풍부하게 만듭니다."},
-                "부사": {"icon": "🎬", "desc": "다른 말을 꾸며주는 양념 역할입니다. 감정의 정도를 세밀하게 표현합니다."}
+                "명사": {"icon": "💎", "desc": "사람, 사물, 장소 등의 이름을 나타내는 핵심 주제어입니다."},
+                "동사": {"icon": "⚡", "desc": "주인공의 움직임이나 역동적인 동작을 설명합니다."},
+                "형용사": {"icon": "🎨", "desc": "가사의 분위기와 감정 상태를 풍부하게 묘사합니다."},
+                "부사": {"icon": "🎬", "desc": "의미를 세밀하게 꾸며주는 양념 같은 역할입니다."}
             }
 
             for i, (name, info) in enumerate(pos_info.items()):
@@ -167,12 +155,12 @@ if analyze_btn:
                         cnt = spec_df.iloc[0]['횟수']
                         st.markdown(f"""
                             <div class="analysis-card">
-                                <div class="pos-title">{info['icon']} {name} (Part of Speech)</div>
+                                <div class="pos-title">{info['icon']} {name}</div>
                                 <div class="pos-desc">{info['desc']}</div>
-                                <div class="result-line">
+                                <div style="display: flex; align-items: baseline;">
                                     <span class="card-word">{top_w}</span>
                                     <span class="card-count">{cnt}회 등장</span>
-                                    <a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:5px;">사전 보기 →</a>
+                                    <a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.75rem; margin-left:8px; color:#1DB954; text-decoration:none;">사전 보기 →</a>
                                 </div>
                             </div>
                             """, unsafe_allow_html=True)
