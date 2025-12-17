@@ -2,51 +2,63 @@ import streamlit as st
 from konlpy.tag import Okt
 import pandas as pd
 from googletrans import Translator
-import plotly.express as px
 
 # 1. 페이지 설정
 st.set_page_config(page_title="K-POP INSIGHT", layout="wide", page_icon="🎧")
 
-# 2. 커스텀 CSS
+# 2. 리소스 로드 (캐싱 적용)
+@st.cache_resource
+def get_resources():
+    return Okt(), Translator()
+
+okt, translator = get_resources()
+
+# 3. 커스텀 CSS (모든 디자인 요구사항 통합)
 st.markdown("""
     <style>
+    /* 기본 배경 및 텍스트 설정 */
     .stApp {
         background: radial-gradient(circle at top left, #121212, #191414) !important;
         color: #E0E0E0 !important;
     }
     
-    .main-title {
-        background: linear-gradient(to right, #1DB954, #1ED760);
+    /* [메인 제목] 크기 확대 및 그린 그라데이션 */
+    .main-product-title {
+        font-family: 'Inter', sans-serif;
+        font-size: 5rem !important;
+        font-weight: 900 !important;
+        letter-spacing: -2px;
+        background: linear-gradient(135deg, #1DB954 0%, #1ED760 50%, #81EEA3 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 3rem !important;
-        font-weight: 900;
-        text-align: left;
+        margin-bottom: 0.2rem !important;
+        line-height: 1.1;
     }
     
+    /* [서브 타이틀] 3포인트 상향 조정 */
+    .sub-text {
+        color: #1DB954 !important;
+        font-size: 1.5rem !important;
+        font-weight: 600;
+        margin-bottom: 2.5rem;
+        opacity: 0.95;
+    }
+
+    /* [섹션 헤더] 가사 속 문법 학습 등 */
     h3 {
         font-size: 1.8rem !important;
         color: #FFFFFF !important;
         font-weight: 800 !important;
+        margin-top: 1rem;
         margin-bottom: 1.5rem !important;
     }
 
-    [data-testid="stMetricLabel"] p {
-        font-size: 1.3rem !important;
-        font-weight: 800 !important;
-        color: #FFFFFF !important;
-    }
-    
-    [data-testid="stMetricValue"] {
-        font-size: 2.0rem !important;
-        font-weight: 400 !important;
-        color: #1DB954 !important;
-    }
-
+    /* [가사 입력 레이블] 크기 상향 및 입력창과의 여백 확보 */
     .stTextArea label p {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
+        margin-bottom: 35px !important;
     }
 
     .stTextArea textarea {
@@ -56,6 +68,11 @@ st.markdown("""
         border: 1px solid #404040 !important;
     }
 
+    /* [분석 실행 버튼] 스퀘어 디자인 및 상단 밀착 조정 */
+    .stButton {
+        margin-top: -10px !important;
+    }
+    
     .stButton>button {
         width: auto !important;
         min-width: 160px;
@@ -65,8 +82,28 @@ st.markdown("""
         font-weight: 700;
         height: 3.2rem;
         border: none;
+        transition: all 0.2s ease;
+    }
+    .stButton>button:hover {
+        background-color: #1ED760 !important;
+        filter: brightness(1.1);
     }
 
+    /* [메트릭 라벨] 굵고 크게 */
+    [data-testid="stMetricLabel"] p {
+        font-size: 1.3rem !important;
+        font-weight: 800 !important;
+        color: #FFFFFF !important;
+    }
+    
+    /* [메트릭 데이터 값] 크기 하향 및 가늘게 (62, 38 등) */
+    [data-testid="stMetricValue"] {
+        font-size: 2.0rem !important;
+        font-weight: 400 !important;
+        color: #1DB954 !important;
+    }
+
+    /* [문법 학습 카드] 디자인 */
     .analysis-card {
         border-left: 3px solid #1DB954;
         padding: 12px 18px;
@@ -86,47 +123,43 @@ st.markdown("""
         font-size: 0.85rem;
         color: #B3B3B3;
         margin-bottom: 10px;
+        line-height: 1.4;
     }
 
+    /* [분석된 단어] 제목보다 작게 조정 (날, 멋지다 등) */
     .card-word {
         font-size: 1.2rem !important;
         font-weight: 400 !important;
         color: #FFFFFF;
         margin-right: 8px;
     }
+
+    .card-count {
+        font-size: 0.9rem;
+        color: #1DB954;
+        font-weight: 500;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# 리소스 로드
-@st.cache_resource
-def get_resources():
-    return Okt(), Translator()
-
-okt, translator = get_resources()
-
-# --- 헤더 ---
-st.markdown('<h1 class="main-title">K-POP INSIGHT</h1>', unsafe_allow_html=True)
-st.markdown('<p style="color:#1DB954; font-weight:600; margin-bottom:2rem;">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
+# --- 헤더 섹션 ---
+st.markdown('<h1 class="main-product-title">&lt;K-POP INSIGHT&gt;</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-text">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
 
 # --- 입력 섹션 ---
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
 
-# [수정] 가사 입력창 밑에 스페이스를 더 추가
-st.write("") 
-st.write("") 
-st.write("") 
+st.write("") # 버튼 위 미세 여백
 
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석 실행")
 
-# 결과창 전 여백
-st.write("") 
-st.write("") 
+st.write("") # 버튼 아래 결과와의 여백
 
+# --- 분석 로직 ---
 if analyze_btn:
     if lyrics_input.strip():
-        # ... (이후 데이터 분석 로직 동일)
         with st.spinner('데이터 분석 중...'):
             morphs = okt.pos(lyrics_input, stem=True)
             target_pos_map = {'Noun': '명사', 'Verb': '동사', 'Adjective': '형용사', 'Adverb': '부사'}
@@ -136,13 +169,15 @@ if analyze_btn:
         if not df_all.empty:
             df_counts = df_all.groupby(['단어', '품사']).size().reset_index(name='횟수').sort_values(by='횟수', ascending=False)
 
-            # 요약 대시보드
+            # 1. 요약 대시보드
+            st.write("")
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("전체 단어", f"{len(all_words)}")
             m2.metric("고유 단어", f"{len(df_counts)}")
             m3.metric("최빈 단어", df_counts.iloc[0]['단어'])
             m4.metric("주요 품사", df_counts.iloc[0]['품사'])
 
+            # 2. 결과 섹션 (번역 및 데이터)
             st.divider()
             c_l, c_r = st.columns([1, 1.2])
             with c_l:
@@ -150,7 +185,8 @@ if analyze_btn:
                 try:
                     translation = translator.translate(lyrics_input, dest='en')
                     st.info(translation.text)
-                except: st.error("번역 실패")
+                except:
+                    st.error("번역 서버 연결에 실패했습니다.")
 
             with c_r:
                 st.markdown("### 📊 분석 데이터")
@@ -158,15 +194,18 @@ if analyze_btn:
                 df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
                 st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True)
 
+            # 3. 문법 학습 섹션
             st.divider()
             st.markdown("### 📚 가사 속 문법 학습")
             p1, p2 = st.columns(2)
+            
             pos_info = {
                 "명사": {"icon": "💎", "desc": "사람, 사물, 장소 등의 이름을 나타내는 핵심 주제어입니다."},
-                "동사": {"icon": "⚡", "desc": "주인공의 움직임이나 역동적인 동작을 설명합니다."},
+                "동사": {"icon": "⚡", "desc": "주인공의 움직임이나 동작을 설명합니다."},
                 "형용사": {"icon": "🎨", "desc": "가사의 분위기와 감정 상태를 풍부하게 묘사합니다."},
                 "부사": {"icon": "🎬", "desc": "의미를 세밀하게 꾸며주는 양념 같은 역할입니다."}
             }
+
             for i, (name, info) in enumerate(pos_info.items()):
                 target_col = p1 if i < 2 else p2
                 with target_col:
@@ -180,8 +219,14 @@ if analyze_btn:
                                 <div class="pos-desc">{info['desc']}</div>
                                 <div style="display: flex; align-items: baseline;">
                                     <span class="card-word">{top_w}</span>
-                                    <span style="font-size: 0.9rem; color: #1DB954;">{cnt}회 등장</span>
+                                    <span class="card-count">{cnt}회 등장</span>
                                     <a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.75rem; margin-left:8px; color:#1DB954; text-decoration:none;">사전 보기 →</a>
                                 </div>
                             </div>
                             """, unsafe_allow_html=True)
+                    else:
+                        st.caption(f"{info['icon']} {name} 데이터가 없습니다.")
+        else:
+            st.warning("분석할 수 있는 단어가 충분하지 않습니다.")
+    else:
+        st.error("가사를 입력해 주세요!")
