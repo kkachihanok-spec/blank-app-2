@@ -74,7 +74,6 @@ st.markdown("""
         transform: translateY(-2px);
     }
 
-    /* [수정] 요약 대시보드 수치 폰트 크기 15% 확대 */
     [data-testid="stMetricLabel"] p { 
         font-size: 1.6rem !important; 
         color: #FFFFFF !important; 
@@ -82,12 +81,11 @@ st.markdown("""
         margin-bottom: 8px !important; 
     }
     [data-testid="stMetricValue"] { 
-        font-size: 1.67rem !important; /* 기존 1.45rem에서 약 15% 확대 */
+        font-size: 1.67rem !important; 
         color: #4a5fcc !important; 
         font-weight: 700 !important; 
     }
 
-    /* 가사 대조 번역 카드 */
     .lyrics-card {
         border-left: 4px solid #4a5fcc;
         padding: 24px;
@@ -108,7 +106,6 @@ st.markdown("""
     .kr-txt { font-size: 1.1rem; color: #FFFFFF; font-weight: 600; display: block; margin-bottom: 4px; }
     .en-txt { font-size: 0.95rem; color: #8b92b2; font-weight: 400; display: block; font-style: italic; }
 
-    /* 문법 분석 카드 */
     .analysis-card {
         border-left: 4px solid #2a3f88;
         padding: 16px 20px;
@@ -120,9 +117,17 @@ st.markdown("""
     
     .pos-title { font-size: 1.3rem !important; font-weight: 800 !important; color: #7d8dec; margin-bottom: 10px; }
     .pos-desc { font-size: 1.05rem !important; color: #8b92b2; margin-bottom: 14px; line-height: 1.6; }
-    .data-row { display: flex; align-items: baseline; border-top: 1px solid rgba(141, 146, 178, 0.2); padding-top: 12px; }
-    .card-word { font-weight: 700 !important; color: #FFFFFF; font-size: 1.1rem; }
-    .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; }
+    
+    /* [수정] data-row 내부 텍스트 폰트 크기 통일 */
+    .data-row { 
+        display: flex; 
+        align-items: baseline; 
+        border-top: 1px solid rgba(141, 146, 178, 0.2); 
+        padding-top: 12px; 
+        font-size: 1.1rem !important; /* 전체 줄의 기본 크기 설정 */
+    }
+    .card-word { font-weight: 700 !important; color: #FFFFFF; } /* 개별 폰트 크기 제거하여 부모에 맞춤 */
+    .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } /* 개별 폰트 크기 제거 */
     
     .lyrics-card::-webkit-scrollbar { width: 6px; }
     .lyrics-card::-webkit-scrollbar-thumb { background: #2a3f88; border-radius: 10px; }
