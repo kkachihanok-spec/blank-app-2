@@ -14,7 +14,7 @@ def get_resources():
 
 okt, translator = get_resources()
 
-# 3. 커스텀 CSS
+# 3. 커스텀 CSS (유령 박스 원인 스타일 제거 및 정리)
 st.markdown("""
     <style>
     .stApp {
@@ -135,24 +135,9 @@ st.markdown("""
     .card-word { font-weight: 700 !important; color: #FFFFFF; } 
     .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } 
 
-    /* 퀴즈 선택지 전용 박스 스타일 */
-    .quiz-selection-box {
-        background: rgba(74, 95, 204, 0.1); 
-        border: 1px solid rgba(74, 95, 204, 0.4); 
-        padding: 25px; 
-        border-radius: 15px;
-        margin-top: 10px;
-    }
+    /* 퀴즈 정답 섹션 여백 조정 */
+    .quiz-result-area { margin-top: 15px; }
 
-    [data-testid="stWidgetLabel"] p {
-        font-size: 1.25rem !important; 
-        color: #FFFFFF !important;
-        font-weight: 700 !important;
-    }
-    div[data-testid="stMarkdownContainer"] p {
-        font-size: 1.25rem !important;
-    }
-    
     .lyrics-card::-webkit-scrollbar { width: 6px; }
     .lyrics-card::-webkit-scrollbar-thumb { background: #2a3f88; border-radius: 10px; }
     </style>
@@ -277,37 +262,40 @@ if analyze_btn:
                         '''
                         st.markdown(card_html, unsafe_allow_html=True)
 
-            # 5. [수정 완료] 퀴즈 섹션 (잔상 박스 완벽 제거 버전)
+            # 5. [유령 박스 완벽 제거] 퀴즈 섹션
             st.divider()
             st.markdown("### 📝 오늘의 가사 퀴즈")
             
             top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
             
-            # 질문: 별도의 빈 div 없이 깔끔하게 텍스트만 배치
+            # 질문 영역: 마진을 직접 조절하여 잔상을 방지
             st.markdown(f"""
-                <p style="margin: 20px 0 10px 5px; font-size: 1.25rem; font-weight: 600;">
-                    <span style="color: #4a5fcc; font-weight: 800;">Q.</span> 
-                    이 가사에서 가장 많이 사용된 단어는 '{top_word}'입니다. 이 단어의 품사는 무엇일까요?
-                </p>
+                <div style="margin: 20px 0px 10px 5px;">
+                    <span style="color: #4a5fcc; font-weight: 800; font-size: 1.35rem;">Q.</span> 
+                    <span style="color: white; font-size: 1.2rem; font-weight: 600;">
+                        이 가사에서 가장 많이 사용된 단어는 '{top_word}'입니다. 이 단어의 품사는 무엇일까요?
+                    </span>
+                </div>
             """, unsafe_allow_html=True)
             
-            # 선택지: 오직 라디오 버튼 영역만 박스로 감쌈
-            st.markdown('<div class="quiz-selection-box">', unsafe_allow_html=True)
+            # 라디오 버튼: label_visibility="collapsed"로 유령 라벨 공간 제거
             user_choice = st.radio(
-                "정답을 골라보세요!", 
+                "정답 선택", 
                 ["명사", "동사", "형용사", "부사"], 
                 index=None, 
-                key="quiz_final_session"
+                key="quiz_final_no_ghost",
+                label_visibility="collapsed"
             )
-            st.markdown('</div>', unsafe_allow_html=True)
             
             if user_choice:
-                st.write("") 
+                # 결과 출력 시에만 공간 확보
+                st.markdown('<div class="quiz-result-area">', unsafe_allow_html=True)
                 if user_choice == top_pos:
                     st.success(f"정답입니다! 🎉 '{top_word}'은(는) **{top_pos}**입니다.")
                     st.balloons()
                 else:
                     st.error("아쉬워요! 위쪽 분석 데이터를 다시 확인해 보세요. 🧐")
+                st.markdown('</div>', unsafe_allow_html=True)
 
         else:
             st.warning("분석 데이터 부족")
