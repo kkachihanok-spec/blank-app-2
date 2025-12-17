@@ -134,23 +134,6 @@ st.markdown("""
     }
     .card-word { font-weight: 700 !important; color: #FFFFFF; } 
     .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } 
-
-    /* --- [추가] 퀴즈 선택지 전용 박스 스타일 --- */
-    .quiz-selection-box {
-        background: rgba(74, 95, 204, 0.1); 
-        border: 1px solid rgba(74, 95, 204, 0.4); 
-        padding: 25px; 
-        border-radius: 15px;
-    }
-
-    [data-testid="stWidgetLabel"] p {
-        font-size: 1.25rem !important; 
-        color: #FFFFFF !important;
-        font-weight: 700 !important;
-    }
-    div[data-testid="stMarkdownContainer"] p {
-        font-size: 1.25rem !important;
-    }
     
     .lyrics-card::-webkit-scrollbar { width: 6px; }
     .lyrics-card::-webkit-scrollbar-thumb { background: #2a3f88; border-radius: 10px; }
@@ -219,13 +202,13 @@ if analyze_btn:
                     column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, 
                     hide_index=True, 
                     use_container_width=True,
-                    height=520 
+                    height=520 # 다시 520px로 높이 복구하여 대칭 맞춤
                 )
 
-            # 3. 그래프 독립 섹션
+            # 3. [수정] 그래프 독립 섹션
             st.divider()
             st.markdown("### 📈 단어 빈도 시각화")
-            top_20 = df_counts.head(20)
+            top_20 = df_counts.head(20) # 공간이 넓어졌으므로 TOP 20까지 보여줍니다.
             fig = px.bar(
                 top_20, 
                 x='단어', 
@@ -275,41 +258,8 @@ if analyze_btn:
                             </div>
                         '''
                         st.markdown(card_html, unsafe_allow_html=True)
-
-            # 5. [수정됨] 퀴즈 섹션 (박스 제거 및 레이아웃 조정)
-            st.divider()
-            st.markdown("### 📝 오늘의 가사 퀴즈")
-            
-            top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
-            
-            # 질문: 박스를 빼고 텍스트로 노출
-            st.markdown(f"""
-                <div style="margin-bottom: 25px; padding-left: 5px;">
-                    <span style="color: #4a5fcc; font-weight: 800; font-size: 1.35rem;">Q.</span> 
-                    <span style="color: white; font-size: 1.25rem; font-weight: 600;">
-                        이 가사에서 가장 많이 사용된 단어는 '{top_word}'입니다. 이 단어의 품사는 무엇일까요?
-                    </span>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            # 정답 선택지: 박스 안에 넣어 가시성 확보
-            st.markdown('<div class="quiz-selection-box">', unsafe_allow_html=True)
-            user_choice = st.radio(
-                "정답을 골라보세요!", 
-                ["명사", "동사", "형용사", "부사"], 
-                index=None, 
-                key="quiz_final"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            if user_choice:
-                st.write("") # 간격용
-                if user_choice == top_pos:
-                    st.success(f"정답입니다! 🎉 '{top_word}'은(는) **{top_pos}**입니다.")
-                    st.balloons()
-                else:
-                    st.error("아쉬워요! 위쪽 분석 데이터를 다시 확인해 보세요. 🧐")
-
+                    else:
+                        st.caption(f"{info['icon']} {name} 데이터 없음")
         else:
             st.warning("분석 데이터 부족")
     else:
