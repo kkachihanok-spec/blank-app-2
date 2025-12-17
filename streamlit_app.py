@@ -13,12 +13,12 @@ def get_resources():
 
 okt, translator = get_resources()
 
-# 3. 커스텀 CSS (새로운 다크 네이비 & 블루 퍼플 팔레트 적용)
+# 3. 커스텀 CSS (배경 그라데이션 및 컬러 팔레트 적용)
 st.markdown("""
     <style>
-    /* 기본 배경 및 텍스트 설정 */
+    /* [배경 설정] 상단 다크네이비에서 하단 블랙으로 흐르는 세로 그라데이션 */
     .stApp {
-        background: radial-gradient(circle at top left, #0a0e1a, #141b2d) !important;
+        background: linear-gradient(to bottom, #0a0e1a 0%, #141b2d 30%, #050505 100%) !important;
         color: #FFFFFF !important;
     }
     
@@ -60,9 +60,9 @@ st.markdown("""
         line-height: 1.4 !important;
     }
 
-    /* 입력창 배경 및 보더 */
+    /* 입력창 배경 (배경과 조화를 위해 투명도 살짝 부여) */
     .stTextArea textarea {
-        background-color: #141b2d !important;
+        background-color: rgba(20, 27, 45, 0.7) !important;
         color: #FFFFFF !important;
         border-radius: 12px !important;
         border: 1px solid #2d3548 !important;
@@ -114,12 +114,6 @@ st.markdown("""
     .pos-desc { font-size: 0.85rem; color: #8b92b2; margin-bottom: 10px; }
     .card-word { font-size: 1.2rem !important; font-weight: 500 !important; color: #FFFFFF; }
     .card-count { font-size: 0.9rem; color: #4a5fcc; font-weight: 500; }
-    
-    /* 데이터 테이블/에디터 보더 */
-    .stDataEditor {
-        border: 1px solid #2d3548 !important;
-        border-radius: 12px;
-    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -151,13 +145,14 @@ if analyze_btn:
         if not df_all.empty:
             df_counts = df_all.groupby(['단어', '품사']).size().reset_index(name='횟수').sort_values(by='횟수', ascending=False)
 
-            # 요약 대시보드
+            # 1. 요약 대시보드
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("전체 단어", f"{len(all_words)}")
             m2.metric("고유 단어", f"{len(df_counts)}")
             m3.metric("최빈 단어", df_counts.iloc[0]['단어'])
             m4.metric("주요 품사", df_counts.iloc[0]['품사'])
 
+            # 2. 번역 및 데이터
             st.divider()
             c_l, c_r = st.columns([1, 1.2])
             with c_l:
@@ -174,6 +169,7 @@ if analyze_btn:
                 df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
                 st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True)
 
+            # 3. 문법 학습 섹션
             st.divider()
             st.markdown("### 📚 가사 속 문법 학습")
             p1, p2 = st.columns(2)
