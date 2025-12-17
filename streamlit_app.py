@@ -2,6 +2,7 @@ import streamlit as st
 from konlpy.tag import Okt
 import pandas as pd
 from googletrans import Translator
+import plotly.express as px  # 그래프 시각화를 위한 라이브러리 추가
 
 # 1. 페이지 설정
 st.set_page_config(page_title="K-POP INSIGHT", layout="wide", page_icon="🎧")
@@ -57,21 +58,20 @@ st.markdown("""
         border: 1px solid #2d3548 !important;
     }
 
-    /* [수정] 분석 버튼 디자인: 가로폭을 텍스트 길이에 맞춤(width: auto) */
     .stButton>button {
         background-color: #2a3f88 !important;
         color: #FFFFFF !important;
         font-weight: 700;
-        width: auto !important;        /* 가로폭 자동 조절 */
-        min-width: 150px !important;   /* 최소 폭 유지 */
+        width: auto !important;
+        min-width: 150px !important;
         height: 3.84rem !important;   
         font-size: 1.44rem !important; 
         border: none;
         margin-top: 20px !important;  
         display: flex !important;
         justify-content: flex-start !important; 
-        padding-left: 30px !important;  /* 왼쪽 여백 */
-        padding-right: 30px !important; /* 오른쪽 여백 추가로 텍스트에 맞게 확장 */
+        padding-left: 30px !important;
+        padding-right: 30px !important;
         align-items: center !important;
         transition: all 0.3s ease;
     }
@@ -150,7 +150,6 @@ lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분�
 
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
-    # 버튼 문구 유지
     analyze_btn = st.button("🚀 분석을 실행해줘!")
 
 # --- 분석 결과 로직 ---
@@ -203,17 +202,42 @@ if analyze_btn:
                 df_display = df_counts.copy()
                 df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
                 
+                # 표 출력
                 st.data_editor(
                     df_display, 
                     column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, 
                     hide_index=True, 
                     use_container_width=True,
-                    height=520 
+                    height=250 # 그래프 추가를 위해 표 높이 조정
                 )
+                
+                # [추가] 단어 빈도 시각화 그래프
+                st.markdown("#### 📈 TOP 10 단어 빈도")
+                top_10 = df_counts.head(10)
+                fig = px.bar(
+                    top_10, 
+                    x='횟수', 
+                    y='단어', 
+                    orientation='h',
+                    color='품사',
+                    color_discrete_map={'명사': '#7d8dec', '동사': '#4a5fcc', '형용사': '#2a3f88', '부사': '#8b92b2'},
+                    template='plotly_dark'
+                )
+                fig.update_layout(
+                    height=230,
+                    margin=dict(l=0, r=0, t=0, b=0),
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    showlegend=False,
+                    xaxis=dict(showgrid=False),
+                    yaxis=dict(autorange="reversed") # 빈도 높은 순으로 위에서부터
+                )
+                st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
             # 3. 문법 학습 섹션
             st.divider()
             st.markdown("### 📚 가사 속 문법 학습")
+            # (이하 문법 학습 섹션 로직 동일...)
             pos_info = {
                 "명사": {"icon": "💎", "desc": "사물이나 개념의 이름입니다."},
                 "동사": {"icon": "⚡", "desc": "동작이나 움직임을 나타냅니다."},
