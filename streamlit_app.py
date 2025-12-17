@@ -13,7 +13,7 @@ def get_resources():
 
 okt, translator = get_resources()
 
-# 3. 커스텀 CSS (디자인 및 박스 제거용)
+# 3. 커스텀 CSS
 st.markdown("""
     <style>
     .stApp {
@@ -43,10 +43,12 @@ st.markdown("""
 
     hr { border-bottom: 1px solid #2d3548 !important; }
 
+    /* [수정] 가사 입력 라벨과 TextArea 사이 마진 추가 */
     .stTextArea label p {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
+        margin-bottom: 25px !important; /* 라벨 하단 간격 확대 */
     }
 
     .stTextArea textarea {
@@ -56,12 +58,22 @@ st.markdown("""
         border: 1px solid #2d3548 !important;
     }
 
+    /* [수정] 분석 실행 버튼 디자인 (크기 20% 확대 및 상단 마진) */
     .stButton>button {
         background-color: #2a3f88 !important;
         color: #FFFFFF !important;
         font-weight: 700;
-        height: 3.2rem;
+        width: 200px !important;      /* 너비 약 20% 확대 */
+        height: 3.84rem !important;   /* 높이 약 20% 확대 (3.2rem -> 3.84rem) */
+        font-size: 1.2rem !important; /* 폰트 크기 동반 상승 */
         border: none;
+        margin-top: 20px !important;  /* TextArea와의 간격 추가 */
+        transition: all 0.3s ease;
+    }
+    
+    .stButton>button:hover {
+        background-color: #4a5fcc !important;
+        transform: translateY(-2px);
     }
 
     /* 요약 대시보드 */
@@ -124,13 +136,15 @@ st.markdown('<h1 class="main-product-title">&lt;K-POP INSIGHT&gt;</h1>', unsafe_
 st.markdown('<p class="sub-text">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
 st.divider()
 
-# --- 입력 ---
+# --- 입력 섹션 ---
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
+
+# 버튼 배치
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석 실행")
 
-# --- 분석 결과 ---
+# --- 분석 결과 로직 ---
 if analyze_btn:
     if lyrics_input.strip():
         st.divider()
@@ -161,7 +175,6 @@ if analyze_btn:
                 st.markdown("### 🌍 가사 대조 번역")
                 lines = [line.strip() for line in lyrics_input.split('\n') if line.strip()]
                 
-                # HTML을 빌드할 때 f-string 내의 중괄호 충돌을 피하기 위해 분리해서 처리합니다.
                 html_output = '<div class="lyrics-card">'
                 for line in lines:
                     try:
@@ -174,8 +187,6 @@ if analyze_btn:
                     except:
                         html_output += f'<div class="lyrics-line-pair"><span class="kr-txt">{line}</span></div>'
                 html_output += '</div>'
-                
-                # 반드시 한 번의 마크다운 호출로 렌더링
                 st.markdown(html_output, unsafe_allow_html=True)
 
             with c_r:
