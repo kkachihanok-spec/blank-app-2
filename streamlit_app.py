@@ -22,7 +22,7 @@ st.markdown("""
         color: #FFFFFF !important;
     }
     
-    /* [메인 제목] 블루 퍼플 그라데이션 */
+    /* [메인 제목] */
     .main-product-title {
         font-family: 'Inter', sans-serif;
         font-size: 4rem !important; 
@@ -36,7 +36,6 @@ st.markdown("""
         padding-top: 1rem;
     }
     
-    /* [서브 타이틀] 그레이 텍스트 (#8b92b2) */
     .sub-text {
         color: #8b92b2 !important;
         font-size: 1.2rem !important; 
@@ -45,19 +44,16 @@ st.markdown("""
         opacity: 0.95;
     }
 
-    /* 구분선 스타일 (#2d3548) */
     hr {
         margin: 1.5rem 0 !important;
         border-bottom: 1px solid #2d3548 !important;
     }
 
-    /* [가사 입력 레이블] */
     .stTextArea label p {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
         margin-bottom: 15px !important;
-        line-height: 1.4 !important;
     }
 
     .stTextArea textarea {
@@ -67,7 +63,6 @@ st.markdown("""
         border: 1px solid #2d3548 !important;
     }
 
-    /* [분석 실행 버튼] 블루 퍼플 강조색 */
     .stButton>button {
         width: auto !important;
         min-width: 160px;
@@ -79,7 +74,6 @@ st.markdown("""
         border: none;
     }
 
-    /* 분석 결과 제목 (1.7rem) */
     .result-header {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
@@ -95,14 +89,30 @@ st.markdown("""
         margin-bottom: 16px;
         background: rgba(45, 53, 72, 0.25);
         border-radius: 0 12px 12px 0;
-        border-top: 1px solid rgba(45, 53, 72, 0.5);
-        border-right: 1px solid rgba(45, 53, 72, 0.5);
-        border-bottom: 1px solid rgba(45, 53, 72, 0.5);
+        border: 1px solid rgba(45, 53, 72, 0.5);
     }
-    .pos-title { font-size: 1.1rem; font-weight: 700; color: #7d8dec; margin-bottom: 6px; }
-    .pos-desc { font-size: 0.85rem; color: #8b92b2; margin-bottom: 12px; line-height: 1.5; }
-    .card-word { font-size: 1.3rem !important; font-weight: 600 !important; color: #FFFFFF; }
-    .card-count { font-size: 0.9rem; color: #4a5fcc; font-weight: 500; }
+    .pos-title { font-size: 1.1rem; font-weight: 700; color: #7d8dec; margin-bottom: 8px; }
+    
+    /* [수정] 핵심 설명 폰트 2포인트 상향 (기존 0.85rem -> 약 1.05rem) */
+    .pos-desc { 
+        font-size: 1.05rem !important; 
+        color: #8b92b2; 
+        margin-bottom: 14px; 
+        line-height: 1.6; 
+    }
+
+    /* [수정] 안내 문구와 데이터 폰트 사이즈 통일 (1.1rem) */
+    .data-row {
+        display: flex; 
+        align-items: baseline; 
+        border-top: 1px solid rgba(141, 146, 178, 0.2); 
+        padding-top: 12px;
+        font-size: 1.1rem !important; 
+    }
+    .data-label { color: #8b92b2; margin-right: 10px; }
+    .card-word { font-weight: 700 !important; color: #FFFFFF; }
+    .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; }
+    
     </style>
     """, unsafe_allow_html=True)
 
@@ -134,14 +144,14 @@ if analyze_btn:
         if not df_all.empty:
             df_counts = df_all.groupby(['단어', '품사']).size().reset_index(name='횟수').sort_values(by='횟수', ascending=False)
 
-            # 요약 대시보드
+            # 1. 요약 대시보드
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("전체 단어", f"{len(all_words)}")
             m2.metric("고유 단어", f"{len(df_counts)}")
             m3.metric("최빈 단어", df_counts.iloc[0]['단어'])
             m4.metric("주요 품사", df_counts.iloc[0]['품사'])
 
-            # 번역 및 데이터 섹션
+            # 2. 번역 및 데이터
             st.divider()
             c_l, c_r = st.columns([1, 1.2])
             with c_l:
@@ -158,28 +168,15 @@ if analyze_btn:
                 df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
                 st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True)
 
-            # 문법 학습 섹션 (상세 설명 포함)
+            # 3. 문법 학습 섹션
             st.divider()
             st.markdown("### 📚 가사 속 문법 학습")
             
-            # 품사별 상세 설명 정의
             pos_info = {
-                "명사": {
-                    "icon": "💎", 
-                    "desc": "사람, 사물, 장소나 추상적인 개념의 이름을 나타냅니다. 가사에서 주로 '누가', '무엇'에 해당하는 핵심 소재가 됩니다."
-                },
-                "동사": {
-                    "icon": "⚡", 
-                    "desc": "주어의 동작이나 움직임을 나타냅니다. 가사 속 주인공이 현재 어떤 행동을 하고 있는지 생동감 있게 표현합니다."
-                },
-                "형용사": {
-                    "icon": "🎨", 
-                    "desc": "사람이나 사물의 성질이나 상태를 나타냅니다. 가사의 감정선이나 분위기를 풍부하게 꾸며주는 역할을 합니다."
-                },
-                "부사": {
-                    "icon": "🎬", 
-                    "desc": "용언(동사, 형용사)이나 다른 부사를 꾸며주어 의미를 더 세밀하게 만듭니다. '어떻게' 수행되는지를 설명합니다."
-                }
+                "명사": {"icon": "💎", "desc": "사람, 사물, 장소나 추상적인 개념의 이름을 나타냅니다. 가사에서 주로 '누가', '무엇'에 해당하는 핵심 소재가 됩니다."},
+                "동사": {"icon": "⚡", "desc": "주어의 동작이나 움직임을 나타냅니다. 가사 속 주인공이 현재 어떤 행동을 하고 있는지 생동감 있게 표현합니다."},
+                "형용사": {"icon": "🎨", "desc": "사람이나 사물의 성질이나 상태를 나타냅니다. 가사의 감정선이나 분위기를 풍부하게 꾸며주는 역할을 합니다."},
+                "부사": {"icon": "🎬", "desc": "용언이나 다른 부사를 꾸며주어 의미를 더 세밀하게 만듭니다. '어떻게' 수행되는지를 설명하는 양념 역할을 합니다."}
             }
 
             p1, p2 = st.columns(2)
@@ -194,11 +191,11 @@ if analyze_btn:
                             <div class="analysis-card">
                                 <div class="pos-title">{info['icon']} {name}</div>
                                 <div class="pos-desc">{info['desc']}</div>
-                                <div style="display: flex; align-items: baseline; border-top: 1px solid rgba(141, 146, 178, 0.2); padding-top: 10px;">
-                                    <span style="font-size: 0.8rem; color: #8b92b2; margin-right: 10px;">가장 많이 사용된 단어:</span>
+                                <div class="data-row">
+                                    <span class="data-label">가장 많이 사용된 단어:</span>
                                     <span class="card-word">{top_w}</span>
-                                    <span class="card-count" style="margin-left:12px;">{cnt}회</span>
-                                    <a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.75rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a>
+                                    <span class="card-count">{cnt}회</span>
+                                    <a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a>
                                 </div>
                             </div>
                             """, unsafe_allow_html=True)
