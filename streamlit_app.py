@@ -13,7 +13,7 @@ def get_resources():
 
 okt, translator = get_resources()
 
-# 3. 커스텀 CSS (잘림 현상 방지 및 디자인 통합)
+# 3. 커스텀 CSS (디자인 통합 및 여백 최적화)
 st.markdown("""
     <style>
     /* 기본 배경 및 텍스트 설정 */
@@ -22,7 +22,7 @@ st.markdown("""
         color: #E0E0E0 !important;
     }
     
-    /* [메인 제목] 4rem (잘림 방지 line-height 확보) */
+    /* [메인 제목] 4rem */
     .main-product-title {
         font-family: 'Inter', sans-serif;
         font-size: 4rem !important; 
@@ -45,9 +45,9 @@ st.markdown("""
         opacity: 0.95;
     }
 
-    /* 구분선(hr) 색상 조정 */
+    /* 구분선 스타일 */
     hr {
-        margin: 1rem 0 2rem 0 !important;
+        margin: 1.5rem 0 !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
 
@@ -83,6 +83,15 @@ st.markdown("""
         border: none;
     }
 
+    /* 분석 결과 메인 섹션 제목 */
+    .result-header {
+        font-size: 2.2rem !important;
+        font-weight: 800 !important;
+        color: #FFFFFF !important;
+        margin-top: 1rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+
     /* 결과 메트릭 및 카드 스타일 */
     [data-testid="stMetricLabel"] p { font-size: 1.3rem !important; font-weight: 800 !important; color: #FFFFFF !important; }
     [data-testid="stMetricValue"] { font-size: 2.0rem !important; font-weight: 400 !important; color: #1DB954 !important; }
@@ -105,8 +114,7 @@ st.markdown("""
 st.markdown('<h1 class="main-product-title">&lt;K-POP INSIGHT&gt;</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
 
-# --- [추가] 타이틀과 입력창 사이 줄 긋기 ---
-st.divider()
+st.divider() # 서브 타이틀과 입력창 사이 줄
 
 # --- 입력 섹션 ---
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
@@ -115,11 +123,15 @@ col_btn, _ = st.columns([1, 4])
 with col_btn:
     analyze_btn = st.button("🚀 분석 실행")
 
-st.write("") 
-
 # --- 분석 로직 ---
 if analyze_btn:
     if lyrics_input.strip():
+        # 분석 버튼 아래 줄 긋기
+        st.divider()
+        
+        # 분석 결과 메인 제목 추가
+        st.markdown('<div class="result-header">📊 분석 결과</div>', unsafe_allow_html=True)
+
         with st.spinner('데이터 분석 중...'):
             morphs = okt.pos(lyrics_input, stem=True)
             target_pos_map = {'Noun': '명사', 'Verb': '동사', 'Adjective': '형용사', 'Adverb': '부사'}
@@ -129,15 +141,14 @@ if analyze_btn:
         if not df_all.empty:
             df_counts = df_all.groupby(['단어', '품사']).size().reset_index(name='횟수').sort_values(by='횟수', ascending=False)
 
-            # 요약 대시보드
-            st.write("")
+            # 1. 요약 대시보드
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("전체 단어", f"{len(all_words)}")
             m2.metric("고유 단어", f"{len(df_counts)}")
             m3.metric("최빈 단어", df_counts.iloc[0]['단어'])
             m4.metric("주요 품사", df_counts.iloc[0]['품사'])
 
-            # 결과 섹션 (번역 및 데이터)
+            # 2. 번역 및 상세 데이터
             st.divider()
             c_l, c_r = st.columns([1, 1.2])
             with c_l:
@@ -154,7 +165,7 @@ if analyze_btn:
                 df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
                 st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True)
 
-            # 문법 학습 섹션
+            # 3. 문법 학습 섹션
             st.divider()
             st.markdown("### 📚 가사 속 문법 학습")
             p1, p2 = st.columns(2)
