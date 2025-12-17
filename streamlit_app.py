@@ -7,7 +7,7 @@ import plotly.express as px
 # 1. 페이지 설정
 st.set_page_config(page_title="K-POP INSIGHT", layout="wide", page_icon="🎧")
 
-# 2. 커스텀 CSS (데이터 값 크기 및 굵기 하향 조정)
+# 2. 커스텀 CSS
 st.markdown("""
     <style>
     .stApp {
@@ -31,30 +31,26 @@ st.markdown("""
         margin-bottom: 1.5rem !important;
     }
 
-    /* 메트릭 라벨 (제목) - 굵고 크게 유지 */
     [data-testid="stMetricLabel"] p {
         font-size: 1.3rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
     }
     
-    /* [수정] 메트릭 실제 값 (62, 38 등) - 크기 2pt 하향 및 가늘게 */
     [data-testid="stMetricValue"] {
-        font-size: 2.0rem !important; /* 2.2rem -> 2.0rem */
+        font-size: 2.0rem !important;
         font-weight: 400 !important;
         color: #1DB954 !important;
     }
 
-    /* 가사 입력 레이블 */
     .stTextArea label p {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
     }
 
-    /* [수정] 품사 카드 내 분석 단어 (날, 멋지다 등) - 크기 하향 및 가늘게 */
     .card-word {
-        font-size: 1.2rem !important; /* 1.4rem -> 1.2rem */
+        font-size: 1.2rem !important;
         font-weight: 400 !important;
         color: #FFFFFF;
         margin-right: 8px;
@@ -109,6 +105,10 @@ lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분�
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석 실행")
+
+# [수정] 버튼 바로 아래에 여백 추가
+st.write("") 
+st.write("") 
 
 if analyze_btn:
     if lyrics_input.strip():
