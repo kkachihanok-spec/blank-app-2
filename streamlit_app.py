@@ -13,7 +13,7 @@ def get_resources():
 
 okt, translator = get_resources()
 
-# 3. 커스텀 CSS (디자인 통합 및 여백 최적화)
+# 3. 커스텀 CSS (폰트 사이즈 통일 및 디자인 최적화)
 st.markdown("""
     <style>
     /* 기본 배경 및 텍스트 설정 */
@@ -51,7 +51,7 @@ st.markdown("""
         border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
 
-    /* [가사 입력 레이블] */
+    /* [가사 입력 레이블] - 1.7rem */
     .stTextArea label p {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
@@ -83,13 +83,14 @@ st.markdown("""
         border: none;
     }
 
-    /* 분석 결과 메인 섹션 제목 */
+    /* [수정] 분석 결과 제목: 가사 입력 레이블과 동일하게 1.7rem으로 설정 */
     .result-header {
-        font-size: 2.2rem !important;
+        font-size: 1.7rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
-        margin-top: 1rem !important;
-        margin-bottom: 1.5rem !important;
+        margin-top: 0.5rem !important;
+        margin-bottom: 20px !important;
+        line-height: 1.4 !important;
     }
 
     /* 결과 메트릭 및 카드 스타일 */
@@ -129,7 +130,7 @@ if analyze_btn:
         # 분석 버튼 아래 줄 긋기
         st.divider()
         
-        # 분석 결과 메인 제목 추가
+        # [수정] 분석 결과 메인 제목 (1.7rem 반영)
         st.markdown('<div class="result-header">📊 분석 결과</div>', unsafe_allow_html=True)
 
         with st.spinner('데이터 분석 중...'):
