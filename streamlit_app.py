@@ -79,17 +79,18 @@ st.markdown("""
         font-weight: 800 !important;
         color: #FFFFFF !important;
         margin-top: 0.5rem !important;
-        margin-bottom: 20px !important;
+        margin-bottom: 25px !important;
     }
 
-    /* [수정] 라벨(1.6rem) 대비 수치 크기를 20% 축소 (1.45rem) */
+    /* [수정] 메트릭 라벨과 수치 사이 간격 조정 및 화살표 스타일 */
     [data-testid="stMetricLabel"] p { 
         font-size: 1.6rem !important; 
         color: #FFFFFF !important; 
         font-weight: 900 !important; 
+        margin-bottom: 12px !important; /* 라벨과 수치 사이의 간격 추가 */
     }
     [data-testid="stMetricValue"] { 
-        font-size: 1.45rem !important; /* 기존 1.8rem에서 약 20% 하향 */
+        font-size: 1.45rem !important; 
         color: #4a5fcc !important; 
         font-weight: 700 !important; 
     }
@@ -160,12 +161,12 @@ if analyze_btn:
         if not df_all.empty:
             df_counts = df_all.groupby(['단어', '품사']).size().reset_index(name='횟수').sort_values(by='횟수', ascending=False)
 
-            # 1. 요약 대시보드
+            # 1. 요약 대시보드 (수치 앞에 화살표 추가)
             m1, m2, m3, m4 = st.columns(4)
-            m1.metric("전체 단어", f"{len(all_words)}")
-            m2.metric("고유 단어", f"{len(df_counts)}")
-            m3.metric("최빈 단어", df_counts.iloc[0]['단어'])
-            m4.metric("주요 품사", df_counts.iloc[0]['품사'])
+            m1.metric("전체 단어", f"→ {len(all_words)}")
+            m2.metric("고유 단어", f"→ {len(df_counts)}")
+            m3.metric("최빈 단어", f"→ {df_counts.iloc[0]['단어']}")
+            m4.metric("주요 품사", f"→ {df_counts.iloc[0]['품사']}")
 
             # 2. 번역 및 데이터
             st.divider()
