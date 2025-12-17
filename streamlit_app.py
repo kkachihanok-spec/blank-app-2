@@ -13,7 +13,7 @@ def get_resources():
 
 okt, translator = get_resources()
 
-# 3. 커스텀 CSS (잘림 현상 방지를 위해 여백 수치 정밀 조정)
+# 3. 커스텀 CSS (잘림 현상 방지 및 디자인 통합)
 st.markdown("""
     <style>
     /* 기본 배경 및 텍스트 설정 */
@@ -22,7 +22,7 @@ st.markdown("""
         color: #E0E0E0 !important;
     }
     
-    /* [메인 제목] 4rem (잘림 방지를 위해 line-height와 margin 확보) */
+    /* [메인 제목] 4rem (잘림 방지 line-height 확보) */
     .main-product-title {
         font-family: 'Inter', sans-serif;
         font-size: 4rem !important; 
@@ -32,25 +32,31 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 0.5rem !important;
-        line-height: 1.2 !important; /* 글자 잘림 방지를 위해 높이 확보 */
+        line-height: 1.2 !important;
         padding-top: 1rem;
     }
     
-    /* [서브 타이틀] 1.2rem (간격을 최소화하되 글자는 안 겹치게) */
+    /* [서브 타이틀] 1.2rem */
     .sub-text {
         color: #1DB954 !important;
         font-size: 1.2rem !important; 
         font-weight: 600;
-        margin-bottom: 2rem !important; 
+        margin-bottom: 1.5rem !important; 
         opacity: 0.95;
     }
 
-    /* [가사 입력 섹션] 레이블과 입력창 사이 여백 최적화 */
+    /* 구분선(hr) 색상 조정 */
+    hr {
+        margin: 1rem 0 2rem 0 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    /* [가사 입력 레이블] */
     .stTextArea label p {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
-        margin-bottom: 15px !important; /* 너무 멀지 않게 조정 */
+        margin-bottom: 15px !important;
         line-height: 1.4 !important;
     }
 
@@ -61,7 +67,7 @@ st.markdown("""
         border: 1px solid #404040 !important;
     }
 
-    /* [분석 실행 버튼] 스퀘어 디자인 및 자연스러운 상단 여백 */
+    /* [분석 실행 버튼] 스퀘어 디자인 */
     .stButton {
         padding-top: 0.5rem !important;
     }
@@ -77,7 +83,7 @@ st.markdown("""
         border: none;
     }
 
-    /* 결과 관련 스타일 */
+    /* 결과 메트릭 및 카드 스타일 */
     [data-testid="stMetricLabel"] p { font-size: 1.3rem !important; font-weight: 800 !important; color: #FFFFFF !important; }
     [data-testid="stMetricValue"] { font-size: 2.0rem !important; font-weight: 400 !important; color: #1DB954 !important; }
 
@@ -99,10 +105,12 @@ st.markdown("""
 st.markdown('<h1 class="main-product-title">&lt;K-POP INSIGHT&gt;</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
 
+# --- [추가] 타이틀과 입력창 사이 줄 긋기 ---
+st.divider()
+
 # --- 입력 섹션 ---
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
 
-# 버튼 위치를 과하게 올리지 않고 자연스럽게 배치
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석 실행")
@@ -121,7 +129,7 @@ if analyze_btn:
         if not df_all.empty:
             df_counts = df_all.groupby(['단어', '품사']).size().reset_index(name='횟수').sort_values(by='횟수', ascending=False)
 
-            # 1. 요약 대시보드
+            # 요약 대시보드
             st.write("")
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("전체 단어", f"{len(all_words)}")
@@ -129,7 +137,7 @@ if analyze_btn:
             m3.metric("최빈 단어", df_counts.iloc[0]['단어'])
             m4.metric("주요 품사", df_counts.iloc[0]['품사'])
 
-            # 2. 결과 섹션 (번역 및 데이터)
+            # 결과 섹션 (번역 및 데이터)
             st.divider()
             c_l, c_r = st.columns([1, 1.2])
             with c_l:
@@ -146,7 +154,7 @@ if analyze_btn:
                 df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
                 st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True)
 
-            # 3. 문법 학습 섹션
+            # 문법 학습 섹션
             st.divider()
             st.markdown("### 📚 가사 속 문법 학습")
             p1, p2 = st.columns(2)
