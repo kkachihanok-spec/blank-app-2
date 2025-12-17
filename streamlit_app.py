@@ -10,15 +10,6 @@ except Exception:
 # 페이지 설정
 st.set_page_config(page_title="K-Pop 가사 분석기", layout="wide", page_icon="🎵")
 
-import streamlit as st
-from konlpy.tag import Okt
-import pandas as pd
-from googletrans import Translator
-import plotly.express as px
-
-# 페이지 설정
-st.set_page_config(page_title="K-Pop 가사 분석기", layout="wide", page_icon="🎵")
-
 # 형태소 분석기 및 번역기 초기화
 @st.cache_resource
 def get_resources():
@@ -45,6 +36,8 @@ if st.button("🚀 분석 및 번역 시작"):
                 all_words.append({'단어': word, '품사': target_pos[pos]})
         
         df_all = pd.DataFrame(all_words)
+        # 빈도 DF 초기화 (단어가 없을 때 에러 방지)
+        df_counts = pd.DataFrame(columns=['단어', '품사', '횟수'])
 
         # 레이아웃 나누기
         col1, col2 = st.columns([1, 1.2])
@@ -85,13 +78,16 @@ if st.button("🚀 분석 및 번역 시작"):
             st.divider()
             st.subheader("📈 단어 빈도수 TOP 10")
             top_10 = df_counts.head(10)
-            fig = px.bar(
-                top_10, x='단어', y='횟수', color='품사', text='횟수',
-                title="가사에서 가장 많이 사용된 단어",
-                color_discrete_sequence=px.colors.qualitative.Pastel
-            )
-            fig.update_traces(textposition='outside')
-            st.plotly_chart(fig, use_container_width=True)
+            if px:
+                fig = px.bar(
+                    top_10, x='단어', y='횟수', color='품사', text='횟수',
+                    title="가사에서 가장 많이 사용된 단어",
+                    color_discrete_sequence=px.colors.qualitative.Pastel
+                )
+                fig.update_traces(textposition='outside')
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("plotly가 설치되어 있지 않아 차트를 표시할 수 없습니다.")
 
         # --- 4. 상세 품사 개념 설명란 (추가된 부분) ---
         st.divider()
