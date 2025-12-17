@@ -91,9 +91,16 @@ st.markdown("""
         border-radius: 0 12px 12px 0;
         border: 1px solid rgba(45, 53, 72, 0.5);
     }
-    .pos-title { font-size: 1.1rem; font-weight: 700; color: #7d8dec; margin-bottom: 8px; }
     
-    /* [수정] 핵심 설명 폰트 2포인트 상향 (기존 0.85rem -> 약 1.05rem) */
+    /* [수정] 품사 제목 폰트 2포인트 상향 (기존 1.1rem -> 1.3rem) */
+    .pos-title { 
+        font-size: 1.3rem !important; 
+        font-weight: 800 !important; 
+        color: #7d8dec; 
+        margin-bottom: 10px; 
+    }
+    
+    /* 핵심 설명 폰트 (상향 유지) */
     .pos-desc { 
         font-size: 1.05rem !important; 
         color: #8b92b2; 
@@ -101,7 +108,7 @@ st.markdown("""
         line-height: 1.6; 
     }
 
-    /* [수정] 안내 문구와 데이터 폰트 사이즈 통일 (1.1rem) */
+    /* 데이터 영역 폰트 통일 */
     .data-row {
         display: flex; 
         align-items: baseline; 
