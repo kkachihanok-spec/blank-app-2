@@ -7,7 +7,7 @@ import plotly.express as px
 # 1. 페이지 설정
 st.set_page_config(page_title="K-POP INSIGHT", layout="wide", page_icon="🎧")
 
-# 2. 커스텀 CSS
+# 2. 커스텀 CSS (버튼 r값 제거 및 스퀘어 디자인 적용)
 st.markdown("""
     <style>
     .stApp {
@@ -77,14 +77,21 @@ st.markdown("""
         margin-bottom: 10px;
     }
 
+    /* [수정] 버튼 스타일: 둥근 모서리 제거 (r값 최소화) */
     .stButton>button {
         width: auto !important;
         min-width: 160px;
-        border-radius: 50px !important;
+        border-radius: 4px !important; /* 50px -> 4px (스퀘어 스타일) */
         background-color: #1DB954 !important;
         color: white !important;
         font-weight: 700;
-        height: 3rem;
+        height: 3.2rem;
+        border: none;
+        transition: all 0.2s ease;
+    }
+    .stButton>button:hover {
+        background-color: #1ED760 !important;
+        filter: brightness(1.1);
     }
     </style>
     """, unsafe_allow_html=True)
@@ -106,7 +113,7 @@ col_btn, _ = st.columns([1, 4])
 with col_btn:
     analyze_btn = st.button("🚀 분석 실행")
 
-# [수정] 버튼 바로 아래에 여백 추가
+# 버튼 아래 여백
 st.write("") 
 st.write("") 
 
