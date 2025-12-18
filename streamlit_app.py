@@ -30,7 +30,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (기존 디자인 100% 복구 + 반반 버튼 설정)
+# 3. 커스텀 CSS (기존 디자인 100% 유지 + 버튼 너비 100% 강제 확장)
 st.markdown("""
     <style>
     .stApp {
@@ -61,16 +61,18 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     
-    /* 🔥 다운로드 버튼 반반 꽉 차게 설정 */
-    div[data-testid="column"] div.stDownloadButton > button {
+    /* 🔥 버튼 너비를 부모 칼럼의 100%로 강제 확장 (가로 꽉 차게) */
+    div.stDownloadButton > button {
         width: 100% !important;
+        display: block !important;
         background: rgba(81, 109, 244, 0.1) !important;
         border: 1px solid rgba(81, 109, 244, 0.4) !important;
-        color: #516df4 !important; font-size: 1.2rem !important; font-weight: 700 !important;
-        padding: 20px 0 !important; border-radius: 12px !important;
+        color: #516df4 !important; font-size: 1.25rem !important; font-weight: 700 !important;
+        padding: 22px 0 !important; border-radius: 12px !important;
         transition: all 0.3s ease;
+        margin-top: 10px;
     }
-    div[data-testid="column"] div.stDownloadButton > button:hover {
+    div.stDownloadButton > button:hover {
         background: rgba(81, 109, 244, 0.2) !important;
         transform: translateY(-3px);
         border-color: #516df4 !important;
@@ -251,13 +253,13 @@ if st.session_state.analyzed_data:
     total_score = 0
     all_answered = True
     for i, config in enumerate(quiz_configs):
-        q_key = f"quiz_vFinal_{i}"
+        q_key = f"quiz_vF_{i}"
         st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{config["q"]}</span></div>', unsafe_allow_html=True)
         opts = ["명사", "동사", "형용사", "부사"] if config["type"] == "pos" else ["데이터 확인", "감성적", "활기찬", "조용한"] if config["type"] == "fixed" else [f"{len(df_counts)}개", f"{len(df_counts)+5}개", f"{len(df_counts)-2}개", "10개"]
         if q_key not in st.session_state:
             random.shuffle(opts)
             st.session_state[q_key] = opts
-        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_vFinal_{q_key}", label_visibility="collapsed")
+        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_vF_{q_key}", label_visibility="collapsed")
         st.markdown("</div>", unsafe_allow_html=True)
         if ans:
             if ans == config["a"]:
@@ -280,13 +282,13 @@ if st.session_state.analyzed_data:
             </div>
         ''', unsafe_allow_html=True)
         
-        # --- 반반 꽉 찬 다운로드 버튼 ---
-        col_pdf, col_txt = st.columns(2)
-        with col_pdf:
+        # --- 화면 가로 50%씩 꽉 채우는 버튼 영역 ---
+        c_pdf, c_txt = st.columns(2)
+        with c_pdf:
             if FPDF_AVAILABLE:
                 pdf_data = create_pdf_report(data, total_score)
                 st.download_button("📥 PDF 리포트 다운로드", data=pdf_data, file_name="Lyric_Report.pdf", mime="application/pdf")
             else: st.info("PDF 모듈 미설치")
-        with col_txt:
+        with c_txt:
             txt_data = create_txt_report(data, total_score, st.session_state.translated_lines)
             st.download_button("📄 TXT 리포트 다운로드", data=txt_data, file_name="Lyric_Report.txt", mime="text/plain")
