@@ -22,7 +22,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (채도 맞춤형 컬러 업데이트)
+# 3. 커스텀 CSS (합격 점수 컬러만 #2b91f7로 변경)
 st.markdown("""
     <style>
     .stApp {
@@ -106,9 +106,9 @@ st.markdown("""
         margin: 10px 0 20px 0 !important; letter-spacing: -2px; 
     }
     
-    /* 🔥 [수정] 점수 컬러 채도 맞춤: 일렉트릭 사이언 블루(00F3FF) vs 울트라 바이올렛(AF40FF) */
+    /* 🔥 [수정] 합격 점수 컬러를 #2b91f7로 변경 */
     .score-text-fail { color: #AF40FF !important; -webkit-text-fill-color: #AF40FF !important; background: none !important; }
-    .score-text-pass { color: #00F3FF !important; -webkit-text-fill-color: #00F3FF !important; background: none !important; }
+    .score-text-pass { color: #2b91f7 !important; -webkit-text-fill-color: #2b91f7 !important; background: none !important; }
     
     .score-status-text { font-size: 1.28rem !important; font-weight: 700; color: white; opacity: 1.0; margin-top: 5px !important; }
 
@@ -216,7 +216,7 @@ if st.session_state.analyzed_data:
     all_answered = True
     
     for i, config in enumerate(quiz_configs):
-        q_key = f"final_quiz_v9_q_{i}"
+        q_key = f"final_quiz_v10_q_{i}"
         st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{config["q"]}</span></div>', unsafe_allow_html=True)
         
         if config["type"] == "pos": opts = ["명사", "동사", "형용사", "부사"]
@@ -231,7 +231,7 @@ if st.session_state.analyzed_data:
             random.shuffle(opts)
             st.session_state[q_key] = opts
             
-        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_f_v9_{q_key}", label_visibility="collapsed")
+        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_f_v10_{q_key}", label_visibility="collapsed")
         st.markdown("</div>", unsafe_allow_html=True)
         
         if ans:
