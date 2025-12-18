@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS
+# 3. 커스텀 CSS (마진 최소화 반영)
 st.markdown("""
     <style>
     .stApp {
@@ -53,16 +53,20 @@ st.markdown("""
         color: #8b92b2 !important;
         font-size: 1.1rem !important; 
         font-weight: 500;
-        margin-bottom: 1.5rem !important; 
+        margin-bottom: 1.0rem !important; 
     }
 
-    hr { border-bottom: 1px solid #2d3548 !important; }
+    hr { 
+        margin-top: 1rem !important;
+        margin-bottom: 1rem !important;
+        border-bottom: 1px solid #2d3548 !important; 
+    }
 
     .stTextArea label p {
         font-size: 1.7rem !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
-        margin-bottom: 25px !important; 
+        margin-bottom: 15px !important; 
     }
 
     .stTextArea textarea {
@@ -82,7 +86,7 @@ st.markdown("""
         width: auto !important;
         min-width: 150px !important;
         height: 3.84rem !important;
-        margin-top: 20px !important;  
+        margin-top: 15px !important;  
         display: flex !important;
         justify-content: center !important; 
         padding-left: 30px !important;
@@ -92,12 +96,12 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     
-    /* --- [메트릭 스타일] --- */
+    /* --- [메트릭 스타일 유지] --- */
     [data-testid="stMetricLabel"] p { 
         font-size: 1.1rem !important; 
         color: #4a5fcc !important; 
         font-weight: 900 !important; 
-        margin-bottom: 6px !important; 
+        margin-bottom: 4px !important; 
     }
     
     [data-testid="stMetricValue"] div:first-child::before {
@@ -128,14 +132,14 @@ st.markdown("""
     .analysis-card {
         border-left: 4px solid #2a3f88;
         padding: 16px 20px;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
         background: rgba(45, 53, 72, 0.25);
         border-radius: 0 12px 12px 0;
         border: 1px solid rgba(45, 53, 72, 0.5);
     }
     
-    .pos-title { font-size: 1.3rem !important; font-weight: 800 !important; color: #7d8dec; margin-bottom: 10px; }
-    .data-row { display: flex; align-items: baseline; border-top: 1px solid rgba(141, 146, 178, 0.2); padding-top: 12px; }
+    .pos-title { font-size: 1.3rem !important; font-weight: 800 !important; color: #7d8dec; margin-bottom: 8px; }
+    .data-row { display: flex; align-items: baseline; border-top: 1px solid rgba(141, 146, 178, 0.2); padding-top: 10px; }
     .card-word { font-weight: 700 !important; color: #FFFFFF; font-size: 1.1rem; } 
     .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } 
 
@@ -145,7 +149,7 @@ st.markdown("""
         border-radius: 12px;
         padding: 12px 20px;
         margin-top: 5px;
-        margin-bottom: 25px; 
+        margin-bottom: 20px; 
     }
     
     div[data-testid="stRadio"] > div { gap: 0px !important; margin-top: -12px !important; }
@@ -157,7 +161,7 @@ st.markdown("""
         border-radius: 8px;
         border: 1px solid transparent;
         animation: fadeInUp 0.25s ease-out forwards;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
     }
     .correct-box { background: rgba(74, 95, 204, 0.1); border-color: #4a5fcc; }
     .wrong-box { background: rgba(255, 75, 75, 0.05); border-color: rgba(255, 75, 75, 0.4); }
@@ -211,10 +215,9 @@ if st.session_state.analyzed_data:
     all_words = data['all_words']
     saved_lyrics = data['lyrics_input']
 
-    # --- [섹션 마진 35px로 정밀 조정] ---
-    st.markdown('<div style="margin-top: 35px;"></div>', unsafe_allow_html=True) 
+    # --- [마진을 대폭 줄인 분석 결과 헤더] ---
     st.divider()
-    st.markdown('<div style="font-size:1.7rem; font-weight:800; color:white; margin-top:35px; margin-bottom:35px;">📊 분석 결과</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:1.7rem; font-weight:800; color:white; margin-top:10px; margin-bottom:15px;">📊 분석 결과</div>', unsafe_allow_html=True)
 
     # 1. 요약 대시보드
     m1, m2, m3, m4 = st.columns(4)
@@ -222,8 +225,6 @@ if st.session_state.analyzed_data:
     m2.metric("고유 단어", f"{len(df_counts)}")
     m3.metric("최빈 단어", f"{df_counts.iloc[0]['단어']}")
     m4.metric("주요 품사", f"{df_counts.iloc[0]['품사']}")
-
-    st.markdown('<div style="margin-bottom: 35px;"></div>', unsafe_allow_html=True) 
 
     # 2. 번역 및 데이터 섹션
     st.divider()
@@ -248,12 +249,12 @@ if st.session_state.analyzed_data:
         df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
         st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True, use_container_width=True, height=520)
 
-    # 3. 그래프
+    # 3. 그래프 (마진 축소 반영)
     st.divider()
     st.markdown("### 📈 단어 빈도 시각화")
     top_20 = df_counts.head(20)
     fig = px.bar(top_20, x='단어', y='횟수', color='품사', color_discrete_map={'명사': '#7d8dec', '동사': '#4a5fcc', '형용사': '#2a3f88', '부사': '#8b92b2'}, template='plotly_dark')
-    fig.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+    fig.update_layout(height=400, margin=dict(l=10, r=10, t=10, b=10), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     st.plotly_chart(fig, use_container_width=True)
 
     # 4. 문법 학습 섹션
