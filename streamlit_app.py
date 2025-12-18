@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (기존 스타일 완벽 유지 + 버튼 단색 및 테두리 적용)
+# 3. 커스텀 CSS (기존 스타일 유지 + 버튼 테두리 제거 및 스퀘어 형태 적용)
 st.markdown("""
     <style>
     .stApp {
@@ -62,17 +62,17 @@ st.markdown("""
         border: 1px solid #2d3548 !important;
     }
 
-    /* --- [수정] 버튼: 단색 #4e5ec5 + 연한 그레이 테두리 --- */
+    /* --- [수정] 버튼: 테두리 제거 + 스퀘어(Border-radius 최소화) --- */
     .stButton>button {
-        background-color: #4e5ec5 !important; /* 그라데이션 제거, 단색 적용 */
-        border: 1px solid #d1d5db !important;  /* 얇은 연한 그레이 테두리 */
+        background-color: #4e5ec5 !important; 
+        border: none !important;                /* 테두리 제거 */
+        border-radius: 2px !important;          /* R값을 거의 없앤 스퀘어 모양 */
         color: #FFFFFF !important;
         font-weight: 700;
         width: auto !important;
         min-width: 150px !important;
         height: 3.84rem !important;   
         font-size: 1.44rem !important; 
-        border-radius: 10px !important;
         margin-top: 20px !important;  
         display: flex !important;
         justify-content: flex-start !important; 
@@ -84,8 +84,7 @@ st.markdown("""
     }
     
     .stButton>button:hover {
-        background-color: #5d6edb !important; /* 호버 시 살짝 밝은 블루 */
-        border-color: #ffffff !important;      /* 호버 시 테두리 밝게 */
+        background-color: #5d6edb !important; 
         transform: translateY(-1px);
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
     }
@@ -207,7 +206,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 이하 코드 로직 ---
+# --- 이하 코드 로직 동일 ---
 
 # --- 헤더 ---
 st.markdown('<h1 class="main-product-title">&lt;K-POP INSIGHT&gt;</h1>', unsafe_allow_html=True)
@@ -320,7 +319,7 @@ if st.session_state.analyzed_data:
     
     user_choice = st.radio(
         "정답 선택", ["명사", "동사", "형용사", "부사"], 
-        index=None, key="quiz_final_fixed_flat", label_visibility="collapsed"
+        index=None, key="quiz_final_fixed_square", label_visibility="collapsed"
     )
     
     st.markdown("</div>", unsafe_allow_html=True)
