@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (기존 스타일 완벽 유지 + 지정된 #703eb7 -> #0b0e25 그라데이션 적용)
+# 3. 커스텀 CSS (기존 스타일 완벽 유지 + 버튼 단색 및 테두리 적용)
 st.markdown("""
     <style>
     .stApp {
@@ -62,30 +62,32 @@ st.markdown("""
         border: 1px solid #2d3548 !important;
     }
 
-    /* --- [수정] 버튼 퍼플(#703eb7) to 딥네이비(#0b0e25) 가로 그라데이션 --- */
+    /* --- [수정] 버튼: 단색 #4e5ec5 + 연한 그레이 테두리 --- */
     .stButton>button {
-        background: linear-gradient(to right, #703eb7, #0b0e25) !important; /* 가로 그라데이션 */
+        background-color: #4e5ec5 !important; /* 그라데이션 제거, 단색 적용 */
+        border: 1px solid #d1d5db !important;  /* 얇은 연한 그레이 테두리 */
         color: #FFFFFF !important;
         font-weight: 700;
         width: auto !important;
         min-width: 150px !important;
         height: 3.84rem !important;   
         font-size: 1.44rem !important; 
-        border: none !important;
+        border-radius: 10px !important;
         margin-top: 20px !important;  
         display: flex !important;
         justify-content: flex-start !important; 
         padding-left: 30px !important;
         padding-right: 30px !important;
         align-items: center !important;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(112, 62, 183, 0.2);
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     
     .stButton>button:hover {
-        background: linear-gradient(to right, #8553d1, #1a1e3d) !important; /* 호버 시 약간 밝게 */
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(112, 62, 183, 0.4);
+        background-color: #5d6edb !important; /* 호버 시 살짝 밝은 블루 */
+        border-color: #ffffff !important;      /* 호버 시 테두리 밝게 */
+        transform: translateY(-1px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
     }
 
     [data-testid="stMetricLabel"] p { 
@@ -318,7 +320,7 @@ if st.session_state.analyzed_data:
     
     user_choice = st.radio(
         "정답 선택", ["명사", "동사", "형용사", "부사"], 
-        index=None, key="quiz_final_fixed_gradient", label_visibility="collapsed"
+        index=None, key="quiz_final_fixed_flat", label_visibility="collapsed"
     )
     
     st.markdown("</div>", unsafe_allow_html=True)
