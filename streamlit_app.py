@@ -21,7 +21,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (사용자가 맘에 들어했던 원코드 디자인 완벽 복구)
+# 3. 커스텀 CSS (사용자가 맘에 들어했던 원코드 디자인 100% 유지)
 st.markdown("""
     <style>
     .stApp {
@@ -140,7 +140,7 @@ st.markdown("""
     .result-title { font-size: 1.25rem !important; font-weight: 800 !important; margin-bottom: 2px !important; display: block; }
     .result-sub { color: #FFFFFF; font-size: 1.0rem !important; opacity: 0.9; display: block; }
 
-    /* 점수 리포트 섹션만 스타일 변경 */
+    /* 점수 리포트 가변형 디자인 (레드/블루) */
     .score-container {
         padding: 40px; border-radius: 20px; text-align: center; margin: 30px 0;
         backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1);
@@ -156,10 +156,11 @@ st.markdown("""
         margin-bottom: 5px !important;
     }
     .score-number { 
-        font-size: 6rem !important; font-weight: 900 !important; line-height: 1; margin: 10px 0 !important;
+        font-size: 5.5rem !important; font-weight: 900 !important; line-height: 1; margin: 15px 0 !important;
     }
     .score-number-fail { background: linear-gradient(135deg, #ff4b4b 0%, #ff9a9e 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .score-number-pass { background: linear-gradient(135deg, #7d8dec 0%, #4a5fcc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .score-total-base { font-size: 2rem; color: rgba(255,255,255,0.3); vertical-align: middle; margin-left: 10px; }
 
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -244,7 +245,7 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # --- 퀴즈 섹션 (원코드 폰트/마진 유지) ---
+    # --- 퀴즈 섹션 (5문항) ---
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     
@@ -286,24 +287,24 @@ if st.session_state.analyzed_data:
         else: all_answered = False
         user_results.append({"q": q_text, "user": ans, "correct": q_ans})
 
-    # --- 퀴즈 완료 시 (점수에 따른 가변 디자인 & 리포트 노출) ---
+    # --- 퀴즈 완료 시 (100점 만점 기준 점수 표시) ---
     if all_answered:
         st.divider()
         score_class = "score-pass" if total_score >= 51 else "score-fail"
         num_class = "score-number-pass" if total_score >= 51 else "score-number-fail"
-        status_text = "🏆 완벽하게 마스터하셨네요!" if total_score >= 51 else "🧐 다시 한번 복습이 필요해요."
+        status_text = "🏆 가사 분석의 신이시군요!" if total_score >= 51 else "🧐 복습 후 리포트를 확인해 보세요."
         
         st.markdown(f'''
             <div class="score-container {score_class}">
                 <div class="score-title-text">YOUR LEARNING SCORE</div>
-                <div class="score-number {num_class}">{total_score}</div>
+                <div class="score-number {num_class}">{total_score}<span class="score-total-base">/ 100</span></div>
                 <div class="score-status">{status_text}</div>
             </div>
         ''', unsafe_allow_html=True)
 
         st.markdown("### 📥 나의 학습 완벽 총정리")
         full_report = f"==== K-LYRIC 101 학습 총정리 리포트 ====\n일시: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n"
-        full_report += f"[최종 점수: {total_score}점]\n\n"
+        full_report += f"[최종 점수: {total_score}점 / 100점]\n\n"
         full_report += "[1. 가사 대조 번역본]\n"
         for item in st.session_state.translated_lines:
             full_report += f"KR: {item['kr']}\nEN: {item['en']}\n"
