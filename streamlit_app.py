@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (기존 스타일 완벽 유지 + 블루-퍼플 가로 그라데이션 버튼)
+# 3. 커스텀 CSS (기존 스타일 완벽 유지 + 지정된 #703eb7 퍼플 그라데이션 적용)
 st.markdown("""
     <style>
     .stApp {
@@ -62,9 +62,9 @@ st.markdown("""
         border: 1px solid #2d3548 !important;
     }
 
-    /* --- [수정] 버튼 블루 to 퍼플 가로 그라데이션 --- */
+    /* --- [수정] 버튼 블루 to 퍼플(#703eb7) 가로 그라데이션 --- */
     .stButton>button {
-        background: linear-gradient(to right, #2a3f88, #8869ac) !important; /* 가로 그라데이션 */
+        background: linear-gradient(to right, #2a3f88, #703eb7) !important; /* 가로 그라데이션 적용 */
         color: #FFFFFF !important;
         font-weight: 700;
         width: auto !important;
@@ -79,13 +79,13 @@ st.markdown("""
         padding-right: 30px !important;
         align-items: center !important;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(42, 63, 136, 0.4);
+        box-shadow: 0 4px 15px rgba(112, 62, 183, 0.3);
     }
     
     .stButton>button:hover {
-        background: linear-gradient(to right, #3a4fa8, #9d7fc2) !important; /* 호버 시 양쪽 모두 밝게 */
+        background: linear-gradient(to right, #3a4fa8, #8553d1) !important; /* 호버 시 미세하게 밝게 */
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(136, 105, 172, 0.5);
+        box-shadow: 0 6px 20px rgba(112, 62, 183, 0.5);
     }
 
     [data-testid="stMetricLabel"] p { 
@@ -204,8 +204,6 @@ st.markdown("""
     .lyrics-card::-webkit-scrollbar-thumb { background: #2a3f88; border-radius: 10px; }
     </style>
     """, unsafe_allow_html=True)
-
-# --- 코드 로직 (변화 없음) ---
 
 # --- 헤더 ---
 st.markdown('<h1 class="main-product-title">&lt;K-POP INSIGHT&gt;</h1>', unsafe_allow_html=True)
