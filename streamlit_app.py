@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (이미지 스타일 반영: 이중 타이틀 구조)
+# 3. 커스텀 CSS (타이틀 2줄 + 단색 스퀘어 버튼 + 모든 레이아웃 유지)
 st.markdown("""
     <style>
     .stApp {
@@ -26,7 +26,7 @@ st.markdown("""
         color: #FFFFFF !important;
     }
     
-    /* 메인 한국어 타이틀 스타일 */
+    /* 메인 한국어 타이틀: 가사학개론 */
     .main-title-kr {
         font-family: 'Inter', sans-serif;
         font-size: 4.5rem !important; 
@@ -40,7 +40,7 @@ st.markdown("""
         padding-top: 1rem;
     }
 
-    /* 서브 영어 타이틀 스타일 */
+    /* 서브 영어 타이틀: K-Lyric 101 (화이트) */
     .brand-title-en {
         font-family: 'Inter', sans-serif;
         font-size: 2.5rem !important;
@@ -74,11 +74,11 @@ st.markdown("""
         border: 1px solid #2d3548 !important;
     }
 
-    /* 버튼 스타일: 단색 #4e5ec5 + 스퀘어 유지 */
+    /* 버튼 스타일: 단색 #4e5ec5 + 스퀘어(R값 2px) + 테두리 없음 */
     .stButton>button {
         background-color: #4e5ec5 !important; 
         border: none !important;
-        border-radius: 2px !important;
+        border-radius: 2px !important; 
         color: #FFFFFF !important;
         font-weight: 700;
         width: auto !important;
@@ -138,6 +138,15 @@ st.markdown("""
     .pos-title { font-size: 1.3rem !important; font-weight: 800 !important; color: #7d8dec; margin-bottom: 10px; }
     .pos-desc { font-size: 1.05rem !important; color: #8b92b2; margin-bottom: 14px; line-height: 1.6; }
     
+    .data-row { 
+        display: flex; 
+        align-items: baseline; 
+        border-top: 1px solid rgba(141, 146, 178, 0.2); 
+        padding-top: 12px; 
+    }
+    .card-word { font-weight: 700 !important; color: #FFFFFF; font-size: 1.1rem; } 
+    .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } 
+
     .quiz-outer-box {
         background: rgba(45, 53, 72, 0.15);
         border: 1px solid rgba(74, 95, 204, 0.3);
@@ -149,15 +158,23 @@ st.markdown("""
     
     div[data-testid="stRadio"] > div { gap: 0px !important; margin-top: -12px !important; }
     [data-testid="stWidgetLabel"] { display: none; }
+    div[data-testid="stRadio"] label { color: white !important; font-size: 0.95rem !important; }
 
     .custom-result-box {
         padding: 12px 20px; 
         border-radius: 8px;
         border: 1px solid transparent;
+        text-align: left; 
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
         animation: fadeInUp 0.25s ease-out forwards;
     }
     .correct-box { background: rgba(74, 95, 204, 0.1); border-color: #4a5fcc; }
     .wrong-box { background: rgba(255, 75, 75, 0.05); border-color: rgba(255, 75, 75, 0.4); }
+
+    .result-title { font-size: 1.25rem !important; font-weight: 800 !important; margin-bottom: 2px !important; }
+    .result-sub { color: #FFFFFF; font-size: 1.0rem; opacity: 0.9; }
 
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(10px); }
@@ -169,20 +186,20 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 헤더 섹션 (이미지 디자인 반영) ---
+# --- [4] 헤더 섹션 (수정된 타이틀) ---
 st.markdown('<div class="main-title-kr">가사학개론</div>', unsafe_allow_html=True)
 st.markdown('<div class="brand-title-en">K-Lyric 101</div>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">AI 기반 K-POP 가사 데이터 분석 및 언어 학습 엔진</p>', unsafe_allow_html=True)
 st.divider()
 
-# --- 입력 섹션 ---
+# --- [5] 입력 섹션 ---
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
 
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석을 실행해줘!")
 
-# --- 분석 로직 ---
+# --- [6] 분석 로직 ---
 if analyze_btn:
     if lyrics_input.strip():
         with st.spinner('데이터 분석 중...'):
@@ -201,7 +218,7 @@ if analyze_btn:
     else:
         st.error("가사를 입력해 주세요.")
 
-# --- 출력 섹션 ---
+# --- [7] 출력 섹션 (모든 기능 포함) ---
 if st.session_state.analyzed_data:
     data = st.session_state.analyzed_data
     df_counts = data['df_counts']
@@ -229,7 +246,7 @@ if st.session_state.analyzed_data:
         for line in lines:
             try:
                 translated = translator.translate(line, dest='en').text
-                line_html = f'<div style="margin-bottom:20px;"><span class="kr-txt">{line}</span><span class="en-txt">{translated}</span></div>'
+                line_html = f'<div style="margin-bottom:20px; border-bottom:1px solid rgba(141,146,178,0.1); padding-bottom:10px;"><span class="kr-txt">{line}</span><span class="en-txt">{translated}</span></div>'
                 html_output += line_html
             except:
                 html_output += f'<div style="margin-bottom:20px;"><span class="kr-txt">{line}</span></div>'
@@ -247,10 +264,42 @@ if st.session_state.analyzed_data:
     st.markdown("### 📈 단어 빈도 시각화")
     top_20 = df_counts.head(20)
     fig = px.bar(top_20, x='단어', y='횟수', color='품사', color_discrete_map={'명사': '#7d8dec', '동사': '#4a5fcc', '형용사': '#2a3f88', '부사': '#8b92b2'}, template='plotly_dark')
-    fig.update_layout(height=400, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-    st.plotly_chart(fig, use_container_width=True)
+    fig.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)'))
+    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-    # 4. 문법 학습 및 퀴즈 섹션 (동일 로직 유지)
+    # 4. 문법 학습 섹션
     st.divider()
     st.markdown("### 📚 가사 속 문법 학습")
-    # ... (중략: 기존 문법 카드 및 퀴즈 로직 코드 동일하게 삽입)
+    pos_info = {"명사": {"icon": "💎", "desc": "사물이나 개념의 이름입니다."}, "동사": {"icon": "⚡", "desc": "동작이나 움직임을 나타냅니다."}, "형용사": {"icon": "🎨", "desc": "상태나 성질을 묘사합니다."}, "부사": {"icon": "🎬", "desc": "행동을 더 세밀하게 꾸며줍니다."}}
+    p1, p2 = st.columns(2)
+    for i, (name, info) in enumerate(pos_info.items()):
+        target_col = p1 if i < 2 else p2
+        with target_col:
+            spec_df = df_counts[df_counts['품사'] == name]
+            if not spec_df.empty:
+                top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
+                st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
+
+    # 5. 퀴즈 섹션
+    st.divider()
+    st.markdown("### 📝 오늘의 가사 퀴즈")
+    top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
+    
+    st.markdown(f"""
+        <div class="quiz-outer-box">
+            <div style="line-height: 1.2; margin-bottom: 4px;">
+                <span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q.</span> 
+                <span style="color: white; font-size: 1.1rem; font-weight: 700;">
+                    이 가사에서 가장 많이 사용된 단어는 '{top_word}'입니다. 이 단어의 품사는 무엇일까요?
+                </span>
+            </div>
+    """, unsafe_allow_html=True)
+    
+    user_choice = st.radio("정답 선택", ["명사", "동사", "형용사", "부사"], index=None, key="final_quiz_v3", label_visibility="collapsed")
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    if user_choice:
+        if user_choice == top_pos:
+            st.markdown(f'<div class="custom-result-box correct-box"><span class="result-title" style="color:#7d8dec;">🎉 정답입니다!</span><span class="result-sub">\'{top_word}\'은(는) 완벽한 <b>{top_pos}</b>입니다.</span></div>', unsafe_allow_html=True)
+        else:
+            st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#ff4b4b;">아쉬워요! 🧐</span><span class="result-sub">위쪽 분석 데이터를 다시 한 번 확인해 볼까요?</span></div>', unsafe_allow_html=True)
