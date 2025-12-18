@@ -21,7 +21,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (사용자 지정 디자인 완벽 유지)
+# 3. 커스텀 CSS (원코드 디자인 완벽 유지)
 st.markdown("""
     <style>
     .stApp {
@@ -238,7 +238,7 @@ if st.session_state.analyzed_data:
     ]
     
     user_results_for_report = []
-    all_answered = True # 모든 퀴즈 답변 여부 체크용
+    all_answered = True 
     
     for i, (q_text, q_ans, q_key) in enumerate(quiz_data):
         st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{q_text}</span></div>', unsafe_allow_html=True)
@@ -252,11 +252,11 @@ if st.session_state.analyzed_data:
             else:
                 st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#ff4b4b;">아쉬워요! 🧐</span><span class="result-sub">위쪽 분석 데이터를 다시 확인해 보세요.</span></div>', unsafe_allow_html=True)
         else:
-            all_answered = False # 하나라도 안 풀었으면 False
+            all_answered = False 
             
         user_results_for_report.append({"q": q_text, "user": ans, "correct": q_ans})
 
-    # --- 퀴즈를 모두 풀었을 때만 리포트 노출 ---
+    # --- 퀴즈 완료 시에만 리포트 섹션 등장 (안내 문구 삭제) ---
     if all_answered:
         st.divider()
         st.markdown("### 📥 나의 학습 완벽 총정리")
@@ -274,6 +274,3 @@ if st.session_state.analyzed_data:
             full_report += f"- {row['단어']} ({row['품사']}): {row['횟수']}회\n"
             
         st.download_button(label="✨ 오늘 공부한 모든 내용 저장하기", data=full_report, file_name=f"K-Lyric_Complete_Study_{datetime.now().strftime('%m%d')}.txt", mime='text/plain')
-    else:
-        # 모든 퀴즈를 풀지 않았을 때 안내 메시지 (선택 사항)
-        st.info("💡 3개의 퀴즈를 모두 풀면 하단에 '완벽 총정리 리포트' 다운로드 버튼이 나타납니다.")
