@@ -3,6 +3,7 @@ from konlpy.tag import Okt
 import pandas as pd
 from googletrans import Translator
 import plotly.express as px
+from datetime import datetime
 
 # 1. 페이지 설정
 st.set_page_config(page_title="K-Lyric 101", layout="wide", page_icon="🎧")
@@ -18,7 +19,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (초기 마진값 복구 및 메트릭 스타일 유지)
+# 3. 커스텀 CSS (기존 디자인 및 마진 유지)
 st.markdown("""
     <style>
     .stApp {
@@ -92,7 +93,6 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     
-    /* --- [메트릭 스타일 유지] --- */
     [data-testid="stMetricLabel"] p { 
         font-size: 1.1rem !important; 
         color: #4a5fcc !important; 
@@ -211,16 +211,30 @@ if st.session_state.analyzed_data:
     all_words = data['all_words']
     saved_lyrics = data['lyrics_input']
 
-    # --- [초기 쾌적한 마진 복구] ---
+    # 1. 분석 결과 헤더 (초기 마진 복구)
     st.divider()
     st.markdown('<div style="font-size:1.7rem; font-weight:800; color:white; margin-bottom:25px;">📊 분석 결과</div>', unsafe_allow_html=True)
 
-    # 1. 요약 대시보드
+    # 요약 대시보드
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("전체 단어", f"{len(all_words)}")
     m2.metric("고유 단어", f"{len(df_counts)}")
     m3.metric("최빈 단어", f"{df_counts.iloc[0]['단어']}")
     m4.metric("주요 품사", f"{df_counts.iloc[0]['품사']}")
+
+    # --- [신규: 나만의 학습 리포트 다운로드 섹션] ---
+    st.markdown('<div style="margin-top: 15px;"></div>', unsafe_allow_html=True)
+    d_col1, d_col2, _ = st.columns([1, 1, 2])
+    
+    # CSV 데이터 준비
+    csv_data = df_counts.to_csv(index=False).encode('utf-8-sig')
+    with d_col1:
+        st.download_button(label="📁 단어장 다운로드 (CSV)", data=csv_data, file_name=f"klyric_vocabulary_{datetime.now().strftime('%m%d')}.csv", mime='text/csv')
+    
+    # TXT 리포트 데이터 준비
+    report_txt = f"=== K-Lyric 101 학습 리포트 ===\n일시: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n[원본 가사]\n{saved_lyrics}\n\n[주요 분석]\n- 전체 단어: {len(all_words)}\n- 고유 단어: {len(df_counts)}\n- 가장 많이 사용된 단어: {df_counts.iloc[0]['단어']}({df_counts.iloc[0]['품사']})\n"
+    with d_col2:
+        st.download_button(label="📄 학습 리포트 저장 (TXT)", data=report_txt, file_name=f"klyric_report_{datetime.now().strftime('%m%d')}.txt", mime='text/plain')
 
     # 2. 번역 및 데이터 섹션
     st.divider()
@@ -266,7 +280,7 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # 5. 퀴즈 섹션 (3문항 유지)
+    # 5. 퀴즈 섹션
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
