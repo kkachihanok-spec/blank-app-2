@@ -258,9 +258,9 @@ if st.session_state.analyzed_data:
         else:
             theme_color = "#AF40FF"  # 퍼플
             theme_bg = "rgba(175, 64, 255, 0.1)"
-            advice_title = "🌱 [조언 1] 기초 학습 가이드"
+            advice_title = "[조언 1] 기초 학습 가이드"
             advice_text = "조급해하지 마세요! 가사 속의 <b>'명사'</b>부터 하나씩 수집해 보는 건 어떨까요? 좋아하는 가수의 인터뷰 영상을 자막과 함께 보며 발음을 익히는 것부터 시작해 보세요."
-            ref_title = "🔗 [조언 2] 기초 학습 레퍼런스"
+            ref_title = "[조언 2] 기초 학습 레퍼런스"
 
         st.markdown(f"""
             <style>
