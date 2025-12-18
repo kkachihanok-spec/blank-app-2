@@ -21,79 +21,146 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (사용자 원코드 100% 복구 + 결과창만 프리미엄 레이아웃)
+# 3. 커스텀 CSS (사용자 원본 디자인 100% 복구)
 st.markdown("""
     <style>
-    /* [원코드 복구] 메인 레이아웃 및 텍스트 */
     .stApp {
         background: linear-gradient(to bottom, #0a0e1a 0%, #141b2d 30%, #050505 100%) !important;
         color: #FFFFFF !important;
     }
     .main-title-kr {
-        font-family: 'Inter', sans-serif; font-size: 4.5rem !important; font-weight: 900 !important;
-        letter-spacing: -2px; background: linear-gradient(135deg, #7d8dec 0%, #4a5fcc 50%, #2a3f88 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        margin-bottom: 0rem !important; line-height: 1.1 !important; padding-top: 1rem;
+        font-family: 'Inter', sans-serif;
+        font-size: 4.5rem !important; 
+        font-weight: 900 !important;
+        letter-spacing: -2px;
+        background: linear-gradient(135deg, #7d8dec 0%, #4a5fcc 50%, #2a3f88 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0rem !important;
+        line-height: 1.1 !important;
+        padding-top: 1rem;
     }
     .brand-title-en {
-        font-family: 'Inter', sans-serif; font-size: 2.5rem !important; font-weight: 700 !important;
-        color: #FFFFFF !important; margin-top: -10px !important; margin-bottom: 0.5rem !important; letter-spacing: 1px;
+        font-family: 'Inter', sans-serif;
+        font-size: 2.5rem !important;
+        font-weight: 700 !important;
+        color: #FFFFFF !important;
+        margin-top: -10px !important;
+        margin-bottom: 0.5rem !important;
+        letter-spacing: 1px;
     }
-    .sub-text { color: #8b92b2 !important; font-size: 1.1rem !important; font-weight: 500; margin-bottom: 1.5rem !important; }
+    .sub-text {
+        color: #8b92b2 !important;
+        font-size: 1.1rem !important; 
+        font-weight: 500;
+        margin-bottom: 1.5rem !important; 
+    }
     hr { border-bottom: 1px solid #2d3548 !important; }
-    
-    .stTextArea label p { font-size: 1.7rem !important; font-weight: 800 !important; color: #FFFFFF !important; margin-bottom: 25px !important; }
-    .stTextArea textarea { background-color: rgba(20, 27, 45, 0.7) !important; color: #FFFFFF !important; border-radius: 12px !important; border: 1px solid #2d3548 !important; }
-    
+    .stTextArea label p {
+        font-size: 1.7rem !important;
+        font-weight: 800 !important;
+        color: #FFFFFF !important;
+        margin-bottom: 25px !important; 
+    }
+    .stTextArea textarea {
+        background-color: rgba(20, 27, 45, 0.7) !important;
+        color: #FFFFFF !important;
+        border-radius: 12px !important;
+        border: 1px solid #2d3548 !important;
+    }
     .stButton>button {
-        background-color: #4e5ec5 !important; border: none !important; border-radius: 2px !important; color: #FFFFFF !important;
-        font-weight: 800 !important; font-size: 1.73rem !important; width: auto !important; min-width: 150px !important;
-        height: 3.84rem !important; margin-top: 20px !important; display: flex !important; justify-content: center !important;
-        padding-left: 30px !important; padding-right: 30px !important; align-items: center !important; transition: all 0.2s ease;
+        background-color: #4e5ec5 !important; 
+        border: none !important;
+        border-radius: 2px !important;
+        color: #FFFFFF !important;
+        font-weight: 800 !important;
+        font-size: 1.73rem !important;
+        width: auto !important;
+        min-width: 150px !important;
+        height: 3.84rem !important;
+        margin-top: 20px !important;  
+        display: flex !important;
+        justify-content: center !important; 
+        padding-left: 30px !important;
+        padding-right: 30px !important;
+        align-items: center !important;
+        transition: all 0.2s ease;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
-
-    /* [원코드 복구] 가사 대조 및 분석 카드 */
+    
+    /* [복구] 메트릭 화살표 및 라벨 컬러 */
+    [data-testid="stMetricLabel"] p { font-size: 1.1rem !important; color: #4a5fcc !important; font-weight: 900 !important; margin-bottom: 6px !important; }
+    [data-testid="stMetricValue"] div:first-child::before { content: "→ "; color: #8b92b2 !important; font-weight: 700 !important; }
+    [data-testid="stMetricValue"] div { font-size: 1.54rem !important; color: #FFFFFF !important; font-weight: 700 !important; }
+    
     .lyrics-card {
-        border-left: 4px solid #4a5fcc; padding: 24px; background: rgba(45, 53, 72, 0.25);
-        border-radius: 0 12px 12px 0; border: 1px solid rgba(45, 53, 72, 0.5); height: 520px; overflow-y: auto;
+        border-left: 4px solid #4a5fcc;
+        padding: 24px;
+        background: rgba(45, 53, 72, 0.25);
+        border-radius: 0 12px 12px 0;
+        border: 1px solid rgba(45, 53, 72, 0.5);
+        height: 520px;
+        overflow-y: auto;
     }
+    .kr-txt { font-size: 1.1rem; color: #FFFFFF; font-weight: 600; display: block; margin-bottom: 4px; }
+    .en-txt { font-size: 0.95rem; color: #8b92b2; font-weight: 400; display: block; font-style: italic; }
+    
     .analysis-card {
-        border-left: 4px solid #2a3f88; padding: 16px 20px; margin-bottom: 16px;
-        background: rgba(45, 53, 72, 0.25); border-radius: 0 12px 12px 0; border: 1px solid rgba(45, 53, 72, 0.5);
+        border-left: 4px solid #2a3f88;
+        padding: 16px 20px;
+        margin-bottom: 16px;
+        background: rgba(45, 53, 72, 0.25);
+        border-radius: 0 12px 12px 0;
+        border: 1px solid rgba(45, 53, 72, 0.5);
     }
-    .quiz-outer-box {
-        background: rgba(45, 53, 72, 0.15); border: 1px solid rgba(74, 95, 204, 0.3);
-        border-radius: 12px; padding: 12px 20px; margin-top: 5px; margin-bottom: 25px; 
-    }
+    .pos-title { font-size: 1.3rem !important; font-weight: 800 !important; color: #7d8dec; margin-bottom: 10px; }
+    .data-row { display: flex; align-items: baseline; border-top: 1px solid rgba(141, 146, 178, 0.2); padding-top: 12px; }
+    .card-word { font-weight: 700 !important; color: #FFFFFF; font-size: 1.1rem; } 
+    .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } 
 
-    /* 🔥 [새로운 점수 결과창 스타일] */
+    /* [복구] 퀴즈 섹션 오리지널 디자인 */
+    .quiz-outer-box {
+        background: rgba(45, 53, 72, 0.15);
+        border: 1px solid rgba(74, 95, 204, 0.3);
+        border-radius: 12px;
+        padding: 12px 20px;
+        margin-top: 5px;
+        margin-bottom: 25px; 
+    }
+    div[data-testid="stRadio"] > div { gap: 0px !important; margin-top: -12px !important; }
+    [data-testid="stWidgetLabel"] { display: none; }
+    div[data-testid="stRadio"] label { color: white !important; font-size: 0.95rem !important; }
+
+    .custom-result-box {
+        padding: 12px 20px; 
+        border-radius: 8px;
+        border: 1px solid transparent;
+        animation: fadeInUp 0.25s ease-out forwards;
+        margin-bottom: 25px;
+    }
+    .correct-box { background: rgba(74, 95, 204, 0.1); border-color: #4a5fcc; }
+    .wrong-box { background: rgba(255, 75, 75, 0.05); border-color: rgba(255, 75, 75, 0.4); }
+    .result-title { font-size: 1.25rem !important; font-weight: 800 !important; margin-bottom: 2px !important; display: block; }
+    .result-sub { color: #FFFFFF; font-size: 1.0rem !important; opacity: 0.9; display: block; }
+
+    /* 프리미엄 점수 리포트 (이 부분만 새롭게 적용) */
     .score-container-premium {
         padding: 60px 40px; border-radius: 24px; text-align: center; margin: 40px 0;
         backdrop-filter: blur(20px); box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         animation: fadeInUp 0.7s ease-out;
     }
-    .score-fail-premium { 
-        background: linear-gradient(145deg, rgba(255, 59, 48, 0.1) 0%, rgba(0, 0, 0, 0.6) 100%);
-        border: 1px solid rgba(255, 59, 48, 0.3);
-    }
-    .score-pass-premium { 
-        background: linear-gradient(145deg, rgba(74, 95, 204, 0.1) 0%, rgba(0, 0, 0, 0.6) 100%);
-        border: 1px solid rgba(74, 95, 204, 0.3);
-    }
-    .score-number-premium { 
-        font-size: 7rem !important; font-weight: 900 !important; line-height: 1; margin: 20px 0 !important;
-        letter-spacing: -3px;
-    }
+    .score-fail-premium { background: linear-gradient(145deg, rgba(255, 59, 48, 0.1) 0%, rgba(0, 0, 0, 0.6) 100%); border: 1px solid rgba(255, 59, 48, 0.3); }
+    .score-pass-premium { background: linear-gradient(145deg, rgba(74, 95, 204, 0.1) 0%, rgba(0, 0, 0, 0.6) 100%); border: 1px solid rgba(74, 95, 204, 0.3); }
+    .score-number-premium { font-size: 7rem !important; font-weight: 900 !important; line-height: 1; margin: 20px 0 !important; letter-spacing: -3px; }
     .score-text-fail { background: linear-gradient(180deg, #ff4d4d, #9e1a1a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .score-text-pass { background: linear-gradient(180deg, #7d8dec, #3a47af); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .score-status-text { font-size: 1.5rem; font-weight: 600; color: white; opacity: 0.9; margin-top: 15px; }
 
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 메인 코드 ---
+# --- 메인 코드 (분석 로직 원상복구) ---
 st.markdown('<div class="main-title-kr">가사학개론</div>', unsafe_allow_html=True)
 st.markdown('<div class="brand-title-en">K-Lyric 101</div>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">AI 기반 K-POP 가사 데이터 분석 및 언어 학습 엔진</p>', unsafe_allow_html=True)
@@ -145,7 +212,7 @@ if st.session_state.analyzed_data:
         st.markdown("### 🌍 가사 대조 번역")
         html_output = '<div class="lyrics-card">'
         for item in st.session_state.translated_lines:
-            html_output += f'<div style="margin-bottom:20px; border-bottom:1px solid rgba(141,146,178,0.1); padding-bottom:10px;"><span class="kr-txt" style="font-size:1.1rem; color:white; font-weight:600; display:block;">{item["kr"]}</span><span class="en-txt" style="font-size:0.95rem; color:#8b92b2; display:block; font-style:italic;">{item["en"]}</span></div>'
+            html_output += f'<div style="margin-bottom:20px; border-bottom:1px solid rgba(141,146,178,0.1); padding-bottom:10px;"><span class="kr-txt">{item["kr"]}</span><span class="en-txt">{item["en"]}</span></div>'
         st.markdown(html_output + '</div>', unsafe_allow_html=True)
     with c_r:
         st.markdown("### 📊 분석 데이터")
@@ -170,9 +237,9 @@ if st.session_state.analyzed_data:
             spec_df = df_counts[df_counts['품사'] == name]
             if not spec_df.empty:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
-                st.markdown(f'''<div class="analysis-card"><div class="pos-title" style="font-size:1.3rem; font-weight:800; color:#7d8dec; margin-bottom:10px;">{info['icon']} {name}</div><div class="pos-desc" style="color:#8b92b2; margin-bottom:12px;">{info['desc']}</div><div class="data-row" style="display:flex; align-items:baseline; border-top:1px solid rgba(141,146,178,0.2); padding-top:12px;"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span style="font-weight:700; color:white; font-size:1.1rem;">{top_w}</span><span style="color:#4a5fcc; font-weight:600; margin-left:10px;">{cnt}회</span></div></div>''', unsafe_allow_html=True)
+                st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # --- 퀴즈 섹션 (원코드 로직 유지) ---
+    # --- 퀴즈 섹션 (완벽 복구) ---
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     
@@ -180,13 +247,15 @@ if st.session_state.analyzed_data:
     other_pos_df = df_counts[df_counts['품사'] != top_pos]
     second_word = other_pos_df.iloc[0]['단어'] if len(other_pos_df) > 0 else "가사"
     second_pos = other_pos_df.iloc[0]['품사'] if len(other_pos_df) > 0 else "명사"
+    third_word = other_pos_df.iloc[1]['단어'] if len(other_pos_df) > 1 else "노래"
+    third_pos = other_pos_df.iloc[1]['품사'] if len(other_pos_df) > 1 else "명사"
 
     quiz_data = [
         (f"가장 많이 사용된 '{top_word}'의 품사는 무엇인가요?", top_pos, "nq1"),
         (f"단어 '{second_word}'의 품사는 무엇일까요?", second_pos, "nq2"),
         (f"이 가사에는 총 몇 개의 '고유 단어'가 사용되었나요?", f"{len(df_counts)}개", "nq3"),
-        (f"전체 가사 중 단어의 총 개수는 몇 개인가요?", f"{len(data['all_words'])}개", "nq5"),
-        ("분석된 가사가 K-POP 학습에 도움이 되나요?", "네", "nq4")
+        (f"가사 속에 등장한 '{third_word}'의 품사로 알맞은 것은?", third_pos, "nq4"),
+        (f"전체 가사 중 단어의 총 개수는 몇 개인가요?", f"{len(data['all_words'])}개", "nq5")
     ]
     
     user_results = []
@@ -194,15 +263,25 @@ if st.session_state.analyzed_data:
     all_answered = True
     
     for i, (q_text, q_ans, q_key) in enumerate(quiz_data):
-        st.markdown(f'<div class="quiz-outer-box"><b>Q{i+1}. {q_text}</b>', unsafe_allow_html=True)
-        opts = [q_ans, "오답A", "오답B", "오답C"] if i < 4 else ["네", "아니오"]
+        st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{q_text}</span></div>', unsafe_allow_html=True)
+        
+        if i in [0, 1, 3]: opts = ["명사", "동사", "형용사", "부사"]
+        elif i == 2: opts = [f"{len(df_counts)}개", f"{len(df_counts)+2}개", f"{max(0, len(df_counts)-5)}개", "100개"]
+        else: opts = [f"{len(data['all_words'])}개", f"{len(data['all_words'])+10}개", f"{max(0, len(data['all_words'])-10)}개", "알 수 없음"]
+        
         ans = st.radio(f"Radio_{q_key}", opts, index=None, key=q_key, label_visibility="collapsed")
         st.markdown("</div>", unsafe_allow_html=True)
+        
         if ans:
-            if ans == q_ans: total_score += 20
+            if ans == q_ans:
+                st.markdown(f'<div class="custom-result-box correct-box"><span class="result-title" style="color:#7d8dec;">🎉 정답입니다!</span></div>', unsafe_allow_html=True)
+                total_score += 20
+            else:
+                st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#ff4b4b;">아쉬워요!</span><span class="result-sub">정답은 [{q_ans}] 입니다.</span></div>', unsafe_allow_html=True)
         else: all_answered = False
+        user_results.append({"q": q_text, "user": ans, "correct": q_ans})
 
-    # --- ✨ [업데이트된 점수 결과창] ---
+    # --- 최종 프리미엄 점수 리포트 ---
     if all_answered:
         st.divider()
         score_class = "score-pass-premium" if total_score >= 51 else "score-fail-premium"
