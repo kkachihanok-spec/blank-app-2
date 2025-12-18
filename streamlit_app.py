@@ -21,7 +21,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (마진 최적화 및 가변 점수 보드 디자인)
+# 3. 커스텀 CSS (사용자가 맘에 들어했던 원코드 디자인 완벽 복구)
 st.markdown("""
     <style>
     .stApp {
@@ -29,33 +29,118 @@ st.markdown("""
         color: #FFFFFF !important;
     }
     .main-title-kr {
-        font-family: 'Inter', sans-serif; font-size: 4.5rem !important; font-weight: 900 !important;
-        letter-spacing: -2px; background: linear-gradient(135deg, #7d8dec 0%, #4a5fcc 50%, #2a3f88 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        margin-bottom: 0rem !important; line-height: 1.1 !important; padding-top: 1rem;
+        font-family: 'Inter', sans-serif;
+        font-size: 4.5rem !important; 
+        font-weight: 900 !important;
+        letter-spacing: -2px;
+        background: linear-gradient(135deg, #7d8dec 0%, #4a5fcc 50%, #2a3f88 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0rem !important;
+        line-height: 1.1 !important;
+        padding-top: 1rem;
     }
     .brand-title-en {
-        font-family: 'Inter', sans-serif; font-size: 2.5rem !important; font-weight: 700 !important;
-        color: #FFFFFF !important; margin-top: -10px !important; margin-bottom: 0.5rem !important; letter-spacing: 1px;
+        font-family: 'Inter', sans-serif;
+        font-size: 2.5rem !important;
+        font-weight: 700 !important;
+        color: #FFFFFF !important;
+        margin-top: -10px !important;
+        margin-bottom: 0.5rem !important;
+        letter-spacing: 1px;
     }
-    .sub-text { color: #8b92b2 !important; font-size: 1.1rem !important; font-weight: 500; margin-bottom: 1.5rem !important; }
-    hr { border: 0; border-bottom: 1px solid #2d3548 !important; margin: 1.5rem 0 !important; }
-    
-    /* 텍스트 영역 마진 조율 */
-    .stTextArea label p { font-size: 1.7rem !important; font-weight: 800 !important; color: #FFFFFF !important; margin-bottom: 10px !important; }
-    
+    .sub-text {
+        color: #8b92b2 !important;
+        font-size: 1.1rem !important; 
+        font-weight: 500;
+        margin-bottom: 1.5rem !important; 
+    }
+    hr { border-bottom: 1px solid #2d3548 !important; }
+    .stTextArea label p {
+        font-size: 1.7rem !important;
+        font-weight: 800 !important;
+        color: #FFFFFF !important;
+        margin-bottom: 25px !important; 
+    }
+    .stTextArea textarea {
+        background-color: rgba(20, 27, 45, 0.7) !important;
+        color: #FFFFFF !important;
+        border-radius: 12px !important;
+        border: 1px solid #2d3548 !important;
+    }
     .stButton>button {
-        background-color: #4e5ec5 !important; border: none !important; border-radius: 2px !important; color: #FFFFFF !important;
-        font-weight: 800 !important; font-size: 1.73rem !important; width: auto !important; min-width: 150px !important;
-        height: 3.84rem !important; margin-top: 10px !important; transition: all 0.2s ease;
+        background-color: #4e5ec5 !important; 
+        border: none !important;
+        border-radius: 2px !important;
+        color: #FFFFFF !important;
+        font-weight: 800 !important;
+        font-size: 1.73rem !important;
+        width: auto !important;
+        min-width: 150px !important;
+        height: 3.84rem !important;
+        margin-top: 20px !important;  
+        display: flex !important;
+        justify-content: center !important; 
+        padding-left: 30px !important;
+        padding-right: 30px !important;
+        align-items: center !important;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
+    [data-testid="stMetricLabel"] p { font-size: 1.1rem !important; color: #4a5fcc !important; font-weight: 900 !important; margin-bottom: 6px !important; }
+    [data-testid="stMetricValue"] div:first-child::before { content: "→ "; color: #8b92b2 !important; font-weight: 700 !important; }
+    [data-testid="stMetricValue"] div { font-size: 1.54rem !important; color: #FFFFFF !important; font-weight: 700 !important; }
     
-    .lyrics-card { border-left: 4px solid #4a5fcc; padding: 20px; background: rgba(45, 53, 72, 0.25); border-radius: 0 12px 12px 0; border: 1px solid rgba(45, 53, 72, 0.5); height: 500px; overflow-y: auto; }
-    .analysis-card { border-left: 4px solid #2a3f88; padding: 14px 18px; margin-bottom: 12px; background: rgba(45, 53, 72, 0.25); border-radius: 0 12px 12px 0; border: 1px solid rgba(45, 53, 72, 0.5); }
+    .lyrics-card {
+        border-left: 4px solid #4a5fcc;
+        padding: 24px;
+        background: rgba(45, 53, 72, 0.25);
+        border-radius: 0 12px 12px 0;
+        border: 1px solid rgba(45, 53, 72, 0.5);
+        height: 520px;
+        overflow-y: auto;
+    }
+    .kr-txt { font-size: 1.1rem; color: #FFFFFF; font-weight: 600; display: block; margin-bottom: 4px; }
+    .en-txt { font-size: 0.95rem; color: #8b92b2; font-weight: 400; display: block; font-style: italic; }
     
-    .quiz-outer-box { background: rgba(45, 53, 72, 0.15); border: 1px solid rgba(74, 95, 204, 0.3); border-radius: 12px; padding: 15px 20px; margin-bottom: 15px; }
-    
-    /* 세션별 점수 보드 스타일 (레드/블루 가변형) */
+    .analysis-card {
+        border-left: 4px solid #2a3f88;
+        padding: 16px 20px;
+        margin-bottom: 16px;
+        background: rgba(45, 53, 72, 0.25);
+        border-radius: 0 12px 12px 0;
+        border: 1px solid rgba(45, 53, 72, 0.5);
+    }
+    .pos-title { font-size: 1.3rem !important; font-weight: 800 !important; color: #7d8dec; margin-bottom: 10px; }
+    .data-row { display: flex; align-items: baseline; border-top: 1px solid rgba(141, 146, 178, 0.2); padding-top: 12px; }
+    .card-word { font-weight: 700 !important; color: #FFFFFF; font-size: 1.1rem; } 
+    .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } 
+
+    .quiz-outer-box {
+        background: rgba(45, 53, 72, 0.15);
+        border: 1px solid rgba(74, 95, 204, 0.3);
+        border-radius: 12px;
+        padding: 12px 20px;
+        margin-top: 5px;
+        margin-bottom: 25px; 
+    }
+    div[data-testid="stRadio"] > div { gap: 0px !important; margin-top: -12px !important; }
+    [data-testid="stWidgetLabel"] { display: none; }
+    div[data-testid="stRadio"] label { color: white !important; font-size: 0.95rem !important; }
+
+    .custom-result-box {
+        padding: 12px 20px; 
+        border-radius: 8px;
+        border: 1px solid transparent;
+        animation: fadeInUp 0.25s ease-out forwards;
+        margin-bottom: 25px;
+    }
+    .correct-box { background: rgba(74, 95, 204, 0.1); border-color: #4a5fcc; }
+    .wrong-box { background: rgba(255, 75, 75, 0.05); border-color: rgba(255, 75, 75, 0.4); }
+    .result-title { font-size: 1.25rem !important; font-weight: 800 !important; margin-bottom: 2px !important; display: block; }
+    .result-sub { color: #FFFFFF; font-size: 1.0rem !important; opacity: 0.9; display: block; }
+
+    /* 점수 리포트 섹션만 스타일 변경 */
     .score-container {
         padding: 40px; border-radius: 20px; text-align: center; margin: 30px 0;
         backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1);
@@ -75,8 +160,8 @@ st.markdown("""
     }
     .score-number-fail { background: linear-gradient(135deg, #ff4b4b 0%, #ff9a9e 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .score-number-pass { background: linear-gradient(135deg, #7d8dec 0%, #4a5fcc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
     """, unsafe_allow_html=True)
 
@@ -118,7 +203,7 @@ if st.session_state.analyzed_data:
     df_counts = data['df_counts']
     
     st.divider()
-    st.markdown('<div style="font-size:1.7rem; font-weight:800; color:white; margin-bottom:20px;">📊 분석 결과</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:1.7rem; font-weight:800; color:white; margin-bottom:25px;">📊 분석 결과</div>', unsafe_allow_html=True)
 
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("전체 단어", f"{len(data['all_words'])}")
@@ -132,19 +217,19 @@ if st.session_state.analyzed_data:
         st.markdown("### 🌍 가사 대조 번역")
         html_output = '<div class="lyrics-card">'
         for item in st.session_state.translated_lines:
-            html_output += f'<div style="margin-bottom:15px; border-bottom:1px solid rgba(141,146,178,0.1); padding-bottom:8px;"><span class="kr-txt">{item["kr"]}</span><span class="en-txt">{item["en"]}</span></div>'
+            html_output += f'<div style="margin-bottom:20px; border-bottom:1px solid rgba(141,146,178,0.1); padding-bottom:10px;"><span class="kr-txt">{item["kr"]}</span><span class="en-txt">{item["en"]}</span></div>'
         st.markdown(html_output + '</div>', unsafe_allow_html=True)
     with c_r:
         st.markdown("### 📊 분석 데이터")
         df_display = df_counts.copy()
         df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
-        st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True, use_container_width=True, height=500)
+        st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True, use_container_width=True, height=520)
 
     st.divider()
     st.markdown("### 📈 단어 빈도 시각화")
     top_20 = df_counts.head(20)
     fig = px.bar(top_20, x='단어', y='횟수', color='품사', color_discrete_map={'명사': '#7d8dec', '동사': '#4a5fcc', '형용사': '#2a3f88', '부사': '#8b92b2'}, template='plotly_dark')
-    fig.update_layout(height=350, margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+    fig.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     st.plotly_chart(fig, use_container_width=True)
 
     st.divider()
@@ -159,7 +244,7 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # --- 퀴즈 섹션 (5문항) ---
+    # --- 퀴즈 섹션 (원코드 폰트/마진 유지) ---
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     
@@ -201,7 +286,7 @@ if st.session_state.analyzed_data:
         else: all_answered = False
         user_results.append({"q": q_text, "user": ans, "correct": q_ans})
 
-    # --- 퀴즈 완료 시 (점수에 따른 가변 디자인) ---
+    # --- 퀴즈 완료 시 (점수에 따른 가변 디자인 & 리포트 노출) ---
     if all_answered:
         st.divider()
         score_class = "score-pass" if total_score >= 51 else "score-fail"
