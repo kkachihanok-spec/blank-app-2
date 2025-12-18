@@ -21,7 +21,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (점수 배너 디자인 업그레이드 및 원코드 유지)
+# 3. 커스텀 CSS (마진 최적화 및 가변 점수 보드 디자인)
 st.markdown("""
     <style>
     .stApp {
@@ -39,62 +39,44 @@ st.markdown("""
         color: #FFFFFF !important; margin-top: -10px !important; margin-bottom: 0.5rem !important; letter-spacing: 1px;
     }
     .sub-text { color: #8b92b2 !important; font-size: 1.1rem !important; font-weight: 500; margin-bottom: 1.5rem !important; }
-    hr { border-bottom: 1px solid #2d3548 !important; }
-    .stTextArea label p { font-size: 1.7rem !important; font-weight: 800 !important; color: #FFFFFF !important; margin-bottom: 25px !important; }
-    .stTextArea textarea { background-color: rgba(20, 27, 45, 0.7) !important; color: #FFFFFF !important; border-radius: 12px !important; border: 1px solid #2d3548 !important; }
+    hr { border: 0; border-bottom: 1px solid #2d3548 !important; margin: 1.5rem 0 !important; }
+    
+    /* 텍스트 영역 마진 조율 */
+    .stTextArea label p { font-size: 1.7rem !important; font-weight: 800 !important; color: #FFFFFF !important; margin-bottom: 10px !important; }
+    
     .stButton>button {
         background-color: #4e5ec5 !important; border: none !important; border-radius: 2px !important; color: #FFFFFF !important;
         font-weight: 800 !important; font-size: 1.73rem !important; width: auto !important; min-width: 150px !important;
-        height: 3.84rem !important; margin-top: 20px !important; display: flex !important; justify-content: center !important; 
-        padding-left: 30px !important; padding-right: 30px !important; align-items: center !important; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        height: 3.84rem !important; margin-top: 10px !important; transition: all 0.2s ease;
     }
-    [data-testid="stMetricLabel"] p { font-size: 1.1rem !important; color: #4a5fcc !important; font-weight: 900 !important; margin-bottom: 6px !important; }
-    [data-testid="stMetricValue"] div:first-child::before { content: "→ "; color: #8b92b2 !important; font-weight: 700 !important; }
-    [data-testid="stMetricValue"] div { font-size: 1.54rem !important; color: #FFFFFF !important; font-weight: 700 !important; }
     
-    .lyrics-card { border-left: 4px solid #4a5fcc; padding: 24px; background: rgba(45, 53, 72, 0.25); border-radius: 0 12px 12px 0; border: 1px solid rgba(45, 53, 72, 0.5); height: 520px; overflow-y: auto; }
-    .kr-txt { font-size: 1.1rem; color: #FFFFFF; font-weight: 600; display: block; margin-bottom: 4px; }
-    .en-txt { font-size: 0.95rem; color: #8b92b2; font-weight: 400; display: block; font-style: italic; }
+    .lyrics-card { border-left: 4px solid #4a5fcc; padding: 20px; background: rgba(45, 53, 72, 0.25); border-radius: 0 12px 12px 0; border: 1px solid rgba(45, 53, 72, 0.5); height: 500px; overflow-y: auto; }
+    .analysis-card { border-left: 4px solid #2a3f88; padding: 14px 18px; margin-bottom: 12px; background: rgba(45, 53, 72, 0.25); border-radius: 0 12px 12px 0; border: 1px solid rgba(45, 53, 72, 0.5); }
     
-    .analysis-card { border-left: 4px solid #2a3f88; padding: 16px 20px; margin-bottom: 16px; background: rgba(45, 53, 72, 0.25); border-radius: 0 12px 12px 0; border: 1px solid rgba(45, 53, 72, 0.5); }
-    .pos-title { font-size: 1.3rem !important; font-weight: 800 !important; color: #7d8dec; margin-bottom: 10px; }
-    .data-row { display: flex; align-items: baseline; border-top: 1px solid rgba(141, 146, 178, 0.2); padding-top: 12px; }
-    .card-word { font-weight: 700 !important; color: #FFFFFF; font-size: 1.1rem; } 
-    .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } 
-
-    .quiz-outer-box { background: rgba(45, 53, 72, 0.15); border: 1px solid rgba(74, 95, 204, 0.3); border-radius: 12px; padding: 12px 20px; margin-top: 5px; margin-bottom: 25px; }
-    div[data-testid="stRadio"] > div { gap: 0px !important; margin-top: -12px !important; }
-    [data-testid="stWidgetLabel"] { display: none; }
-    div[data-testid="stRadio"] label { color: white !important; font-size: 0.95rem !important; }
-
-    .custom-result-box { padding: 12px 20px; border-radius: 8px; border: 1px solid transparent; animation: fadeInUp 0.25s ease-out forwards; margin-bottom: 25px; }
-    .correct-box { background: rgba(74, 95, 204, 0.1); border-color: #4a5fcc; }
-    .wrong-box { background: rgba(255, 75, 75, 0.05); border-color: rgba(255, 75, 75, 0.4); }
-    .result-title { font-size: 1.25rem !important; font-weight: 800 !important; margin-bottom: 2px !important; display: block; }
-    .result-sub { color: #FFFFFF; font-size: 1.0rem !important; opacity: 0.9; display: block; }
-
-    /* 점수 리포트 세션 세련된 디자인 업그레이드 */
-    .score-board {
-        background: rgba(74, 95, 204, 0.1) !important;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(125, 141, 236, 0.4);
-        border-radius: 16px;
-        padding: 30px;
-        text-align: center;
-        margin: 40px 0;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        animation: fadeInUp 0.5s ease-out;
+    .quiz-outer-box { background: rgba(45, 53, 72, 0.15); border: 1px solid rgba(74, 95, 204, 0.3); border-radius: 12px; padding: 15px 20px; margin-bottom: 15px; }
+    
+    /* 세션별 점수 보드 스타일 (레드/블루 가변형) */
+    .score-container {
+        padding: 40px; border-radius: 20px; text-align: center; margin: 30px 0;
+        backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1);
+        animation: fadeInUp 0.6s ease-out;
     }
-    .score-label { color: #8b92b2; font-size: 1.1rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
-    .score-value { 
-        font-size: 4rem; font-weight: 900; 
-        background: linear-gradient(135deg, #FFFFFF 0%, #7d8dec 100%);
+    .score-fail { background: linear-gradient(145deg, rgba(255, 75, 75, 0.15) 0%, rgba(139, 0, 0, 0.05) 100%); border: 1px solid rgba(255, 75, 75, 0.3) !important; }
+    .score-pass { background: linear-gradient(145deg, rgba(74, 95, 204, 0.15) 0%, rgba(42, 63, 136, 0.05) 100%); border: 1px solid rgba(125, 141, 236, 0.3) !important; }
+    
+    .score-title-text {
+        font-family: 'Inter', sans-serif; font-size: 2.5rem !important; font-weight: 900 !important;
+        background: linear-gradient(135deg, #FFFFFF 0%, #8b92b2 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        margin: 10px 0;
+        margin-bottom: 5px !important;
     }
-    .score-status { color: #4a5fcc; font-weight: 700; font-size: 1.2rem; }
-
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .score-number { 
+        font-size: 6rem !important; font-weight: 900 !important; line-height: 1; margin: 10px 0 !important;
+    }
+    .score-number-fail { background: linear-gradient(135deg, #ff4b4b 0%, #ff9a9e 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .score-number-pass { background: linear-gradient(135deg, #7d8dec 0%, #4a5fcc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
     """, unsafe_allow_html=True)
 
@@ -136,7 +118,7 @@ if st.session_state.analyzed_data:
     df_counts = data['df_counts']
     
     st.divider()
-    st.markdown('<div style="font-size:1.7rem; font-weight:800; color:white; margin-bottom:25px;">📊 분석 결과</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:1.7rem; font-weight:800; color:white; margin-bottom:20px;">📊 분석 결과</div>', unsafe_allow_html=True)
 
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("전체 단어", f"{len(data['all_words'])}")
@@ -150,19 +132,19 @@ if st.session_state.analyzed_data:
         st.markdown("### 🌍 가사 대조 번역")
         html_output = '<div class="lyrics-card">'
         for item in st.session_state.translated_lines:
-            html_output += f'<div style="margin-bottom:20px; border-bottom:1px solid rgba(141,146,178,0.1); padding-bottom:10px;"><span class="kr-txt">{item["kr"]}</span><span class="en-txt">{item["en"]}</span></div>'
+            html_output += f'<div style="margin-bottom:15px; border-bottom:1px solid rgba(141,146,178,0.1); padding-bottom:8px;"><span class="kr-txt">{item["kr"]}</span><span class="en-txt">{item["en"]}</span></div>'
         st.markdown(html_output + '</div>', unsafe_allow_html=True)
     with c_r:
         st.markdown("### 📊 분석 데이터")
         df_display = df_counts.copy()
         df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
-        st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True, use_container_width=True, height=520)
+        st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True, use_container_width=True, height=500)
 
     st.divider()
     st.markdown("### 📈 단어 빈도 시각화")
     top_20 = df_counts.head(20)
     fig = px.bar(top_20, x='단어', y='횟수', color='품사', color_discrete_map={'명사': '#7d8dec', '동사': '#4a5fcc', '형용사': '#2a3f88', '부사': '#8b92b2'}, template='plotly_dark')
-    fig.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+    fig.update_layout(height=350, margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     st.plotly_chart(fig, use_container_width=True)
 
     st.divider()
@@ -177,7 +159,7 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # --- 퀴즈 섹션 (5문항 & 제목 변경) ---
+    # --- 퀴즈 섹션 (5문항) ---
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     
@@ -193,7 +175,7 @@ if st.session_state.analyzed_data:
         (f"단어 '{second_word}'의 품사는 무엇일까요?", second_pos, "nq2"),
         (f"이 가사에는 총 몇 개의 '고유 단어'가 사용되었나요?", f"{len(df_counts)}개", "nq3"),
         (f"가사 속에 등장한 '{third_word}'의 품사로 알맞은 것은?", third_pos, "nq4"),
-        (f"전체 가사 중 단어의 총 개수(형태소 분석 기준)는 몇 개인가요?", f"{len(data['all_words'])}개", "nq5")
+        (f"전체 가사 중 단어의 총 개수는 몇 개인가요?", f"{len(data['all_words'])}개", "nq5")
     ]
     
     user_results = []
@@ -201,7 +183,7 @@ if st.session_state.analyzed_data:
     all_answered = True
     
     for i, (q_text, q_ans, q_key) in enumerate(quiz_data):
-        st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{q_text} (20점)</span></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{q_text}</span></div>', unsafe_allow_html=True)
         
         if i in [0, 1, 3]: opts = ["명사", "동사", "형용사", "부사"]
         elif i == 2: opts = [f"{len(df_counts)}개", f"{len(df_counts)+2}개", f"{max(0, len(df_counts)-5)}개", "100개"]
@@ -212,38 +194,38 @@ if st.session_state.analyzed_data:
         
         if ans:
             if ans == q_ans:
-                st.markdown(f'<div class="custom-result-box correct-box"><span class="result-title" style="color:#7d8dec;">🎉 정답입니다! (+20점)</span><span class="result-sub">완벽한 분석입니다.</span></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="custom-result-box correct-box"><span class="result-title" style="color:#7d8dec;">🎉 정답입니다!</span></div>', unsafe_allow_html=True)
                 total_score += 20
             else:
-                st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#ff4b4b;">아쉬워요! (0점)</span><span class="result-sub">정답은 [{q_ans}] 입니다.</span></div>', unsafe_allow_html=True)
-        else:
-            all_answered = False
+                st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#ff4b4b;">아쉬워요!</span><span class="result-sub">정답은 [{q_ans}] 입니다.</span></div>', unsafe_allow_html=True)
+        else: all_answered = False
         user_results.append({"q": q_text, "user": ans, "correct": q_ans})
 
-    # --- 퀴즈 완료 시 세련된 스코어 보드 및 보고서 노출 ---
+    # --- 퀴즈 완료 시 (점수에 따른 가변 디자인) ---
     if all_answered:
         st.divider()
+        score_class = "score-pass" if total_score >= 51 else "score-fail"
+        num_class = "score-number-pass" if total_score >= 51 else "score-number-fail"
+        status_text = "🏆 완벽하게 마스터하셨네요!" if total_score >= 51 else "🧐 다시 한번 복습이 필요해요."
+        
         st.markdown(f'''
-            <div class="score-board">
-                <div class="score-label">Your Learning Score</div>
-                <div class="score-value">{total_score}</div>
-                <div class="score-status">🏆 리포트가 성공적으로 생성되었습니다.</div>
+            <div class="score-container {score_class}">
+                <div class="score-title-text">YOUR LEARNING SCORE</div>
+                <div class="score-number {num_class}">{total_score}</div>
+                <div class="score-status">{status_text}</div>
             </div>
         ''', unsafe_allow_html=True)
 
         st.markdown("### 📥 나의 학습 완벽 총정리")
         full_report = f"==== K-LYRIC 101 학습 총정리 리포트 ====\n일시: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n"
-        full_report += f"[최종 점수: {total_score}점 / 100점]\n\n"
+        full_report += f"[최종 점수: {total_score}점]\n\n"
         full_report += "[1. 가사 대조 번역본]\n"
         for item in st.session_state.translated_lines:
             full_report += f"KR: {item['kr']}\nEN: {item['en']}\n"
-        full_report += f"\n[2. 가사 통계]\n- 전체 단어: {len(data['all_words'])}\n- 고유 단어: {len(df_counts)}\n- 최빈 단어: {top_word}({top_pos})\n"
+        full_report += f"\n[2. 가사 통계]\n- 전체 단어: {len(data['all_words'])}\n- 고유 단어: {len(df_counts)}\n"
         full_report += "\n[3. 퀴즈 상세 분석]\n"
         for i, ua in enumerate(user_results):
             res = "정답" if ua['user'] == ua['correct'] else f"오답 (선택: {ua['user']})"
-            full_report += f"Q{i+1}. {ua['q']}\n   결과: {res} / 정답: {ua['correct']}\n"
-        full_report += "\n[4. 핵심 단어장 (TOP 10)]\n"
-        for idx, row in df_counts.head(10).iterrows():
-            full_report += f"- {row['단어']} ({row['품사']}): {row['횟수']}회\n"
+            full_report += f"Q{i+1}. {ua['q']}\n   결과: {res}\n"
             
         st.download_button(label="✨ 오늘 공부한 모든 내용 저장하기", data=full_report, file_name=f"K-Lyric_Complete_Study_{datetime.now().strftime('%m%d')}.txt", mime='text/plain')
