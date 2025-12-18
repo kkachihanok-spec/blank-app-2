@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (타이틀 2줄 + 단색 스퀘어 버튼 + 버튼 글씨 20% 확대 및 볼드)
+# 3. 커스텀 CSS
 st.markdown("""
     <style>
     .stApp {
@@ -40,7 +40,7 @@ st.markdown("""
         padding-top: 1rem;
     }
 
-    /* 서브 영어 타이틀: K-Lyric 101 */
+    /* 서브 영어 타이틀: K-Lyric 101 (화이트) */
     .brand-title-en {
         font-family: 'Inter', sans-serif;
         font-size: 2.5rem !important;
@@ -74,22 +74,27 @@ st.markdown("""
         border: 1px solid #2d3548 !important;
     }
 
-    /* --- [수정] 버튼 스타일: 글씨 크기 20% 확대 및 폰트 두께 강화 --- */
+    /* --- [수정] 버튼: 박스 크기는 유지, 텍스트만 키우고 볼드 --- */
     .stButton>button {
         background-color: #4e5ec5 !important; 
         border: none !important;
-        border-radius: 2px !important; 
+        border-radius: 2px !important;          /* 각진 스퀘어 형태 유지 */
         color: #FFFFFF !important;
-        font-weight: 900 !important;       /* 볼드처리 강화 */
+        
+        /* 텍스트 스타일 수정 */
+        font-weight: 800 !important;            /* 볼드(Bold) 적용 */
+        font-size: 1.73rem !important;          /* 원래 1.44rem 대비 20% 확대 */
+        
+        /* 버튼 박스 크기는 원래대로 복구 */
         width: auto !important;
-        min-width: 180px !important;       /* 글자가 커짐에 따라 최소 너비 약간 확장 */
-        height: 4.2rem !important;         /* 높이도 비율에 맞춰 살짝 조정 */
-        font-size: 1.73rem !important;     /* 기존 1.44rem 대비 20% 확대 */
+        min-width: 150px !important;
+        height: 3.84rem !important;             /* 원래 높이로 고정 */
+        
         margin-top: 20px !important;  
         display: flex !important;
         justify-content: center !important; 
-        padding-left: 35px !important;
-        padding-right: 35px !important;
+        padding-left: 30px !important;
+        padding-right: 30px !important;
         align-items: center !important;
         transition: all 0.2s ease;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -98,10 +103,8 @@ st.markdown("""
     .stButton>button:hover {
         background-color: #5d6edb !important; 
         transform: translateY(-1px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
     }
 
-    /* 메트릭 및 카드 스타일 유지 */
     [data-testid="stMetricLabel"] p { font-size: 1.6rem !important; color: #FFFFFF !important; font-weight: 900 !important; }
     [data-testid="stMetricValue"] { font-size: 1.67rem !important; color: #4a5fcc !important; font-weight: 700 !important; }
 
@@ -170,7 +173,7 @@ st.divider()
 # --- [5] 입력 섹션 ---
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
 
-col_btn, _ = st.columns([1.5, 3.5]) # 버튼 크기가 커져서 컬럼 비율 조정
+col_btn, _ = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석을 실행해줘!")
 
@@ -193,7 +196,7 @@ if analyze_btn:
     else:
         st.error("가사를 입력해 주세요.")
 
-# --- [7] 출력 섹션 ---
+# --- [7] 출력 섹션 (번역, 데이터, 그래프, 학습카드, 퀴즈 전체 포함) ---
 if st.session_state.analyzed_data:
     data = st.session_state.analyzed_data
     df_counts = data['df_counts']
@@ -203,7 +206,6 @@ if st.session_state.analyzed_data:
     st.divider()
     st.markdown('<div style="font-size:1.7rem; font-weight:800; color:white; margin-bottom:25px;">📊 분석 결과</div>', unsafe_allow_html=True)
 
-    # 1. 요약 대시보드
     m1, m2, m3, m4 = st.columns(4)
     w_arrow = "→ " 
     m1.metric("전체 단어", f"{w_arrow}{len(all_words)}")
@@ -211,7 +213,6 @@ if st.session_state.analyzed_data:
     m3.metric("최빈 단어", f"{w_arrow}{df_counts.iloc[0]['단어']}")
     m4.metric("주요 품사", f"{w_arrow}{df_counts.iloc[0]['품사']}")
 
-    # 2. 번역 및 데이터 섹션
     st.divider()
     c_l, c_r = st.columns([1.2, 1])
     with c_l:
@@ -234,7 +235,6 @@ if st.session_state.analyzed_data:
         df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
         st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True, use_container_width=True, height=520)
 
-    # 3. 그래프
     st.divider()
     st.markdown("### 📈 단어 빈도 시각화")
     top_20 = df_counts.head(20)
@@ -242,7 +242,6 @@ if st.session_state.analyzed_data:
     fig.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     st.plotly_chart(fig, use_container_width=True)
 
-    # 4. 문법 학습 섹션
     st.divider()
     st.markdown("### 📚 가사 속 문법 학습")
     pos_info = {"명사": {"icon": "💎", "desc": "사물이나 개념의 이름입니다."}, "동사": {"icon": "⚡", "desc": "동작이나 움직임을 나타냅니다."}, "형용사": {"icon": "🎨", "desc": "상태나 성질을 묘사합니다."}, "부사": {"icon": "🎬", "desc": "행동을 더 세밀하게 꾸며줍니다."}}
@@ -255,24 +254,12 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # 5. 퀴즈 섹션
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
-    
-    st.markdown(f"""
-        <div class="quiz-outer-box">
-            <div style="line-height: 1.2; margin-bottom: 4px;">
-                <span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q.</span> 
-                <span style="color: white; font-size: 1.1rem; font-weight: 700;">
-                    이 가사에서 가장 많이 사용된 단어는 '{top_word}'입니다. 이 단어의 품사는 무엇일까요?
-                </span>
-            </div>
-    """, unsafe_allow_html=True)
-    
-    user_choice = st.radio("정답 선택", ["명사", "동사", "형용사", "부사"], index=None, key="final_quiz_fixed", label_visibility="collapsed")
+    st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">이 가사에서 가장 많이 사용된 단어는 \'{top_word}\'입니다. 이 단어의 품사는 무엇일까요?</span></div>', unsafe_allow_html=True)
+    user_choice = st.radio("정답 선택", ["명사", "동사", "형용사", "부사"], index=None, key="final_quiz_v4", label_visibility="collapsed")
     st.markdown("</div>", unsafe_allow_html=True)
-    
     if user_choice:
         if user_choice == top_pos:
             st.markdown(f'<div class="custom-result-box correct-box"><span class="result-title" style="color:#7d8dec;">🎉 정답입니다!</span><span class="result-sub">\'{top_word}\'은(는) 완벽한 <b>{top_pos}</b>입니다.</span></div>', unsafe_allow_html=True)
