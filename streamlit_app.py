@@ -22,7 +22,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (모든 비율 및 컬러 고정)
+# 3. 커스텀 CSS (사용자 원본 디자인 100% 복원 및 고정)
 st.markdown("""
     <style>
     .stApp {
@@ -53,6 +53,7 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     
+    /* 메트릭 화살표 및 라벨 컬러 복구 */
     [data-testid="stMetricLabel"] p { font-size: 1.1rem !important; color: #4a5fcc !important; font-weight: 900 !important; margin-bottom: 6px !important; }
     [data-testid="stMetricValue"] div:first-child::before { content: "→ "; color: #8b92b2 !important; font-weight: 700 !important; }
     [data-testid="stMetricValue"] div { font-size: 1.54rem !important; color: #FFFFFF !important; font-weight: 700 !important; }
@@ -89,6 +90,7 @@ st.markdown("""
     .wrong-box { background: rgba(255, 75, 75, 0.05); border-color: rgba(255, 75, 75, 0.4); }
     .result-title { font-size: 1.25rem !important; font-weight: 800 !important; margin-bottom: 2px !important; display: block; }
 
+    /* 점수 리포트 비율 (사용자 요청 반영: 라벨 100% 확대, 점수 50% 축소) */
     .score-container-premium {
         padding: 60px 40px; border-radius: 24px; text-align: center; margin: 40px 0;
         backdrop-filter: blur(20px); box-shadow: 0 20px 40px rgba(0,0,0,0.4);
@@ -190,52 +192,70 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span></div></div>''', unsafe_allow_html=True)
 
-    # --- 📝 오늘의 가사 퀴즈 (실제 데이터 기반 선택지 생성) ---
+    # --- 📝 오늘의 가사 퀴즈 (5문항 복구 및 선택지 자동 생성) ---
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     
     top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
-    other_words = df_counts['단어'].tolist()[1:10] if len(df_counts) > 5 else ["노래", "가사", "사랑", "마음"]
-    
-    quiz_data = [
-        (f"가장 많이 사용된 '{top_word}'의 품사는 무엇인가요?", top_pos, ["명사", "동사", "형용사", "부사"], "nq1"),
-        (f"이 가사에는 총 몇 개의 '고유 단어'가 사용되었나요?", f"{len(df_counts)}개", [f"{len(df_counts)}개", f"{len(df_counts)+3}개", f"{max(0, len(df_counts)-2)}개", "100개"], "nq3"),
-        (f"전체 가사 중 단어의 총 개수는 몇 개인가요?", f"{len(data['all_words'])}개", [f"{len(data['all_words'])}개", f"{len(data['all_words'])+10}개", f"{max(0, len(data['all_words'])-5)}개", "0개"], "nq5")
+    other_pos_df = df_counts[df_counts['품사'] != top_pos]
+    second_word = other_pos_df.iloc[0]['단어'] if len(other_pos_df) > 0 else "가사"
+    second_pos = other_pos_df.iloc[0]['품사'] if len(other_pos_df) > 0 else "명사"
+    third_word = other_pos_df.iloc[1]['단어'] if len(other_pos_df) > 1 else "노래"
+    third_pos = other_pos_df.iloc[1]['품사'] if len(other_pos_df) > 1 else "명사"
+
+    # 문제 및 정답 데이터
+    quiz_configs = [
+        {"q": f"가장 많이 사용된 '{top_word}'의 품사는 무엇인가요?", "a": top_pos, "type": "pos"},
+        {"q": f"단어 '{second_word}'의 품사는 무엇일까요?", "a": second_pos, "type": "pos"},
+        {"q": f"이 가사에는 총 몇 개의 '고유 단어'가 사용되었나요?", "a": f"{len(df_counts)}개", "type": "count_unique"},
+        {"q": f"가사 속에 등장한 '{third_word}'의 품사로 알맞은 것은?", "a": third_pos, "type": "pos"},
+        {"q": f"전체 가사 중 단어의 총 개수는 몇 개인가요?", "a": f"{len(data['all_words'])}개", "type": "count_total"}
     ]
     
     total_score = 0
     all_answered = True
     
-    for i, (q_text, q_ans, q_opts, q_key) in enumerate(quiz_data):
-        st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{q_text}</span></div>', unsafe_allow_html=True)
+    for i, config in enumerate(quiz_configs):
+        q_key = f"quiz_q_{i}"
+        st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{config["q"]}</span></div>', unsafe_allow_html=True)
         
-        # 선택지 셔플
+        # 선택지 구성 (오답A 대신 실제 데이터 반영)
+        if config["type"] == "pos":
+            opts = ["명사", "동사", "형용사", "부사"]
+        elif config["type"] == "count_unique":
+            base = len(df_counts)
+            opts = [f"{base}개", f"{base+3}개", f"{max(0, base-2)}개", f"{base+10}개"]
+        else: # count_total
+            base = len(data['all_words'])
+            opts = [f"{base}개", f"{base+15}개", f"{max(0, base-10)}개", f"{base+5}개"]
+        
+        # 선택지 고정 셔플 로직
         if q_key not in st.session_state:
-            random.shuffle(q_opts)
-            st.session_state[q_key] = q_opts
-        
+            random.shuffle(opts)
+            st.session_state[q_key] = opts
+            
         ans = st.radio(f"Radio_{q_key}", st.session_state[q_key], index=None, key=f"ans_{q_key}", label_visibility="collapsed")
         st.markdown("</div>", unsafe_allow_html=True)
         
         if ans:
-            if ans == q_ans:
+            if ans == config["a"]:
                 st.markdown(f'<div class="custom-result-box correct-box"><span class="result-title" style="color:#7d8dec;">🎉 정답입니다!</span></div>', unsafe_allow_html=True)
-                total_score += 33.4 # 3문항 기준 약 100점
+                total_score += 20
             else:
-                st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#ff4b4b;">아쉬워요!</span><span style="color:white; opacity:0.8;">정답: {q_ans}</span></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#ff4b4b;">아쉬워요!</span><span style="color:white; opacity:0.8;">정답: {config["a"]}</span></div>', unsafe_allow_html=True)
         else: all_answered = False
 
+    # --- 최종 프리미엄 점수 리포트 ---
     if all_answered:
-        final_score = int(min(100, total_score))
         st.divider()
-        score_class = "score-pass-premium" if final_score >= 60 else "score-fail-premium"
-        text_color_class = "score-text-pass" if final_score >= 60 else "score-text-fail"
-        status_msg = "완벽한 분석입니다!" if final_score >= 60 else "복습이 더 필요합니다."
+        score_class = "score-pass-premium" if total_score >= 60 else "score-fail-premium"
+        text_color_class = "score-text-pass" if total_score >= 60 else "score-text-fail"
+        status_msg = "완벽한 분석입니다!" if total_score >= 60 else "복습이 더 필요합니다."
         
         st.markdown(f'''
             <div class="score-container-premium {score_class}">
                 <div class="score-label-premium">LEARNING REPORT</div>
-                <div class="score-number-premium {text_color_class}">{final_score} / 100</div>
+                <div class="score-number-premium {text_color_class}">{total_score} / 100</div>
                 <div class="score-status-text">{status_msg}</div>
             </div>
         ''', unsafe_allow_html=True)
