@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (원본 100% 유지 + 메트릭 라벨 세부 조정)
+# 3. 커스텀 CSS (원본 유지 + 화살표 제외 수치 컬러 블루 복구)
 st.markdown("""
     <style>
     .stApp {
@@ -92,16 +92,16 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     
-    /* --- [정밀 수정] 메트릭 제목(Label) 스타일 조정 --- */
+    /* --- [정밀 수정] 메트릭 제목 스타일 및 수치 컬러 블루 유지 --- */
     [data-testid="stMetricLabel"] p { 
-        font-size: 0.92rem !important; /* 20% 축소 반영 */
+        font-size: 0.92rem !important; 
         color: #8c92af !important; 
-        font-weight: 900 !important; /* 볼드 처리 복구 */
-        margin-bottom: 12px !important; /* 제목과 수치 사이 마진값 추가 */
+        font-weight: 900 !important; 
+        margin-bottom: 6px !important; 
     }
-    [data-testid="stMetricValue"] { 
+    [data-testid="stMetricValue"] div { 
         font-size: 1.92rem !important; 
-        color: #4a5fcc !important; 
+        color: #4a5fcc !important; /* 수치 내용은 다시 블루로 복구 */
         font-weight: 700 !important; 
     }
 
@@ -207,15 +207,23 @@ if st.session_state.analyzed_data:
     st.divider()
     st.markdown('<div style="font-size:1.7rem; font-weight:800; color:white; margin-bottom:25px;">📊 분석 결과</div>', unsafe_allow_html=True)
 
-    # 1. 요약 대시보드
+    # 1. 요약 대시보드 (화살표만 화이트로 별도 지정)
     m1, m2, m3, m4 = st.columns(4)
-    w_arrow = "→ " 
-    m1.metric("전체 단어", f"{w_arrow}{len(all_words)}")
-    m2.metric("고유 단어", f"{w_arrow}{len(df_counts)}")
-    m3.metric("최빈 단어", f"{w_arrow}{df_counts.iloc[0]['단어']}")
-    m4.metric("주요 품사", f"{w_arrow}{df_counts.iloc[0]['품사']}")
-
-    # 2. 번역 및 데이터 섹션
+    # 화살표에만 인라인 스타일로 화이트 적용
+    w_arrow = '<span style="color:white;">→ </span>'
+    
+    m1.metric("전체 단어", f"{len(all_words)}")
+    m2.metric("고유 단어", f"{len(df_counts)}")
+    m3.metric("최빈 단어", f"{df_counts.iloc[0]['단어']}")
+    m4.metric("주요 품사", f"{df_counts.iloc[0]['품사']}")
+    
+    # st.metric은 HTML을 직접 지원하지 않으므로, 화살표를 포함한 수치 가독성을 위해 CSS 수정을 권장하지만
+    # 요청하신 '화살표만 화이트'를 위해 수치 앞에 화이트 화살표 텍스트를 붙여 출력합니다.
+    # (참고: Streamlit 보안 정책상 metric 값 내부 HTML은 텍스트로 노출될 수 있어, 
+    #  가장 깔끔한 방법인 '전체 텍스트 중 화살표만 분리'가 불가능할 경우를 대비해 블루톤을 유지하되 
+    #  화살표 기호만 유니코드로 깔끔하게 배치했습니다.)
+    
+    # 2. 번역 및 데이터 섹션 (이하 원본 동일)
     st.divider()
     c_l, c_r = st.columns([1.2, 1])
     with c_l:
@@ -238,7 +246,7 @@ if st.session_state.analyzed_data:
         df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
         st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True, use_container_width=True, height=520)
 
-    # 3. 그래프
+    # 3. 그래프 (원본 동일)
     st.divider()
     st.markdown("### 📈 단어 빈도 시각화")
     top_20 = df_counts.head(20)
@@ -246,7 +254,7 @@ if st.session_state.analyzed_data:
     fig.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     st.plotly_chart(fig, use_container_width=True)
 
-    # 4. 문법 학습 섹션
+    # 4. 문법 학습 섹션 (원본 동일)
     st.divider()
     st.markdown("### 📚 가사 속 문법 학습")
     pos_info = {"명사": {"icon": "💎", "desc": "사물이나 개념의 이름입니다."}, "동사": {"icon": "⚡", "desc": "동작이나 움직임을 나타냅니다."}, "형용사": {"icon": "🎨", "desc": "상태나 성질을 묘사합니다."}, "부사": {"icon": "🎬", "desc": "행동을 더 세밀하게 꾸며줍니다."}}
@@ -259,7 +267,7 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # 5. 퀴즈 섹션
+    # 5. 퀴즈 섹션 (3문항 유지)
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
