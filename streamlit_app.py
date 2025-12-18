@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (마진 및 메트릭 스타일 통합 제어)
+# 3. 커스텀 CSS
 st.markdown("""
     <style>
     .stApp {
@@ -92,7 +92,7 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     
-    /* --- [메트릭 정밀 스타일] --- */
+    /* --- [메트릭 스타일] --- */
     [data-testid="stMetricLabel"] p { 
         font-size: 1.1rem !important; 
         color: #4a5fcc !important; 
@@ -112,7 +112,6 @@ st.markdown("""
         font-weight: 700 !important; 
     }
 
-    /* --- [레이아웃 카드 및 학습 섹션] --- */
     .lyrics-card {
         border-left: 4px solid #4a5fcc;
         padding: 24px;
@@ -140,7 +139,6 @@ st.markdown("""
     .card-word { font-weight: 700 !important; color: #FFFFFF; font-size: 1.1rem; } 
     .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } 
 
-    /* --- [퀴즈 섹션] --- */
     .quiz-outer-box {
         background: rgba(45, 53, 72, 0.15);
         border: 1px solid rgba(74, 95, 204, 0.3);
@@ -213,8 +211,8 @@ if st.session_state.analyzed_data:
     all_words = data['all_words']
     saved_lyrics = data['lyrics_input']
 
-    # --- [섹션 마진 정밀 조정] ---
-    st.markdown('<div style="margin-top: 45px;"></div>', unsafe_allow_html=True) # 상단 여백 추가
+    # --- [섹션 마진 35px로 정밀 조정] ---
+    st.markdown('<div style="margin-top: 35px;"></div>', unsafe_allow_html=True) 
     st.divider()
     st.markdown('<div style="font-size:1.7rem; font-weight:800; color:white; margin-top:35px; margin-bottom:35px;">📊 분석 결과</div>', unsafe_allow_html=True)
 
@@ -225,7 +223,7 @@ if st.session_state.analyzed_data:
     m3.metric("최빈 단어", f"{df_counts.iloc[0]['단어']}")
     m4.metric("주요 품사", f"{df_counts.iloc[0]['품사']}")
 
-    st.markdown('<div style="margin-bottom: 45px;"></div>', unsafe_allow_html=True) # 하단 여백 추가
+    st.markdown('<div style="margin-bottom: 35px;"></div>', unsafe_allow_html=True) 
 
     # 2. 번역 및 데이터 섹션
     st.divider()
