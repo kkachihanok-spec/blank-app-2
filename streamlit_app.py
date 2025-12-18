@@ -61,17 +61,31 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     
-    /* 다운로드 버튼 스타일 */
-    div.stDownloadButton > button {
+    /* 다운로드 버튼 그룹 스타일 */
+    .download-buttons-container {
+        display: flex;
+        flex-wrap: wrap; /* 작은 화면에서 줄바꿈 */
+        gap: 10px; /* 버튼 사이 간격 */
+        margin-top: 30px;
+        justify-content: center; /* 중앙 정렬 */
+    }
+    .download-buttons-container div.stDownloadButton > button {
         background: rgba(81, 109, 244, 0.1) !important;
         border: 1px solid rgba(81, 109, 244, 0.4) !important;
         color: #516df4 !important;
         font-weight: 700 !important;
         padding: 12px 24px !important;
         border-radius: 10px !important;
-        margin-top: 20px !important;
+        margin: 0 !important; /* 부모 컨테이너가 간격 관리 */
+        min-width: unset !important; /* 버튼 크기 자동 조절 */
+        font-size: 0.9rem !important;
+        height: auto !important;
     }
-    
+    .download-buttons-container div.stDownloadButton > button:hover {
+        background: rgba(81, 109, 244, 0.2) !important;
+        border-color: #516df4 !important;
+    }
+
     [data-testid="stMetricLabel"] p { font-size: 1.1rem !important; color: #4a5fcc !important; font-weight: 900 !important; margin-bottom: 6px !important; }
     [data-testid="stMetricValue"] div { font-size: 1.54rem !important; color: #FFFFFF !important; font-weight: 700 !important; }
     
@@ -134,22 +148,73 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 4. PDF 생성 함수
-def create_pdf(data, score):
+# 4. PDF 생성 함수 (한글 폰트 지원은 실행 환경의 폰트 경로 설정이 필요하여 텍스트 위주 구성)
+def create_pdf(data, score, translated_lines):
     if not FPDF_AVAILABLE:
         return None
+    
     pdf = FPDF()
+    # 한글 폰트 설정을 위한 임시 방편 (로컬에 폰트 파일이 있어야 함)
+    # pdf.add_font('NanumGothic', '', 'NanumGothic.ttf', uni=True) 
+    # pdf.add_font('NanumGothic', 'B', 'NanumGothicBold.ttf', uni=True)
+    # pdf.set_font("NanumGothic", size=12) # 폰트 설정
+    
     pdf.add_page()
     pdf.set_font("Arial", 'B', 16)
     pdf.cell(200, 10, txt="K-Lyric 101: Analysis Report", ln=True, align='C')
-    pdf.ln(10)
+    pdf.ln(8)
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt=f"Analysis Date: {datetime.now().strftime('%Y-%m-%d')}", ln=True)
-    pdf.cell(200, 10, txt=f"Learning Score: {score} / 100", ln=True)
-    pdf.cell(200, 10, txt=f"Vocabulary Strength: {len(data['df_counts'])} unique words", ln=True)
-    pdf.ln(10)
-    pdf.cell(200, 10, txt="Top Lyrics Sentiment & Data: See App Dashboard", ln=True)
+    pdf.cell(200, 8, txt=f"Analysis Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}", ln=True)
+    pdf.cell(200, 8, txt=f"Learning Score: {score} / 100", ln=True)
+    pdf.cell(200, 8, txt=f"Total Words: {len(data['all_words'])}", ln=True)
+    pdf.cell(200, 8, txt=f"Unique Words: {len(data['df_counts'])}", ln=True)
+    pdf.ln(5)
+
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(200, 8, txt="--- Original Lyrics ---", ln=True)
+    pdf.set_font("Arial", size=10)
+    for item in translated_lines:
+        pdf.multi_cell(0, 6, txt=f"KR: {item['kr']}", align='L')
+        pdf.multi_cell(0, 6, txt=f"EN: {item['en']}", align='L')
+        pdf.ln(1)
+    
+    pdf.ln(5)
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(200, 8, txt="--- Top 10 Frequent Words ---", ln=True)
+    pdf.set_font("Arial", size=10)
+    for idx, row in data['df_counts'].head(10).iterrows():
+        # 한글 깨짐 방지를 위해 PDF는 기본 영문/수치 정보를 위주로 생성하거나 
+        # 로컬 환경에서는 나눔고딕 등 .ttf 폰트를 pdf.add_font()로 등록해야 함
+        pdf.cell(200, 6, txt=f"- {row['단어']} ({row['품사']}): {row['횟수']} times", ln=True)
+    
     return pdf.output(dest='S').encode('latin-1')
+
+# 5. TXT 파일 생성 함수
+def create_txt(data, score, translated_lines):
+    txt_content = []
+    txt_content.append(f"K-Lyric 101: Analysis Report\n")
+    txt_content.append(f"Analysis Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n")
+    txt_content.append(f"Learning Score: {score} / 100\n")
+    txt_content.append(f"Total Words: {len(data['all_words'])}\n")
+    txt_content.append(f"Unique Words: {len(data['df_counts'])}\n\n")
+
+    txt_content.append("--- Original Lyrics & Translation ---\n")
+    for item in translated_lines:
+        txt_content.append(f"KR: {item['kr']}")
+        txt_content.append(f"EN: {item['en']}\n")
+    txt_content.append("\n")
+
+    txt_content.append("--- Top 10 Frequent Words ---\n")
+    for idx, row in data['df_counts'].head(10).iterrows():
+        txt_content.append(f"- {row['단어']} ({row['품사']}): {row['횟수']} times")
+    txt_content.append("\n")
+
+    txt_content.append("--- Full Word Analysis ---\n")
+    for idx, row in data['df_counts'].iterrows():
+        txt_content.append(f"{row['단어']} ({row['품사']}): {row['횟수']} times")
+    
+    return "\n".join(txt_content).encode('utf-8')
+
 
 # --- 메인 실행 로직 ---
 st.markdown('<div class="main-title-kr">가사학개론</div>', unsafe_allow_html=True)
@@ -251,22 +316,26 @@ if st.session_state.analyzed_data:
     all_answered = True
     
     for i, config in enumerate(quiz_configs):
-        q_key = f"final_quiz_v14_q_{i}"
+        q_key = f"final_quiz_v15_q_{i}"
         st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{config["q"]}</span></div>', unsafe_allow_html=True)
         
         if config["type"] == "pos": opts = ["명사", "동사", "형용사", "부사"]
         elif config["type"] == "count_unique":
             b = len(df_counts)
-            opts = [f"{b}개", f"{b+3}개", f"{max(0, b-2)}개", f"{b+7}개"]
-        else:
+            # 오답 선택지에 정답이 포함되지 않도록 수정
+            incorrect_options = [f"{b+random.randint(2,5)}개", f"{max(1, b-random.randint(2,5))}개", f"{b+random.randint(6,10)}개"]
+            opts = [f"{b}개"] + incorrect_options
+            random.shuffle(opts)
+        else: # count_total
             b = len(data['all_words'])
-            opts = [f"{b}개", f"{b+12}개", f"{max(0, b-8)}개", f"{b+4}개"]
+            incorrect_options = [f"{b+random.randint(5,10)}개", f"{max(1, b-random.randint(5,10))}개", f"{b+random.randint(11,15)}개"]
+            opts = [f"{b}개"] + incorrect_options
+            random.shuffle(opts)
         
         if q_key not in st.session_state:
-            random.shuffle(opts)
             st.session_state[q_key] = opts
             
-        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_f_v14_{q_key}", label_visibility="collapsed")
+        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_f_v15_{q_key}", label_visibility="collapsed")
         st.markdown("</div>", unsafe_allow_html=True)
         
         if ans:
@@ -294,14 +363,26 @@ if st.session_state.analyzed_data:
             </div>
         ''', unsafe_allow_html=True)
         
-        # PDF 다운로드 로직
+        # --- 다운로드 버튼 그룹 ---
+        st.markdown('<div class="download-buttons-container">', unsafe_allow_html=True)
+
+        # PDF 다운로드
         if FPDF_AVAILABLE:
-            pdf_data = create_pdf(data, total_score)
+            pdf_data = create_pdf(data, total_score, st.session_state.translated_lines)
             st.download_button(
-                label="📥 분석 리포트 PDF 다운로드",
+                label="📥 PDF 리포트 다운로드",
                 data=pdf_data,
                 file_name=f"K-Lyric_Report_{datetime.now().strftime('%Y%m%d')}.pdf",
-                mime="application/pdf"
+                mime="application/pdf",
+                key="download_pdf"
             )
         else:
-            st.warning("⚠️ PDF 기능을 사용하려면 터미널에 'pip install fpdf'를 실행해 주세요.")
+            st.warning("⚠️ PDF 다운로드 기능을 사용하려면 `pip install fpdf`를 설치해 주세요.")
+            
+        # TXT 다운로드
+        txt_data = create_txt(data, total_score, st.session_state.translated_lines)
+        st.download_button(
+            label="📄 TXT 리포트 다운로드",
+            data=txt_data,
+            file_name=f"K-Lyric_Report_{datetime.now().strftime('%Y%m%d')}.txt",
+            mime="text/plain
