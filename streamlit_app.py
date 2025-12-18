@@ -21,7 +21,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (사용자가 맘에 들어했던 원코드 디자인 100% 유지)
+# 3. 커스텀 CSS (사용자 원코드 디자인 완벽 유지 + 점수 크기 통일)
 st.markdown("""
     <style>
     .stApp {
@@ -140,7 +140,7 @@ st.markdown("""
     .result-title { font-size: 1.25rem !important; font-weight: 800 !important; margin-bottom: 2px !important; display: block; }
     .result-sub { color: #FFFFFF; font-size: 1.0rem !important; opacity: 0.9; display: block; }
 
-    /* 점수 리포트 가변형 디자인 (레드/블루) */
+    /* 점수 리포트 스타일 (글자 크기 통일) */
     .score-container {
         padding: 40px; border-radius: 20px; text-align: center; margin: 30px 0;
         backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1);
@@ -155,12 +155,12 @@ st.markdown("""
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         margin-bottom: 5px !important;
     }
-    .score-number { 
-        font-size: 5.5rem !important; font-weight: 900 !important; line-height: 1; margin: 15px 0 !important;
+    .score-number-full { 
+        font-size: 6rem !important; font-weight: 900 !important; line-height: 1; margin: 15px 0 !important;
+        letter-spacing: -2px;
     }
-    .score-number-fail { background: linear-gradient(135deg, #ff4b4b 0%, #ff9a9e 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .score-number-pass { background: linear-gradient(135deg, #7d8dec 0%, #4a5fcc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .score-total-base { font-size: 2rem; color: rgba(255,255,255,0.3); vertical-align: middle; margin-left: 10px; }
+    .score-color-fail { background: linear-gradient(135deg, #ff4b4b 0%, #ff9a9e 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .score-color-pass { background: linear-gradient(135deg, #7d8dec 0%, #4a5fcc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -287,17 +287,17 @@ if st.session_state.analyzed_data:
         else: all_answered = False
         user_results.append({"q": q_text, "user": ans, "correct": q_ans})
 
-    # --- 퀴즈 완료 시 (100점 만점 기준 점수 표시) ---
+    # --- 퀴즈 완료 시 (글자 크기 통일 및 점수별 가변 디자인) ---
     if all_answered:
         st.divider()
         score_class = "score-pass" if total_score >= 51 else "score-fail"
-        num_class = "score-number-pass" if total_score >= 51 else "score-number-fail"
+        color_class = "score-color-pass" if total_score >= 51 else "score-color-fail"
         status_text = "🏆 가사 분석의 신이시군요!" if total_score >= 51 else "🧐 복습 후 리포트를 확인해 보세요."
         
         st.markdown(f'''
             <div class="score-container {score_class}">
                 <div class="score-title-text">YOUR LEARNING SCORE</div>
-                <div class="score-number {num_class}">{total_score}<span class="score-total-base">/ 100</span></div>
+                <div class="score-number-full {color_class}">{total_score} / 100</div>
                 <div class="score-status">{status_text}</div>
             </div>
         ''', unsafe_allow_html=True)
