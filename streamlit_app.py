@@ -22,7 +22,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (딥 퍼플 컬러 테마 적용)
+# 3. 커스텀 CSS (채도 맞춤형 컬러 업데이트)
 st.markdown("""
     <style>
     .stApp {
@@ -86,8 +86,6 @@ st.markdown("""
         animation: fadeInUp 0.25s ease-out forwards; margin-bottom: 25px;
     }
     .correct-box { background: rgba(74, 95, 204, 0.1); border-color: #4a5fcc; }
-    
-    /* 🔥 [수정] 오답 박스 컬러: 울트라 바이올렛 (9D50BB) */
     .wrong-box { background: rgba(157, 80, 187, 0.05); border-color: rgba(157, 80, 187, 0.5); }
     .result-title { font-size: 1.25rem !important; font-weight: 800 !important; margin-bottom: 2px !important; display: block; }
 
@@ -96,7 +94,6 @@ st.markdown("""
         backdrop-filter: blur(20px); box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         animation: fadeInUp 0.7s ease-out;
     }
-    /* 🔥 [수정] 미달 시 컨테이너: 딥 퍼플 그라데이션 */
     .score-fail-premium { background: linear-gradient(145deg, rgba(110, 72, 170, 0.1) 0%, rgba(0, 0, 0, 0.6) 100%); border: 1px solid rgba(110, 72, 170, 0.3); }
     .score-pass-premium { background: linear-gradient(145deg, rgba(74, 95, 204, 0.1) 0%, rgba(0, 0, 0, 0.6) 100%); border: 1px solid rgba(74, 95, 204, 0.3); }
     
@@ -109,9 +106,9 @@ st.markdown("""
         margin: 10px 0 20px 0 !important; letter-spacing: -2px; 
     }
     
-    /* 🔥 [수정] 점수 단색: 일렉트릭 퍼플 (AF40FF) */
+    /* 🔥 [수정] 점수 컬러 채도 맞춤: 일렉트릭 사이언 블루(00F3FF) vs 울트라 바이올렛(AF40FF) */
     .score-text-fail { color: #AF40FF !important; -webkit-text-fill-color: #AF40FF !important; background: none !important; }
-    .score-text-pass { color: #7d8dec !important; -webkit-text-fill-color: #7d8dec !important; background: none !important; }
+    .score-text-pass { color: #00F3FF !important; -webkit-text-fill-color: #00F3FF !important; background: none !important; }
     
     .score-status-text { font-size: 1.28rem !important; font-weight: 700; color: white; opacity: 1.0; margin-top: 5px !important; }
 
@@ -119,7 +116,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 이하 원본 파이썬 로직 (100% 유지) ---
+# --- 메인 실행 로직 ---
 st.markdown('<div class="main-title-kr">가사학개론</div>', unsafe_allow_html=True)
 st.markdown('<div class="brand-title-en">K-Lyric 101</div>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">AI 기반 K-POP 가사 데이터 분석 및 언어 학습 엔진</p>', unsafe_allow_html=True)
@@ -219,7 +216,7 @@ if st.session_state.analyzed_data:
     all_answered = True
     
     for i, config in enumerate(quiz_configs):
-        q_key = f"final_quiz_v8_q_{i}"
+        q_key = f"final_quiz_v9_q_{i}"
         st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{config["q"]}</span></div>', unsafe_allow_html=True)
         
         if config["type"] == "pos": opts = ["명사", "동사", "형용사", "부사"]
@@ -234,7 +231,7 @@ if st.session_state.analyzed_data:
             random.shuffle(opts)
             st.session_state[q_key] = opts
             
-        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_f_v8_{q_key}", label_visibility="collapsed")
+        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_f_v9_{q_key}", label_visibility="collapsed")
         st.markdown("</div>", unsafe_allow_html=True)
         
         if ans:
