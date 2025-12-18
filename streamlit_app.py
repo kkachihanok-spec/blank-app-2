@@ -22,7 +22,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (완벽 유지 + 결과창 텍스트 비율 최종 조정)
+# 3. 커스텀 CSS (완벽 유지 + 결과창 상단 마진 및 크기 최종 조정)
 st.markdown("""
     <style>
     .stApp {
@@ -89,9 +89,9 @@ st.markdown("""
     .wrong-box { background: rgba(255, 75, 75, 0.05); border-color: rgba(255, 75, 75, 0.4); }
     .result-title { font-size: 1.25rem !important; font-weight: 800 !important; margin-bottom: 2px !important; display: block; }
 
-    /* 🔥 [수정] 점수 리포트 비율 최종 조정 */
+    /* 🔥 [수정] 점수 리포트 크기 축소 및 점수 마진 조정 */
     .score-container-premium {
-        padding: 60px 40px; border-radius: 24px; text-align: center; margin: 40px 0;
+        padding: 40px 40px; border-radius: 24px; text-align: center; margin: 40px 0;
         backdrop-filter: blur(20px); box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         animation: fadeInUp 0.7s ease-out;
     }
@@ -101,29 +101,31 @@ st.markdown("""
     .score-label-premium { 
         letter-spacing: 10px !important; 
         color: rgba(255,255,255,0.7); 
-        font-size: 1.26rem !important; /* 30% 축소 (기존 1.8rem -> 1.26rem) */
+        font-size: 0.9rem !important; /* 전체적으로 30% 더 축소 */
         font-weight: 400 !important; 
-        margin-bottom: 10px;
+        margin-bottom: 0px !important; /* 마진 제거 */
+        padding-bottom: 0px !important;
     }
     .score-number-premium { 
-        font-size: 5.91rem !important; /* 30% 확대 (기존 4.55rem -> 5.91rem) */
-        font-weight: 900 !important; line-height: 1; margin: 30px 0 !important; letter-spacing: -2px; 
+        font-size: 5.91rem !important; 
+        font-weight: 900 !important; 
+        line-height: 0.9 !important; /* 줄 높이를 줄여 위로 밀착 */
+        margin: 10px 0 20px 0 !important; /* 상단 마진을 10px로 최소화 */
+        letter-spacing: -2px; 
     }
     .score-text-fail { background: linear-gradient(180deg, #ff4d4d, #9e1a1a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .score-text-pass { background: linear-gradient(180deg, #7d8dec, #3a47af); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     
     .score-status-text { 
         font-size: 1.28rem !important; 
-        font-weight: 700; color: white; opacity: 1.0; margin-top: 15px; 
+        font-weight: 700; color: white; opacity: 1.0; margin-top: 5px !important; 
     }
 
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 이하 메인 로직 및 퀴즈 5문항 고정 코드 생략 (이전과 동일) ---
-# (실제 실행을 위해 위 CSS 아래에 이전 답변의 메인 코드를 그대로 붙여넣으시면 됩니다.)
-
+# --- 메인 코드 (5문항 유지) ---
 st.markdown('<div class="main-title-kr">가사학개론</div>', unsafe_allow_html=True)
 st.markdown('<div class="brand-title-en">K-Lyric 101</div>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">AI 기반 K-POP 가사 데이터 분석 및 언어 학습 엔진</p>', unsafe_allow_html=True)
@@ -223,7 +225,7 @@ if st.session_state.analyzed_data:
     all_answered = True
     
     for i, config in enumerate(quiz_configs):
-        q_key = f"final_quiz_v2_q_{i}"
+        q_key = f"final_quiz_v3_q_{i}"
         st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{config["q"]}</span></div>', unsafe_allow_html=True)
         
         if config["type"] == "pos": opts = ["명사", "동사", "형용사", "부사"]
@@ -238,7 +240,7 @@ if st.session_state.analyzed_data:
             random.shuffle(opts)
             st.session_state[q_key] = opts
             
-        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_f_v2_{q_key}", label_visibility="collapsed")
+        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_f_v3_{q_key}", label_visibility="collapsed")
         st.markdown("</div>", unsafe_allow_html=True)
         
         if ans:
