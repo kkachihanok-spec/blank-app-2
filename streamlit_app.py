@@ -6,6 +6,13 @@ import plotly.express as px
 from datetime import datetime
 import random
 
+# --- PDF 라이브러리 체크 ---
+try:
+    from fpdf import FPDF
+    FPDF_AVAILABLE = True
+except ImportError:
+    FPDF_AVAILABLE = False
+
 # 1. 페이지 설정
 st.set_page_config(page_title="K-Lyric 101", layout="wide", page_icon="🎧")
 
@@ -22,7 +29,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (합격 점수 컬러만 #516df4로 변경)
+# 3. 커스텀 CSS (합격 점수 컬러 유지 + 다운로드 버튼 50:50 최적화)
 st.markdown("""
     <style>
     .stApp {
@@ -52,7 +59,22 @@ st.markdown("""
         padding-left: 30px !important; padding-right: 30px !important; align-items: center !important; transition: all 0.2s ease;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
+
+    /* 🔥 다운로드 버튼 가로 꽉 채우기 및 중앙 밀착 설정 */
+    div[data-testid="stHorizontalBlock"] { gap: 0px !important; }
+    [data-testid="column"] { padding-left: 0px !important; padding-right: 0px !important; }
     
+    div.stDownloadButton > button {
+        width: 100% !important;
+        background: rgba(81, 109, 244, 0.1) !important;
+        border: 1px solid rgba(81, 109, 244, 0.4) !important;
+        color: #516df4 !important; font-size: 1.25rem !important; font-weight: 700 !important;
+        padding: 22px 0 !important; transition: all 0.3s ease; margin: 0 !important;
+    }
+    div[data-testid="column"]:first-child div.stDownloadButton > button { border-radius: 12px 0 0 12px !important; }
+    div[data-testid="column"]:last-child div.stDownloadButton > button { border-radius: 0 12px 12px 0 !important; border-left: none !important; }
+    div.stDownloadButton > button:hover { background: rgba(81, 109, 244, 0.2) !important; border-color: #516df4 !important; }
+
     [data-testid="stMetricLabel"] p { font-size: 1.1rem !important; color: #4a5fcc !important; font-weight: 900 !important; margin-bottom: 6px !important; }
     [data-testid="stMetricValue"] div:first-child::before { content: "→ "; color: #8b92b2 !important; font-weight: 700 !important; }
     [data-testid="stMetricValue"] div { font-size: 1.54rem !important; color: #FFFFFF !important; font-weight: 700 !important; }
@@ -97,16 +119,9 @@ st.markdown("""
     .score-fail-premium { background: linear-gradient(145deg, rgba(110, 72, 170, 0.1) 0%, rgba(0, 0, 0, 0.6) 100%); border: 1px solid rgba(110, 72, 170, 0.3); }
     .score-pass-premium { background: linear-gradient(145deg, rgba(74, 95, 204, 0.1) 0%, rgba(0, 0, 0, 0.6) 100%); border: 1px solid rgba(74, 95, 204, 0.3); }
     
-    .score-label-premium { 
-        letter-spacing: 2px !important; color: rgba(255,255,255,0.7); 
-        font-size: 0.9rem !important; font-weight: 400 !important; margin-bottom: 0px !important;
-    }
-    .score-number-premium { 
-        font-size: 5.91rem !important; font-weight: 900 !important; line-height: 0.9 !important; 
-        margin: 10px 0 20px 0 !important; letter-spacing: -2px; 
-    }
+    .score-label-premium { letter-spacing: 2px !important; color: rgba(255,255,255,0.7); font-size: 0.9rem !important; font-weight: 400 !important; margin-bottom: 0px !important; }
+    .score-number-premium { font-size: 5.91rem !important; font-weight: 900 !important; line-height: 0.9 !important; margin: 10px 0 20px 0 !important; letter-spacing: -2px; }
     
-    /* 🔥 [수정] 합격 점수 컬러를 #516df4로 변경 */
     .score-text-fail { color: #AF40FF !important; -webkit-text-fill-color: #AF40FF !important; background: none !important; }
     .score-text-pass { color: #516df4 !important; -webkit-text-fill-color: #516df4 !important; background: none !important; }
     
@@ -115,6 +130,26 @@ st.markdown("""
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
     """, unsafe_allow_html=True)
+
+# --- 유틸리티: 파일 생성 ---
+def create_txt_report(data, score):
+    report = f"K-Lyric 101 Report\nDate: {datetime.now().strftime('%Y-%m-%d %H:%M')}\nScore: {score}/100\n\n"
+    report += "--- Word Analysis ---\n"
+    for idx, row in data['df_counts'].iterrows():
+        report += f"{row['단어']} ({row['품사']}): {row['횟수']} times\n"
+    return report.encode('utf-8-sig') # 한글 깨짐 방지용 sig
+
+def create_pdf_report(data, score):
+    if not FPDF_AVAILABLE: return None
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(200, 10, txt="K-Lyric 101 Analysis Report", ln=True, align='C')
+    pdf.ln(10)
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt=f"Final Learning Score: {score}/100", ln=True)
+    pdf.cell(200, 10, txt=f"Total Words: {len(data['all_words'])}", ln=True)
+    return pdf.output(dest='S').encode('latin-1')
 
 # --- 메인 실행 로직 ---
 st.markdown('<div class="main-title-kr">가사학개론</div>', unsafe_allow_html=True)
@@ -196,7 +231,6 @@ if st.session_state.analyzed_data:
 
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
-    
     top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
     other_pos_df = df_counts[df_counts['품사'] != top_pos]
     second_word = other_pos_df.iloc[0]['단어'] if len(other_pos_df) > 0 else "가사"
@@ -218,22 +252,16 @@ if st.session_state.analyzed_data:
     for i, config in enumerate(quiz_configs):
         q_key = f"final_quiz_v12_q_{i}"
         st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{config["q"]}</span></div>', unsafe_allow_html=True)
-        
         if config["type"] == "pos": opts = ["명사", "동사", "형용사", "부사"]
         elif config["type"] == "count_unique":
-            b = len(df_counts)
-            opts = [f"{b}개", f"{b+3}개", f"{max(0, b-2)}개", f"{b+7}개"]
+            b = len(df_counts); opts = [f"{b}개", f"{b+3}개", f"{max(0, b-2)}개", f"{b+7}개"]
         else:
-            b = len(data['all_words'])
-            opts = [f"{b}개", f"{b+12}개", f"{max(0, b-8)}개", f"{b+4}개"]
+            b = len(data['all_words']); opts = [f"{b}개", f"{b+12}개", f"{max(0, b-8)}개", f"{b+4}개"]
         
         if q_key not in st.session_state:
-            random.shuffle(opts)
-            st.session_state[q_key] = opts
-            
+            random.shuffle(opts); st.session_state[q_key] = opts
         ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_f_v12_{q_key}", label_visibility="collapsed")
         st.markdown("</div>", unsafe_allow_html=True)
-        
         if ans:
             if ans == config["a"]:
                 st.markdown(f'<div class="custom-result-box correct-box"><span class="result-title" style="color:#7d8dec;">🎉 정답입니다!</span></div>', unsafe_allow_html=True)
@@ -246,10 +274,7 @@ if st.session_state.analyzed_data:
         st.divider()
         score_class = "score-pass-premium" if total_score >= 60 else "score-fail-premium"
         text_color_class = "score-text-pass" if total_score >= 60 else "score-text-fail"
-        
-        if total_score <= 20: status_msg = "기초부터 차근차근 시작해봐요!"
-        elif 40 <= total_score <= 60: status_msg = "거의 다 왔어요! 조금만 더 집중해볼까요?"
-        else: status_msg = "완벽한 분석입니다! K-POP 가사 마스터네요!"
+        status_msg = "완벽한 분석입니다! K-POP 가사 마스터네요!" if total_score > 60 else "거의 다 왔어요! 조금만 더 집중해볼까요?"
         
         st.markdown(f'''
             <div class="score-container-premium {score_class}">
@@ -258,3 +283,14 @@ if st.session_state.analyzed_data:
                 <div class="score-status-text">{status_msg}</div>
             </div>
         ''', unsafe_allow_html=True)
+
+        # 🔥 [최종 추가] 중앙 정렬된 50:50 다운로드 버튼 영역
+        col_pdf, col_txt = st.columns(2)
+        with col_pdf:
+            if FPDF_AVAILABLE:
+                pdf_data = create_pdf_report(data, total_score)
+                st.download_button("📥 PDF 리포트 저장", data=pdf_data, file_name="K-Lyric_Report.pdf", mime="application/pdf")
+            else: st.info("PDF 라이브러리가 필요합니다.")
+        with col_txt:
+            txt_data = create_txt_report(data, total_score)
+            st.download_button("📄 TXT 리포트 저장", data=txt_data, file_name="K-Lyric_Report.txt", mime="text/plain")
