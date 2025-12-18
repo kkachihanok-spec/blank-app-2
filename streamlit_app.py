@@ -14,11 +14,11 @@ def get_resources():
 
 okt, translator = get_resources()
 
-# --- 세션 상태 초기화 (페이지 증발 방지) ---
+# --- 세션 상태 초기화 ---
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (기존 스타일 유지 + 퀴즈 박스 세로폭 최소화)
+# 3. 커스텀 CSS (기존 스타일 유지 + 새로운 정답/오답 박스 디자인 추가)
 st.markdown("""
     <style>
     .stApp {
@@ -144,12 +144,11 @@ st.markdown("""
         background: rgba(45, 53, 72, 0.15);
         border: 1px solid rgba(74, 95, 204, 0.3);
         border-radius: 12px;
-        padding: 12px 20px; /* 상하 패딩 대폭 축소 */
+        padding: 12px 20px;
         margin-top: 5px;
         margin-bottom: 25px; 
     }
     
-    /* 라디오 버튼 여백 극한으로 압축 */
     div[data-testid="stRadio"] > div {
         gap: 0px !important;
         margin-top: -12px !important;
@@ -159,9 +158,31 @@ st.markdown("""
     div[data-testid="stRadio"] label {
         color: white !important;
         font-size: 0.95rem !important;
-        padding: 1px 0px !important; /* 선택지 간 세로 여백 최소화 */
+        padding: 1px 0px !important;
     }
-    
+
+    /* --- 나만의 축하 메시지 스퀘어 박스 --- */
+    .custom-result-box {
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        text-align: center;
+        animation: fadeInUp 0.5s ease-out;
+    }
+    .correct-box {
+        background: rgba(74, 95, 204, 0.1);
+        border-color: #4a5fcc;
+        box-shadow: 0 0 15px rgba(74, 95, 204, 0.3);
+    }
+    .wrong-box {
+        background: rgba(255, 75, 75, 0.05);
+        border-color: rgba(255, 75, 75, 0.4);
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
     .lyrics-card::-webkit-scrollbar { width: 6px; }
     .lyrics-card::-webkit-scrollbar-thumb { background: #2a3f88; border-radius: 10px; }
     </style>
@@ -208,7 +229,7 @@ if st.session_state.analyzed_data:
     st.divider()
     st.markdown('<div class="result-header" style="font-size:1.7rem; font-weight:800; color:white; margin-bottom:25px;">📊 분석 결과</div>', unsafe_allow_html=True)
 
-    # 1. 요약 대시보드 (완벽 유지)
+    # 1. 요약 대시보드
     m1, m2, m3, m4 = st.columns(4)
     w_arrow = "→ " 
     m1.metric("전체 단어", f"{w_arrow}{len(all_words)}")
@@ -216,7 +237,7 @@ if st.session_state.analyzed_data:
     m3.metric("최빈 단어", f"{w_arrow}{df_counts.iloc[0]['단어']}")
     m4.metric("주요 품사", f"{w_arrow}{df_counts.iloc[0]['품사']}")
 
-    # 2. 번역 및 데이터 섹션 (완벽 유지)
+    # 2. 번역 및 데이터 섹션
     st.divider()
     c_l, c_r = st.columns([1.2, 1])
     with c_l:
@@ -239,7 +260,7 @@ if st.session_state.analyzed_data:
         df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
         st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True, use_container_width=True, height=520)
 
-    # 3. 그래프 (완벽 유지)
+    # 3. 그래프
     st.divider()
     st.markdown("### 📈 단어 빈도 시각화")
     top_20 = df_counts.head(20)
@@ -247,7 +268,7 @@ if st.session_state.analyzed_data:
     fig.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', xaxis=dict(showgrid=False, title=""), yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)', title="빈도수"))
     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-    # 4. 문법 학습 섹션 (완벽 유지)
+    # 4. 문법 학습 섹션
     st.divider()
     st.markdown("### 📚 가사 속 문법 학습")
     pos_info = {"명사": {"icon": "💎", "desc": "사물이나 개념의 이름입니다."}, "동사": {"icon": "⚡", "desc": "동작이나 움직임을 나타냅니다."}, "형용사": {"icon": "🎨", "desc": "상태나 성질을 묘사합니다."}, "부사": {"icon": "🎬", "desc": "행동을 더 세밀하게 꾸며줍니다."}}
@@ -260,7 +281,7 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # 5. [수정] 컴팩트 퀴즈 박스 (높이 최적화)
+    # 5. 퀴즈 박스 및 축하 메시지
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     
@@ -278,14 +299,24 @@ if st.session_state.analyzed_data:
     
     user_choice = st.radio(
         "정답 선택", ["명사", "동사", "형용사", "부사"], 
-        index=None, key="quiz_compact_final", label_visibility="collapsed"
+        index=None, key="quiz_snow_version", label_visibility="collapsed"
     )
     
     st.markdown("</div>", unsafe_allow_html=True)
     
     if user_choice:
         if user_choice == top_pos:
-            st.success(f"정답입니다! 🎉 '{top_word}'은(는) **{top_pos}**입니다.")
-            st.balloons()
+            st.snow() # 눈 내리는 효과
+            st.markdown(f"""
+                <div class="custom-result-box correct-box">
+                    <span style="font-size: 1.5rem; font-weight: 800; color: #7d8dec;">🎉 정답입니다!</span><br>
+                    <span style="color: white; font-size: 1.1rem;">'{top_word}'은(는) 완벽한 <b>{top_pos}</b>입니다.</span>
+                </div>
+            """, unsafe_allow_html=True)
         else:
-            st.error("아쉬워요! 위쪽 분석 데이터를 다시 확인해 보세요. 🧐")
+            st.markdown(f"""
+                <div class="custom-result-box wrong-box">
+                    <span style="font-size: 1.3rem; font-weight: 700; color: #ff4b4b;">아쉬워요! 🧐</span><br>
+                    <span style="color: #8b92b2; font-size: 1rem;">위쪽 분석 데이터를 다시 한 번 확인해 볼까요?</span>
+                </div>
+            """, unsafe_allow_html=True)
