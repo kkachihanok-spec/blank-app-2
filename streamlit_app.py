@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (원본 디자인 100% 유지 + 퀴즈 결과 텍스트 고정)
+# 3. 커스텀 CSS (원본 디자인 유지 + 메트릭 수치 정밀 조정)
 st.markdown("""
     <style>
     .stApp {
@@ -95,9 +95,18 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     
-    /* [원본 유지] 메트릭 대시보드 */
-    [data-testid="stMetricLabel"] p { font-size: 1.6rem !important; color: #FFFFFF !important; font-weight: 900 !important; margin-bottom: 8px !important; }
-    [data-testid="stMetricValue"] { font-size: 1.67rem !important; color: #4a5fcc !important; font-weight: 700 !important; }
+    /* --- [수정] 메트릭 대시보드 폰트 크기 조정 --- */
+    [data-testid="stMetricLabel"] p { 
+        font-size: 0.96rem !important; /* 기존 1.6rem에서 40% 축소 */
+        color: #8b92b2 !important;     /* 제목은 약간 차분하게 변경 */
+        font-weight: 700 !important; 
+        margin-bottom: 4px !important; 
+    }
+    [data-testid="stMetricValue"] { 
+        font-size: 1.92rem !important; /* 기존 1.67rem에서 15% 확대 */
+        color: #4a5fcc !important; 
+        font-weight: 800 !important; 
+    }
 
     /* [원본 유지] 카드 및 분석 섹션 */
     .lyrics-card { border-left: 4px solid #4a5fcc; padding: 24px; background: rgba(45, 53, 72, 0.25); border-radius: 0 12px 12px 0; border: 1px solid rgba(45, 53, 72, 0.5); height: 520px; overflow-y: auto; }
@@ -122,7 +131,7 @@ st.markdown("""
     [data-testid="stWidgetLabel"] { display: none; }
     div[data-testid="stRadio"] label { color: white !important; font-size: 0.95rem !important; }
 
-    /* [수정] 퀴즈 결과창 텍스트 크기 고정 */
+    /* [원본 유지] 퀴즈 결과창 텍스트 크기 고정 */
     .custom-result-box {
         padding: 12px 20px; 
         border-radius: 8px;
@@ -164,16 +173,15 @@ if analyze_btn:
                 st.session_state.analyzed_data = { 'all_words': all_words, 'df_counts': df_counts, 'lyrics_input': lyrics_input }
     else: st.error("가사를 입력해 주세요.")
 
-# --- 출력 섹션 (전체 로직 포함) ---
+# --- 출력 섹션 ---
 if st.session_state.analyzed_data:
     data = st.session_state.analyzed_data
     df_counts, all_words, saved_lyrics = data['df_counts'], data['all_words'], data['lyrics_input']
 
     st.divider()
-    # [원본 디자인 복구] 분석 결과 타이틀
     st.markdown('<div style="font-size:1.7rem; font-weight:800; color:white; margin-bottom:25px;">📊 분석 결과</div>', unsafe_allow_html=True)
 
-    # 1. 요약 대시보드
+    # 1. 요약 대시보드 (수정된 폰트 크기 적용됨)
     m1, m2, m3, m4 = st.columns(4)
     w_arrow = "→ " 
     m1.metric("전체 단어", f"{w_arrow}{len(all_words)}")
@@ -231,26 +239,16 @@ if st.session_state.analyzed_data:
     second_pos = other_pos_df.iloc[0]['품사'] if not other_pos_df.empty else "명사"
     unique_count = len(df_counts)
 
-    # Q1
-    st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q1.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">가장 많이 사용된 \'{top_word}\'의 품사는?</span></div>', unsafe_allow_html=True)
-    ans1 = st.radio("Q1", ["명사", "동사", "형용사", "부사"], index=None, key="uq1", label_visibility="collapsed")
-    st.markdown("</div>", unsafe_allow_html=True)
-    if ans1:
-        if ans1 == top_pos: st.markdown(f'<div class="custom-result-box correct-box"><span class="result-title" style="color:#7d8dec;">🎉 정답입니다!</span><span class="result-sub">\'{top_word}\'은(는) 완벽한 <b>{top_pos}</b>입니다.</span></div>', unsafe_allow_html=True)
-        else: st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#ff4b4b;">아쉬워요! 🧐</span><span class="result-sub">위쪽 분석 데이터를 다시 확인해 보세요.</span></div>', unsafe_allow_html=True)
-
-    # Q2
-    st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q2.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">단어 \'{second_word}\'의 품사는 무엇일까요?</span></div>', unsafe_allow_html=True)
-    ans2 = st.radio("Q2", ["명사", "동사", "형용사", "부사"], index=None, key="uq2", label_visibility="collapsed")
-    st.markdown("</div>", unsafe_allow_html=True)
-    if ans2:
-        if ans2 == second_pos: st.markdown(f'<div class="custom-result-box correct-box"><span class="result-title" style="color:#7d8dec;">🎉 정답입니다!</span><span class="result-sub">\'{second_word}\'은(는) <b>{second_pos}</b>가 맞습니다.</span></div>', unsafe_allow_html=True)
-        else: st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#ff4b4b;">아쉬워요! 🧐</span><span class="result-sub">단어의 의미를 다시 한번 생각해 보세요.</span></div>', unsafe_allow_html=True)
-
-    # Q3
-    st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q3.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">이 가사에는 총 몇 개의 고유 단어가 사용되었나요?</span></div>', unsafe_allow_html=True)
-    ans3 = st.radio("Q3", [f"{unique_count}개", f"{unique_count+3}개", f"{max(0, unique_count-2)}개", "0개"], index=None, key="uq3", label_visibility="collapsed")
-    st.markdown("</div>", unsafe_allow_html=True)
-    if ans3:
-        if ans3 == f"{unique_count}개": st.markdown(f'<div class="custom-result-box correct-box"><span class="result-title" style="color:#7d8dec;">🎉 정답입니다!</span><span class="result-sub">총 <b>{unique_count}개</b>의 고유 단어를 모두 찾아내셨군요!</span></div>', unsafe_allow_html=True)
-        else: st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#ff4b4b;">아쉬워요! 🧐</span><span class="result-sub">대시보드의 \'고유 단어\' 수치를 확인해 보세요.</span></div>', unsafe_allow_html=True)
+    # Q1 ~ Q3 (레이아웃 동일)
+    for q_idx, (q_text, q_ans, q_key) in enumerate([
+        (f"가장 많이 사용된 '{top_word}'의 품사는?", top_pos, "uq1"),
+        (f"단어 '{second_word}'의 품사는 무엇일까요?", second_pos, "uq2"),
+        (f"이 가사에는 총 몇 개의 고유 단어가 사용되었나요?", f"{unique_count}개", "uq3")
+    ]):
+        st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{q_idx+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{q_text}</span></div>', unsafe_allow_html=True)
+        options = ["명사", "동사", "형용사", "부사"] if q_idx < 2 else [f"{unique_count}개", f"{unique_count+3}개", f"{max(0, unique_count-2)}개", "0개"]
+        ans = st.radio(f"Q{q_idx+1}", options, index=None, key=q_key, label_visibility="collapsed")
+        st.markdown("</div>", unsafe_allow_html=True)
+        if ans:
+            if ans == q_ans: st.markdown(f'<div class="custom-result-box correct-box"><span class="result-title" style="color:#7d8dec;">🎉 정답입니다!</span><span class="result-sub">정답을 정확하게 맞히셨습니다!</span></div>', unsafe_allow_html=True)
+            else: st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#ff4b4b;">아쉬워요! 🧐</span><span class="result-sub">위쪽 분석 데이터를 다시 확인해 보세요.</span></div>', unsafe_allow_html=True)
