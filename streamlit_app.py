@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (기존 스타일 유지 + 정답 애니메이션 가속 및 눈송이 보정)
+# 3. 커스텀 CSS (기존 스타일 유지 + 눈 효과 제거 및 결과 박스 크기 통일)
 st.markdown("""
     <style>
     .stApp {
@@ -160,44 +160,38 @@ st.markdown("""
         padding: 1px 0px !important;
     }
 
-    /* 정답/오답 스퀘어 박스 */
+    /* --- 결과 박스 디자인 통일 (크기 및 애니메이션) --- */
     .custom-result-box {
-        padding: 20px;
+        padding: 22px;
         border-radius: 8px;
         border: 1px solid transparent;
         text-align: center;
-        animation: fadeInUp 0.25s ease-out; /* 0.5s -> 0.25s 속도 2배 가속 */
+        min-height: 100px; /* 박스 세로 크기 통일 */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        animation: fadeInUp 0.25s ease-out forwards;
     }
     .correct-box {
         background: rgba(74, 95, 204, 0.1);
         border-color: #4a5fcc;
-        box-shadow: 0 0 15px rgba(74, 95, 204, 0.3);
+        box-shadow: 0 0 15px rgba(74, 95, 204, 0.2);
     }
     .wrong-box {
         background: rgba(255, 75, 75, 0.05);
         border-color: rgba(255, 75, 75, 0.4);
     }
 
-    /* --- 눈송이 애니메이션 (보정 버전) --- */
-    .snowflake {
-      color: #fff;
-      position: fixed;
-      top: -10px;
-      z-index: 999999;
-      user-select: none;
-      pointer-events: none;
-      animation-name: snowflakes-fall, snowflakes-shake;
-      animation-duration: 8s, 3s;
-      animation-timing-function: linear, ease-in-out;
-      animation-iteration-count: infinite, infinite;
+    .result-title {
+        font-size: 1.5rem !important; /* 텍스트 크기 통일 */
+        font-weight: 800 !important;
+        margin-bottom: 8px;
+        display: block;
     }
-    @keyframes snowflakes-fall {
-      0% { top: -10px; }
-      100% { top: 100vh; }
-    }
-    @keyframes snowflakes-shake {
-      0%, 100% { transform: translateX(0); }
-      50% { transform: translateX(50px); }
+
+    .result-sub {
+        color: white;
+        font-size: 1.05rem;
     }
 
     @keyframes fadeInUp {
@@ -303,7 +297,7 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # 5. 퀴즈 박스 및 축하 메시지
+    # 5. 퀴즈 박스 및 축하 메시지 (눈 효과 제거 및 크기 일치 버전)
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     
@@ -321,32 +315,23 @@ if st.session_state.analyzed_data:
     
     user_choice = st.radio(
         "정답 선택", ["명사", "동사", "형용사", "부사"], 
-        index=None, key="quiz_final_fixed", label_visibility="collapsed"
+        index=None, key="quiz_final_no_snow", label_visibility="collapsed"
     )
     
     st.markdown("</div>", unsafe_allow_html=True)
     
     if user_choice:
         if user_choice == top_pos:
-            # --- 보정된 눈송이 생성 코드 ---
-            snow_particles = ""
-            for i in range(25): # 입자 수 증가
-                left_pos = i * 4 # 간격 조정
-                delay = i * 0.3
-                size = 2 + (i % 3) # 아주 작은 크기 (2px ~ 4px)
-                snow_particles += f'<div class="snowflake" style="left:{left_pos}%; animation-delay:{delay}s; font-size:{size}px;">●</div>'
-            st.markdown(snow_particles, unsafe_allow_html=True)
-            
             st.markdown(f"""
                 <div class="custom-result-box correct-box">
-                    <span style="font-size: 1.5rem; font-weight: 800; color: #7d8dec;">🎉 정답입니다!</span><br>
-                    <span style="color: white; font-size: 1.1rem;">'{top_word}'은(는) 완벽한 <b>{top_pos}</b>입니다.</span>
+                    <span class="result-title" style="color: #7d8dec;">🎉 정답입니다!</span>
+                    <span class="result-sub">'{top_word}'은(는) 완벽한 <b>{top_pos}</b>입니다.</span>
                 </div>
             """, unsafe_allow_html=True)
         else:
             st.markdown(f"""
                 <div class="custom-result-box wrong-box">
-                    <span style="font-size: 1.3rem; font-weight: 700; color: #ff4b4b;">아쉬워요! 🧐</span><br>
-                    <span style="color: #8b92b2; font-size: 1rem;">위쪽 분석 데이터를 다시 한 번 확인해 볼까요?</span>
+                    <span class="result-title" style="color: #ff4b4b;">아쉬워요! 🧐</span>
+                    <span class="result-sub">위쪽 분석 데이터를 다시 한 번 확인해 볼까요?</span>
                 </div>
             """, unsafe_allow_html=True)
