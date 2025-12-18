@@ -6,7 +6,7 @@ import plotly.express as px
 from datetime import datetime
 
 # 1. 페이지 설정
-st.set_page_config(page_title="K-Lyric 101", layout="wide", page_icon="🎧")
+st.set_set_page_config(page_title="K-Lyric 101", layout="wide", page_icon="🎧")
 
 # 2. 리소스 로드
 @st.cache_resource
@@ -21,7 +21,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (사용자 지정 디자인 완전 복구)
+# 3. 커스텀 CSS (원래 디자인 완벽 복구)
 st.markdown("""
     <style>
     .stApp {
@@ -116,7 +116,6 @@ st.markdown("""
     .card-word { font-weight: 700 !important; color: #FFFFFF; font-size: 1.1rem; } 
     .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } 
 
-    /* 퀴즈 박스 디자인 복구 */
     .quiz-outer-box {
         background: rgba(45, 53, 72, 0.15);
         border: 1px solid rgba(74, 95, 204, 0.3);
@@ -129,7 +128,6 @@ st.markdown("""
     [data-testid="stWidgetLabel"] { display: none; }
     div[data-testid="stRadio"] label { color: white !important; font-size: 0.95rem !important; }
 
-    /* 결과 박스 디자인 복구 */
     .custom-result-box {
         padding: 12px 20px; 
         border-radius: 8px;
@@ -146,7 +144,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 메인 로직 시작 ---
+# --- 메인 코드 ---
 st.markdown('<div class="main-title-kr">가사학개론</div>', unsafe_allow_html=True)
 st.markdown('<div class="brand-title-en">K-Lyric 101</div>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">AI 기반 K-POP 가사 데이터 분석 및 언어 학습 엔진</p>', unsafe_allow_html=True)
@@ -192,7 +190,6 @@ if st.session_state.analyzed_data:
     m3.metric("최빈 단어", f"{df_counts.iloc[0]['단어']}")
     m4.metric("주요 품사", f"{df_counts.iloc[0]['품사']}")
 
-    # 1. 번역 및 데이터
     st.divider()
     c_l, c_r = st.columns([1.2, 1])
     with c_l:
@@ -207,7 +204,6 @@ if st.session_state.analyzed_data:
         df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
         st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True, use_container_width=True, height=520)
 
-    # 2. 그래프
     st.divider()
     st.markdown("### 📈 단어 빈도 시각화")
     top_20 = df_counts.head(20)
@@ -215,7 +211,6 @@ if st.session_state.analyzed_data:
     fig.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     st.plotly_chart(fig, use_container_width=True)
 
-    # 3. 문법 학습 카드
     st.divider()
     st.markdown("### 📚 가사 속 문법 학습")
     pos_info = {"명사": {"icon": "💎", "desc": "사물이나 개념의 이름입니다."}, "동사": {"icon": "⚡", "desc": "동작이나 움직임을 나타냅니다."}, "형용사": {"icon": "🎨", "desc": "상태나 성질을 묘사합니다."}, "부사": {"icon": "🎬", "desc": "행동을 더 세밀하게 꾸며줍니다."}}
@@ -228,7 +223,7 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # 4. 퀴즈 섹션 (박스 및 결과 멘트 디자인 완전 복구)
+    # --- 퀴즈 섹션 (선택 전 정답 노출 방지 로직 적용) ---
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
@@ -242,20 +237,22 @@ if st.session_state.analyzed_data:
         (f"이 가사에는 총 몇 개의 고유 단어가 사용되었나요?", f"{len(df_counts)}개", "uq3")
     ]
     
-    user_answers = []
+    user_results_for_report = []
     for i, (q_text, q_ans, q_key) in enumerate(quiz_data):
         st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{q_text}</span></div>', unsafe_allow_html=True)
         opts = ["명사", "동사", "형용사", "부사"] if i < 2 else [f"{len(df_counts)}개", f"{len(df_counts)+5}개", f"{max(0, len(df_counts)-3)}개", "100개"]
         ans = st.radio(f"Radio_{q_key}", opts, index=None, key=q_key, label_visibility="collapsed")
-        user_answers.append({"q": q_text, "user": ans, "correct": q_ans})
         st.markdown("</div>", unsafe_allow_html=True)
+        
+        # 선택했을 때만 결과 박스 출력
         if ans:
             if ans == q_ans:
                 st.markdown(f'<div class="custom-result-box correct-box"><span class="result-title" style="color:#7d8dec;">🎉 정답입니다!</span><span class="result-sub">분석 결과와 정확히 일치합니다.</span></div>', unsafe_allow_html=True)
             else:
                 st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#ff4b4b;">아쉬워요! 🧐</span><span class="result-sub">위쪽 분석 데이터를 다시 확인해 보세요.</span></div>', unsafe_allow_html=True)
+        user_results_for_report.append({"q": q_text, "user": ans, "correct": q_ans})
 
-    # 5. [신규: 학습 완벽 총정리 파일]
+    # --- 리포트 다운로드 ---
     st.divider()
     st.markdown("### 📥 나의 학습 완벽 총정리")
     full_report = f"==== K-LYRIC 101 학습 총정리 리포트 ====\n일시: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n"
@@ -264,7 +261,7 @@ if st.session_state.analyzed_data:
         full_report += f"KR: {item['kr']}\nEN: {item['en']}\n"
     full_report += f"\n[2. 가사 통계]\n- 전체 단어: {len(data['all_words'])}\n- 고유 단어: {len(df_counts)}\n- 최빈 단어: {top_word}({top_pos})\n"
     full_report += "\n[3. 퀴즈 결과 분석]\n"
-    for i, ua in enumerate(user_answers):
+    for i, ua in enumerate(user_results_for_report):
         res = "미응답" if not ua['user'] else ("정답" if ua['user'] == ua['correct'] else f"오답 (선택: {ua['user']})")
         full_report += f"Q{i+1}. {ua['q']}\n   결과: {res} / 정답: {ua['correct']}\n"
     full_report += "\n[4. 핵심 단어장 (TOP 10)]\n"
