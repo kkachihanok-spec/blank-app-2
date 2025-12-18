@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (기존 스타일 완벽 유지 + 버튼 그라데이션 추가)
+# 3. 커스텀 CSS (기존 스타일 완벽 유지 + 지정된 퍼플 그라데이션 적용)
 st.markdown("""
     <style>
     .stApp {
@@ -62,9 +62,9 @@ st.markdown("""
         border: 1px solid #2d3548 !important;
     }
 
-    /* --- [수정] 버튼 가로 그라데이션 (네이비 to 퍼플) --- */
+    /* --- [수정] 버튼 그라데이션 (요청하신 #8869ac 퍼플톤 적용) --- */
     .stButton>button {
-        background: linear-gradient(to right, #2a3f88 0%, #5b6ec1 50%, #7d8dec 100%) !important;
+        background: linear-gradient(to right, #8869ac) !important;
         color: #FFFFFF !important;
         font-weight: 700;
         width: auto !important;
@@ -79,13 +79,13 @@ st.markdown("""
         padding-right: 30px !important;
         align-items: center !important;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(42, 63, 136, 0.3);
+        box-shadow: 0 4px 15px rgba(136, 105, 172, 0.3);
     }
     
     .stButton>button:hover {
-        background: linear-gradient(to right, #3a4fa8 0%, #6d82d9 50%, #8e9ef2 100%) !important;
+        background: linear-gradient(to right, #9d7fc2) !important; /* 호버 시 살짝 밝게 */
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(125, 141, 236, 0.4);
+        box-shadow: 0 6px 20px rgba(136, 105, 172, 0.5);
     }
 
     [data-testid="stMetricLabel"] p { 
@@ -205,6 +205,8 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+# --- 이하 코드 로직 (완벽하게 유지됨) ---
+
 # --- 헤더 ---
 st.markdown('<h1 class="main-product-title">&lt;K-POP INSIGHT&gt;</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">가사 데이터 분석 및 맞춤형 문법 엔진</p>', unsafe_allow_html=True)
@@ -298,7 +300,7 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # 5. 퀴즈 박스 및 결과 (컴팩트 & 그라데이션 버튼 대응)
+    # 5. 퀴즈 박스 및 결과
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     
@@ -316,7 +318,7 @@ if st.session_state.analyzed_data:
     
     user_choice = st.radio(
         "정답 선택", ["명사", "동사", "형용사", "부사"], 
-        index=None, key="quiz_final_gradient_button", label_visibility="collapsed"
+        index=None, key="quiz_final_compact_aligned", label_visibility="collapsed"
     )
     
     st.markdown("</div>", unsafe_allow_html=True)
