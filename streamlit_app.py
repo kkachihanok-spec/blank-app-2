@@ -21,7 +21,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (초기 마진 및 디자인 유지)
+# 3. 커스텀 CSS (초기 여유로운 마진 및 기존 디자인 유지)
 st.markdown("""
     <style>
     .stApp {
@@ -136,19 +136,20 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 헤더 ---
+# --- 헤더 섹션 ---
 st.markdown('<div class="main-title-kr">가사학개론</div>', unsafe_allow_html=True)
 st.markdown('<div class="brand-title-en">K-Lyric 101</div>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">AI 기반 K-POP 가사 데이터 분석 및 언어 학습 엔진</p>', unsafe_allow_html=True)
 st.divider()
 
-# --- 입력 ---
+# --- 입력 섹션 ---
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
 
 col_btn, _ = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석을 실행해줘!")
 
+# --- 분석 로직 ---
 if analyze_btn:
     if lyrics_input.strip():
         with st.spinner('데이터 분석 중...'):
@@ -158,7 +159,6 @@ if analyze_btn:
             df_all = pd.DataFrame(all_words)
             df_counts = df_all.groupby(['단어', '품사']).size().reset_index(name='횟수').sort_values(by='횟수', ascending=False)
             
-            # 가사 번역 미리 수행 및 저장
             lines = [line.strip() for line in lyrics_input.split('\n') if line.strip()]
             translated_list = []
             for line in lines:
@@ -168,12 +168,15 @@ if analyze_btn:
             
             st.session_state.analyzed_data = {'all_words': all_words, 'df_counts': df_counts, 'lyrics_input': lyrics_input}
             st.session_state.translated_lines = translated_list
+    else:
+        st.error("가사를 입력해 주세요.")
 
 # --- 출력 섹션 ---
 if st.session_state.analyzed_data:
     data = st.session_state.analyzed_data
     df_counts = data['df_counts']
     
+    # 1. 분석 결과 헤더 및 요약
     st.divider()
     st.markdown('<div style="font-size:1.7rem; font-weight:800; color:white; margin-bottom:25px;">📊 분석 결과</div>', unsafe_allow_html=True)
 
@@ -183,7 +186,7 @@ if st.session_state.analyzed_data:
     m3.metric("최빈 단어", f"{df_counts.iloc[0]['단어']}")
     m4.metric("주요 품사", f"{df_counts.iloc[0]['품사']}")
 
-    # 1. 번역 및 데이터
+    # 2. 가사 번역 및 데이터 테이블
     st.divider()
     c_l, c_r = st.columns([1.2, 1])
     with c_l:
@@ -198,7 +201,28 @@ if st.session_state.analyzed_data:
         df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
         st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True, use_container_width=True, height=520)
 
-    # 2. 퀴즈 섹션
+    # 3. 빈도 시각화 그래프 (원코드 복구)
+    st.divider()
+    st.markdown("### 📈 단어 빈도 시각화")
+    top_20 = df_counts.head(20)
+    fig = px.bar(top_20, x='단어', y='횟수', color='품사', color_discrete_map={'명사': '#7d8dec', '동사': '#4a5fcc', '형용사': '#2a3f88', '부사': '#8b92b2'}, template='plotly_dark')
+    fig.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+    st.plotly_chart(fig, use_container_width=True)
+
+    # 4. 문법 학습 카드 (원코드 복구)
+    st.divider()
+    st.markdown("### 📚 가사 속 문법 학습")
+    pos_info = {"명사": {"icon": "💎", "desc": "사물이나 개념의 이름입니다."}, "동사": {"icon": "⚡", "desc": "동작이나 움직임을 나타냅니다."}, "형용사": {"icon": "🎨", "desc": "상태나 성질을 묘사합니다."}, "부사": {"icon": "🎬", "desc": "행동을 더 세밀하게 꾸며줍니다."}}
+    p1, p2 = st.columns(2)
+    for i, (name, info) in enumerate(pos_info.items()):
+        target_col = p1 if i < 2 else p2
+        with target_col:
+            spec_df = df_counts[df_counts['품사'] == name]
+            if not spec_df.empty:
+                top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
+                st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
+
+    # 5. 퀴즈 섹션 (3문항 유지)
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
@@ -223,25 +247,21 @@ if st.session_state.analyzed_data:
             st.markdown(f'<div class="custom-result-box {status}">결과: {"정답" if ans == q_ans else "오답"}</div>', unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # 3. [완벽 총정리 리포트 다운로드]
+    # 6. [완벽 총정리 리포트 다운로드]
     st.divider()
     st.markdown("### 📥 나의 학습 완벽 총정리")
     
-    # 리포트 텍스트 구성
     full_report = f"==== K-LYRIC 101 학습 총정리 리포트 ====\n일시: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n"
     full_report += "[1. 가사 대조 번역본]\n"
     for item in st.session_state.translated_lines:
         full_report += f"KR: {item['kr']}\nEN: {item['en']}\n"
-    
     full_report += f"\n[2. 가사 통계]\n- 전체 단어: {len(data['all_words'])}\n- 고유 단어: {len(df_counts)}\n- 최빈 단어: {top_word}({top_pos})\n"
-    
     full_report += "\n[3. 퀴즈 결과 분석]\n"
     for i, ua in enumerate(user_answers):
         res = "미응답" if not ua['user'] else ("정답" if ua['user'] == ua['correct'] else f"오답 (선택: {ua['user']})")
         full_report += f"Q{i+1}. {ua['q']}\n   결과: {res} / 정답: {ua['correct']}\n"
-        
     full_report += "\n[4. 핵심 단어장 (TOP 10)]\n"
     for idx, row in df_counts.head(10).iterrows():
         full_report += f"- {row['단어']} ({row['품사']}): {row['횟수']}회\n"
         
-    st.download_button(label="✨ 오늘 공부한 내용 총정리 파일 저장하기", data=full_report, file_name=f"K-Lyric_Complete_Report_{datetime.now().strftime('%m%d')}.txt", mime='text/plain')
+    st.download_button(label="✨ 오늘 공부한 모든 내용 저장하기", data=full_report, file_name=f"K-Lyric_Complete_Study_{datetime.now().strftime('%m%d')}.txt", mime='text/plain')
