@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (기존 스타일 유지 + 눈 효과 제거 및 결과 박스 크기 통일)
+# 3. 커스텀 CSS (기존 스타일 유지 + 결과 박스 컴팩트 왼쪽 정렬 수정)
 st.markdown("""
     <style>
     .stApp {
@@ -160,13 +160,12 @@ st.markdown("""
         padding: 1px 0px !important;
     }
 
-    /* --- 결과 박스 디자인 통일 (크기 및 애니메이션) --- */
+    /* --- 수정된 결과 박스 스타일: 왼쪽 정렬 및 높이 최소화 --- */
     .custom-result-box {
-        padding: 22px;
+        padding: 12px 20px; /* 패딩 축소 */
         border-radius: 8px;
         border: 1px solid transparent;
-        text-align: center;
-        min-height: 100px; /* 박스 세로 크기 통일 */
+        text-align: left; /* 왼쪽 정렬 */
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -175,7 +174,6 @@ st.markdown("""
     .correct-box {
         background: rgba(74, 95, 204, 0.1);
         border-color: #4a5fcc;
-        box-shadow: 0 0 15px rgba(74, 95, 204, 0.2);
     }
     .wrong-box {
         background: rgba(255, 75, 75, 0.05);
@@ -183,19 +181,20 @@ st.markdown("""
     }
 
     .result-title {
-        font-size: 1.5rem !important; /* 텍스트 크기 통일 */
+        font-size: 1.25rem !important; 
         font-weight: 800 !important;
-        margin-bottom: 8px;
+        margin-bottom: 2px !important; /* 마진 최소화 */
         display: block;
     }
 
     .result-sub {
-        color: white;
-        font-size: 1.05rem;
+        color: #FFFFFF;
+        font-size: 1.0rem;
+        opacity: 0.9;
     }
 
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(15px); }
+        from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
@@ -297,7 +296,7 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # 5. 퀴즈 박스 및 축하 메시지 (눈 효과 제거 및 크기 일치 버전)
+    # 5. 퀴즈 박스 및 축하 메시지 (컴팩트 정렬 버전)
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     
@@ -315,7 +314,7 @@ if st.session_state.analyzed_data:
     
     user_choice = st.radio(
         "정답 선택", ["명사", "동사", "형용사", "부사"], 
-        index=None, key="quiz_final_no_snow", label_visibility="collapsed"
+        index=None, key="quiz_final_aligned", label_visibility="collapsed"
     )
     
     st.markdown("</div>", unsafe_allow_html=True)
