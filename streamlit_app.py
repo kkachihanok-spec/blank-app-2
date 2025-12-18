@@ -246,7 +246,7 @@ if st.session_state.analyzed_data:
             </div>
         ''', unsafe_allow_html=True)
 
-        # --- 커스텀 폴딩 가이드 섹션 (제목 색상 화이트 고정) ---
+        # --- 커스텀 폴딩 가이드 섹션 (폰트 20% 축소 반영) ---
         st.divider()
         
         if total_score >= 60:
@@ -274,13 +274,20 @@ if st.session_state.analyzed_data:
                 .custom-summary:hover {{ background: {theme_color}11; }}
                 .custom-summary::after {{ content: '▼'; color: {theme_color}; font-size: 0.8rem; transition: transform 0.3s; }}
                 .custom-details[open] .custom-summary::after {{ transform: rotate(180deg); }}
+                
+                /* 가이드 내부 콘텐츠 폰트 크기 20% 축소 (1.1rem -> 0.88rem, 10px -> 8px 등) */
                 .guide-content {{ padding: 0 25px 25px 25px; animation: fadeIn 0.5s ease; }}
+                .guide-header {{ color: {theme_color}; margin-top: 10px; font-weight: 800; font-size: 0.8rem !important; }}
+                .guide-text {{ color: #FFFFFF; line-height: 1.7; font-size: 0.88rem !important; margin-bottom: 25px; }}
+                .ref-header {{ color: {theme_color}; font-weight: 800; margin-bottom: 15px; font-size: 0.8rem !important; }}
+                
                 @keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(-10px); }} to {{ opacity: 1; transform: translateY(0); }} }}
                 
                 .guide-link-card-custom {{
-                    background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; 
+                    background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; 
                     text-align: center; color: #8b92b2 !important; border: 1px solid rgba(255,255,255,0.1);
                     text-decoration: none; display: block; transition: all 0.2s;
+                    font-size: 0.8rem !important; /* 링크 폰트도 축소 */
                 }}
                 .guide-link-card-custom:hover {{ background: {theme_bg}; border-color: {theme_color}; color: white !important; }}
             </style>
@@ -288,10 +295,10 @@ if st.session_state.analyzed_data:
             <details class="custom-details" open>
                 <summary class="custom-summary"><span>{guide_title}</span></summary>
                 <div class="guide-content">
-                    <h4 style="color: {theme_color}; margin-top: 10px; font-weight: 800;">📝 학습 가이드</h4>
-                    <p style="color: #FFFFFF; line-height: 1.7; font-size: 1.1rem; margin-bottom: 25px;">{advice}</p>
+                    <div class="guide-header">📝 학습 가이드</div>
+                    <p class="guide-text">{advice}</p>
                     <hr style="border-color: rgba(255,255,255,0.1); margin-bottom: 25px;">
-                    <h4 style="color: {theme_color}; font-weight: 800; margin-bottom: 15px;">🔗 추천 학습 레퍼런스</h4>
+                    <div class="ref-header">🔗 추천 학습 레퍼런스</div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <a href="https://dict.naver.com" target="_blank" class="guide-link-card-custom">🟢 네이버 국어사전</a>
                         <a href="https://www.topik.go.kr" target="_blank" class="guide-link-card-custom">🎓 TOPIK 공식 홈페이지</a>
