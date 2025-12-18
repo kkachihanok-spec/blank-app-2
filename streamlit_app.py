@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (화살표 블루 + 수치 화이트 정밀 제어)
+# 3. 커스텀 CSS (메트릭 제목 크기 20% 확대 반영)
 st.markdown("""
     <style>
     .stApp {
@@ -92,22 +92,22 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     
-    /* --- [정밀 수정] 메트릭 제목 스타일 및 수치/화살표 컬러 지정 --- */
+    /* --- [정밀 수정] 메트릭 제목 크기 20% 확대 반영 --- */
     [data-testid="stMetricLabel"] p { 
-        font-size: 0.92rem !important; 
+        font-size: 1.1rem !important; /* 0.92rem에서 20% 확대 */
         color: #8c92af !important; 
         font-weight: 900 !important; 
         margin-bottom: 6px !important; 
     }
     
-    /* 화살표(→)는 원래의 블루 컬러로 삽입 */
+    /* 화살표(→) 블루 컬러 유지 */
     [data-testid="stMetricValue"] div:first-child::before {
         content: "→ ";
         color: #4a5fcc !important; 
         font-weight: 700 !important;
     }
 
-    /* 수치 데이터 본체는 화이트로 변경 */
+    /* 수치 데이터 본체 화이트 유지 */
     [data-testid="stMetricValue"] div { 
         font-size: 1.92rem !important; 
         color: #FFFFFF !important; 
@@ -218,13 +218,12 @@ if st.session_state.analyzed_data:
 
     # 1. 요약 대시보드
     m1, m2, m3, m4 = st.columns(4)
-    # 화살표는 CSS 가상 요소가 블루 컬러로 삽입합니다.
     m1.metric("전체 단어", f"{len(all_words)}")
     m2.metric("고유 단어", f"{len(df_counts)}")
     m3.metric("최빈 단어", f"{df_counts.iloc[0]['단어']}")
     m4.metric("주요 품사", f"{df_counts.iloc[0]['품사']}")
 
-    # 2. 번역 및 데이터 섹션 (이하 원본 동일)
+    # 2. 번역 및 데이터 섹션 (원본 동일)
     st.divider()
     c_l, c_r = st.columns([1.2, 1])
     with c_l:
@@ -247,7 +246,7 @@ if st.session_state.analyzed_data:
         df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
         st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True, use_container_width=True, height=520)
 
-    # 3. 그래프
+    # 3. 그래프 (원본 동일)
     st.divider()
     st.markdown("### 📈 단어 빈도 시각화")
     top_20 = df_counts.head(20)
@@ -255,7 +254,7 @@ if st.session_state.analyzed_data:
     fig.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     st.plotly_chart(fig, use_container_width=True)
 
-    # 4. 문법 학습 섹션
+    # 4. 문법 학습 섹션 (원본 동일)
     st.divider()
     st.markdown("### 📚 가사 속 문법 학습")
     pos_info = {"명사": {"icon": "💎", "desc": "사물이나 개념의 이름입니다."}, "동사": {"icon": "⚡", "desc": "동작이나 움직임을 나타냅니다."}, "형용사": {"icon": "🎨", "desc": "상태나 성질을 묘사합니다."}, "부사": {"icon": "🎬", "desc": "행동을 더 세밀하게 꾸며줍니다."}}
@@ -268,7 +267,7 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # 5. 퀴즈 섹션 (3문항 유지)
+    # 5. 퀴즈 섹션 (3문항 완벽 유지)
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
