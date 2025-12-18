@@ -21,7 +21,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (원코드 디자인 완벽 유지)
+# 3. 커스텀 CSS (점수 배너 디자인 업그레이드 및 원코드 유지)
 st.markdown("""
     <style>
     .stApp {
@@ -73,10 +73,26 @@ st.markdown("""
     .result-title { font-size: 1.25rem !important; font-weight: 800 !important; margin-bottom: 2px !important; display: block; }
     .result-sub { color: #FFFFFF; font-size: 1.0rem !important; opacity: 0.9; display: block; }
 
-    .score-banner {
-        background: linear-gradient(90deg, #4a5fcc 0%, #2a3f88 100%); padding: 20px; border-radius: 12px;
-        text-align: center; margin-bottom: 30px; border: 1px solid #7d8dec;
+    /* 점수 리포트 세션 세련된 디자인 업그레이드 */
+    .score-board {
+        background: rgba(74, 95, 204, 0.1) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(125, 141, 236, 0.4);
+        border-radius: 16px;
+        padding: 30px;
+        text-align: center;
+        margin: 40px 0;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        animation: fadeInUp 0.5s ease-out;
     }
+    .score-label { color: #8b92b2; font-size: 1.1rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+    .score-value { 
+        font-size: 4rem; font-weight: 900; 
+        background: linear-gradient(135deg, #FFFFFF 0%, #7d8dec 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        margin: 10px 0;
+    }
+    .score-status { color: #4a5fcc; font-weight: 700; font-size: 1.2rem; }
 
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -128,7 +144,6 @@ if st.session_state.analyzed_data:
     m3.metric("최빈 단어", f"{df_counts.iloc[0]['단어']}")
     m4.metric("주요 품사", f"{df_counts.iloc[0]['품사']}")
 
-    # 1. 번역/데이터/그래프/문법 (기존 유지)
     st.divider()
     c_l, c_r = st.columns([1.2, 1])
     with c_l:
@@ -162,9 +177,9 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # --- 퀴즈 섹션 (5문항 & 채점 시스템 도입) ---
+    # --- 퀴즈 섹션 (5문항 & 제목 변경) ---
     st.divider()
-    st.markdown("### 📝 오늘의 실력 검증 퀴즈 (5문항)")
+    st.markdown("### 📝 오늘의 가사 퀴즈")
     
     top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
     other_pos_df = df_counts[df_counts['품사'] != top_pos]
@@ -188,7 +203,6 @@ if st.session_state.analyzed_data:
     for i, (q_text, q_ans, q_key) in enumerate(quiz_data):
         st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{q_text} (20점)</span></div>', unsafe_allow_html=True)
         
-        # 선택지 구성
         if i in [0, 1, 3]: opts = ["명사", "동사", "형용사", "부사"]
         elif i == 2: opts = [f"{len(df_counts)}개", f"{len(df_counts)+2}개", f"{max(0, len(df_counts)-5)}개", "100개"]
         else: opts = [f"{len(data['all_words'])}개", f"{len(data['all_words'])+10}개", f"{max(0, len(data['all_words'])-10)}개", "알 수 없음"]
@@ -206,13 +220,14 @@ if st.session_state.analyzed_data:
             all_answered = False
         user_results.append({"q": q_text, "user": ans, "correct": q_ans})
 
-    # --- 5문제 모두 풀었을 때만 점수와 보고서 공개 ---
+    # --- 퀴즈 완료 시 세련된 스코어 보드 및 보고서 노출 ---
     if all_answered:
         st.divider()
         st.markdown(f'''
-            <div class="score-banner">
-                <span style="color: #FFFFFF; font-size: 1.5rem; font-weight: 800;">🏆 학습 결과 리포트 활성화</span><br/>
-                <span style="color: #7d8dec; font-size: 3rem; font-weight: 900;">최종 점수: {total_score} / 100</span>
+            <div class="score-board">
+                <div class="score-label">Your Learning Score</div>
+                <div class="score-value">{total_score}</div>
+                <div class="score-status">🏆 리포트가 성공적으로 생성되었습니다.</div>
             </div>
         ''', unsafe_allow_html=True)
 
