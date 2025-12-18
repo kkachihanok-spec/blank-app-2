@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (기존 스타일 유지 + 커스텀 작은 눈 효과 추가)
+# 3. 커스텀 CSS (기존 스타일 유지 + 정답 애니메이션 가속 및 눈송이 보정)
 st.markdown("""
     <style>
     .stApp {
@@ -139,7 +139,6 @@ st.markdown("""
     .card-word { font-weight: 700 !important; color: #FFFFFF; } 
     .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } 
 
-    /* 퀴즈 박스 세로폭 최소화 */
     .quiz-outer-box {
         background: rgba(45, 53, 72, 0.15);
         border: 1px solid rgba(74, 95, 204, 0.3);
@@ -161,13 +160,13 @@ st.markdown("""
         padding: 1px 0px !important;
     }
 
-    /* 나만의 축하 메시지 스퀘어 박스 */
+    /* 정답/오답 스퀘어 박스 */
     .custom-result-box {
         padding: 20px;
         border-radius: 8px;
         border: 1px solid transparent;
         text-align: center;
-        animation: fadeInUp 0.5s ease-out;
+        animation: fadeInUp 0.25s ease-out; /* 0.5s -> 0.25s 속도 2배 가속 */
     }
     .correct-box {
         background: rgba(74, 95, 204, 0.1);
@@ -179,35 +178,30 @@ st.markdown("""
         border-color: rgba(255, 75, 75, 0.4);
     }
 
-    /* --- 아주 작은 눈송이 애니메이션 CSS --- */
+    /* --- 눈송이 애니메이션 (보정 버전) --- */
     .snowflake {
       color: #fff;
-      font-size: 10px; /* 입자 기본 크기(이모지 기준) */
-      font-family: Arial;
-      text-shadow: 0 0 1px #000;
       position: fixed;
-      top: -10%;
-      z-index: 9999;
+      top: -10px;
+      z-index: 999999;
       user-select: none;
-      cursor: default;
+      pointer-events: none;
       animation-name: snowflakes-fall, snowflakes-shake;
-      animation-duration: 10s, 3s;
+      animation-duration: 8s, 3s;
       animation-timing-function: linear, ease-in-out;
       animation-iteration-count: infinite, infinite;
-      animation-play-state: running, running;
     }
     @keyframes snowflakes-fall {
-      0% { top: -10%; }
-      100% { top: 100%; }
+      0% { top: -10px; }
+      100% { top: 100vh; }
     }
     @keyframes snowflakes-shake {
-      0% { transform: translateX(0px); }
-      50% { transform: translateX(80px); }
-      100% { transform: translateX(0px); }
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(50px); }
     }
 
     @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(10px); }
+        from { opacity: 0; transform: translateY(15px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
@@ -327,18 +321,21 @@ if st.session_state.analyzed_data:
     
     user_choice = st.radio(
         "정답 선택", ["명사", "동사", "형용사", "부사"], 
-        index=None, key="quiz_custom_snow", label_visibility="collapsed"
+        index=None, key="quiz_final_fixed", label_visibility="collapsed"
     )
     
     st.markdown("</div>", unsafe_allow_html=True)
     
     if user_choice:
         if user_choice == top_pos:
-            # --- 아주 작은 커스텀 눈송이 생성 스크립트 ---
-            snow_html = ""
-            for i in range(15): # 눈송이 개수
-                snow_html += f'<div class="snowflake" style="left:{i*7}%; animation-delay:{i*0.5}s; font-size:{2+i%4}px;">.</div>'
-            st.markdown(snow_html, unsafe_allow_html=True)
+            # --- 보정된 눈송이 생성 코드 ---
+            snow_particles = ""
+            for i in range(25): # 입자 수 증가
+                left_pos = i * 4 # 간격 조정
+                delay = i * 0.3
+                size = 2 + (i % 3) # 아주 작은 크기 (2px ~ 4px)
+                snow_particles += f'<div class="snowflake" style="left:{left_pos}%; animation-delay:{delay}s; font-size:{size}px;">●</div>'
+            st.markdown(snow_particles, unsafe_allow_html=True)
             
             st.markdown(f"""
                 <div class="custom-result-box correct-box">
