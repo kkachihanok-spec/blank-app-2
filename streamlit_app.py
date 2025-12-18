@@ -30,7 +30,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (기존 디자인 100% 유지 + 버튼 너비 100% 강제 확장)
+# 3. 커스텀 CSS (기존 디자인 유지 + 버튼 간격 제로 및 50% 꽉 채우기 강제 설정)
 st.markdown("""
     <style>
     .stApp {
@@ -61,20 +61,32 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     
-    /* 🔥 버튼 너비를 부모 칼럼의 100%로 강제 확장 (가로 꽉 차게) */
+    /* 🔥 칼럼 간격 제거 및 다운로드 버튼 가로 100% (결과적으로 50:50) 강제 확장 */
+    [data-testid="column"] {
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+    div[data-testid="stHorizontalBlock"] {
+        gap: 0px !important;
+    }
     div.stDownloadButton > button {
         width: 100% !important;
-        display: block !important;
         background: rgba(81, 109, 244, 0.1) !important;
         border: 1px solid rgba(81, 109, 244, 0.4) !important;
         color: #516df4 !important; font-size: 1.25rem !important; font-weight: 700 !important;
-        padding: 22px 0 !important; border-radius: 12px !important;
+        padding: 22px 0 !important; border-radius: 0px !important; /* 반반 느낌을 위해 라운드 해제 */
         transition: all 0.3s ease;
-        margin-top: 10px;
+    }
+    /* 왼쪽 버튼은 왼쪽만 라운드, 오른쪽 버튼은 오른쪽만 라운드 적용 (디테일) */
+    div[data-testid="column"]:first-child div.stDownloadButton > button {
+        border-radius: 12px 0 0 12px !important;
+    }
+    div[data-testid="column"]:last-child div.stDownloadButton > button {
+        border-radius: 0 12px 12px 0 !important;
+        border-left: none !important; /* 중앙 경계선 겹침 방지 */
     }
     div.stDownloadButton > button:hover {
         background: rgba(81, 109, 244, 0.2) !important;
-        transform: translateY(-3px);
         border-color: #516df4 !important;
     }
 
@@ -282,13 +294,12 @@ if st.session_state.analyzed_data:
             </div>
         ''', unsafe_allow_html=True)
         
-        # --- 화면 가로 50%씩 꽉 채우는 버튼 영역 ---
+        # --- 중앙 간격을 없앤 50:50 꽉 찬 버튼 영역 ---
         c_pdf, c_txt = st.columns(2)
         with c_pdf:
             if FPDF_AVAILABLE:
                 pdf_data = create_pdf_report(data, total_score)
                 st.download_button("📥 PDF 리포트 다운로드", data=pdf_data, file_name="Lyric_Report.pdf", mime="application/pdf")
-            else: st.info("PDF 모듈 미설치")
         with c_txt:
             txt_data = create_txt_report(data, total_score, st.session_state.translated_lines)
             st.download_button("📄 TXT 리포트 다운로드", data=txt_data, file_name="Lyric_Report.txt", mime="text/plain")
