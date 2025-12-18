@@ -5,8 +5,8 @@ from googletrans import Translator
 import plotly.express as px
 from datetime import datetime
 
-# 1. 페이지 설정
-st.set_set_page_config(page_title="K-Lyric 101", layout="wide", page_icon="🎧")
+# 1. 페이지 설정 (오타 수정 완료: set_page_config)
+st.set_page_config(page_title="K-Lyric 101", layout="wide", page_icon="🎧")
 
 # 2. 리소스 로드
 @st.cache_resource
@@ -21,7 +21,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (원래 디자인 완벽 복구)
+# 3. 커스텀 CSS (사용자 지정 디자인 및 여유로운 마진 완벽 고수)
 st.markdown("""
     <style>
     .stApp {
@@ -144,7 +144,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 메인 코드 ---
+# --- 메인 대시보드 ---
 st.markdown('<div class="main-title-kr">가사학개론</div>', unsafe_allow_html=True)
 st.markdown('<div class="brand-title-en">K-Lyric 101</div>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">AI 기반 K-POP 가사 데이터 분석 및 언어 학습 엔진</p>', unsafe_allow_html=True)
@@ -223,7 +223,7 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # --- 퀴즈 섹션 (선택 전 정답 노출 방지 로직 적용) ---
+    # --- 퀴즈 섹션 (선택 전 결과 노출 방지) ---
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
@@ -244,15 +244,14 @@ if st.session_state.analyzed_data:
         ans = st.radio(f"Radio_{q_key}", opts, index=None, key=q_key, label_visibility="collapsed")
         st.markdown("</div>", unsafe_allow_html=True)
         
-        # 선택했을 때만 결과 박스 출력
-        if ans:
+        if ans: # 유저가 선택했을 때만 결과 표시
             if ans == q_ans:
                 st.markdown(f'<div class="custom-result-box correct-box"><span class="result-title" style="color:#7d8dec;">🎉 정답입니다!</span><span class="result-sub">분석 결과와 정확히 일치합니다.</span></div>', unsafe_allow_html=True)
             else:
                 st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#ff4b4b;">아쉬워요! 🧐</span><span class="result-sub">위쪽 분석 데이터를 다시 확인해 보세요.</span></div>', unsafe_allow_html=True)
         user_results_for_report.append({"q": q_text, "user": ans, "correct": q_ans})
 
-    # --- 리포트 다운로드 ---
+    # --- 총정리 리포트 다운로드 ---
     st.divider()
     st.markdown("### 📥 나의 학습 완벽 총정리")
     full_report = f"==== K-LYRIC 101 학습 총정리 리포트 ====\n일시: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n\n"
