@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (기존 스타일 완벽 유지 + 지정된 퍼플 그라데이션 적용)
+# 3. 커스텀 CSS (기존 스타일 완벽 유지 + 블루-퍼플 가로 그라데이션 버튼)
 st.markdown("""
     <style>
     .stApp {
@@ -62,9 +62,9 @@ st.markdown("""
         border: 1px solid #2d3548 !important;
     }
 
-    /* --- [수정] 버튼 그라데이션 (요청하신 #8869ac 퍼플톤 적용) --- */
+    /* --- [수정] 버튼 블루 to 퍼플 가로 그라데이션 --- */
     .stButton>button {
-        background: linear-gradient(to right, #8869ac) !important;
+        background: linear-gradient(to right, #2a3f88, #8869ac) !important; /* 가로 그라데이션 */
         color: #FFFFFF !important;
         font-weight: 700;
         width: auto !important;
@@ -79,11 +79,11 @@ st.markdown("""
         padding-right: 30px !important;
         align-items: center !important;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(136, 105, 172, 0.3);
+        box-shadow: 0 4px 15px rgba(42, 63, 136, 0.4);
     }
     
     .stButton>button:hover {
-        background: linear-gradient(to right, #9d7fc2) !important; /* 호버 시 살짝 밝게 */
+        background: linear-gradient(to right, #3a4fa8, #9d7fc2) !important; /* 호버 시 양쪽 모두 밝게 */
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(136, 105, 172, 0.5);
     }
@@ -205,7 +205,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 이하 코드 로직 (완벽하게 유지됨) ---
+# --- 코드 로직 (변화 없음) ---
 
 # --- 헤더 ---
 st.markdown('<h1 class="main-product-title">&lt;K-POP INSIGHT&gt;</h1>', unsafe_allow_html=True)
@@ -318,7 +318,7 @@ if st.session_state.analyzed_data:
     
     user_choice = st.radio(
         "정답 선택", ["명사", "동사", "형용사", "부사"], 
-        index=None, key="quiz_final_compact_aligned", label_visibility="collapsed"
+        index=None, key="quiz_final_fixed_gradient", label_visibility="collapsed"
     )
     
     st.markdown("</div>", unsafe_allow_html=True)
