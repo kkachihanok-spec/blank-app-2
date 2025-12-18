@@ -22,7 +22,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (이전 디자인 완벽 유지)
+# 3. 커스텀 CSS (색감 조정 및 그라데이션 제거)
 st.markdown("""
     <style>
     .stApp {
@@ -86,7 +86,9 @@ st.markdown("""
         animation: fadeInUp 0.25s ease-out forwards; margin-bottom: 25px;
     }
     .correct-box { background: rgba(74, 95, 204, 0.1); border-color: #4a5fcc; }
-    .wrong-box { background: rgba(255, 75, 75, 0.05); border-color: rgba(255, 75, 75, 0.4); }
+    
+    /* 🔥 [수정] 오답 박스 컬러: 퍼플에 가까운 딥마젠타 톤으로 변경 */
+    .wrong-box { background: rgba(142, 45, 226, 0.05); border-color: rgba(142, 45, 226, 0.5); }
     .result-title { font-size: 1.25rem !important; font-weight: 800 !important; margin-bottom: 2px !important; display: block; }
 
     /* 점수 리포트 레이아웃 */
@@ -95,7 +97,8 @@ st.markdown("""
         backdrop-filter: blur(20px); box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         animation: fadeInUp 0.7s ease-out;
     }
-    .score-fail-premium { background: linear-gradient(145deg, rgba(255, 59, 48, 0.1) 0%, rgba(0, 0, 0, 0.6) 100%); border: 1px solid rgba(255, 59, 48, 0.3); }
+    /* 🔥 [수정] 성적이 낮을 때의 컨테이너 컬러도 퍼플 계열 그라데이션으로 변경 */
+    .score-fail-premium { background: linear-gradient(145deg, rgba(142, 45, 226, 0.1) 0%, rgba(0, 0, 0, 0.6) 100%); border: 1px solid rgba(142, 45, 226, 0.3); }
     .score-pass-premium { background: linear-gradient(145deg, rgba(74, 95, 204, 0.1) 0%, rgba(0, 0, 0, 0.6) 100%); border: 1px solid rgba(74, 95, 204, 0.3); }
     
     .score-label-premium { 
@@ -113,8 +116,10 @@ st.markdown("""
         margin: 10px 0 20px 0 !important; 
         letter-spacing: -2px; 
     }
-    .score-text-fail { background: linear-gradient(180deg, #ff4d4d, #9e1a1a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .score-text-pass { background: linear-gradient(180deg, #7d8dec, #3a47af); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    /* 🔥 [수정] 점수 그라데이션 제거 및 컬러 변경 */
+    .score-text-fail { color: #A062FF !important; -webkit-text-fill-color: #A062FF !important; background: none !important; }
+    .score-text-pass { color: #7d8dec !important; -webkit-text-fill-color: #7d8dec !important; background: none !important; }
     
     .score-status-text { 
         font-size: 1.28rem !important; 
@@ -225,7 +230,7 @@ if st.session_state.analyzed_data:
     all_answered = True
     
     for i, config in enumerate(quiz_configs):
-        q_key = f"final_quiz_v5_q_{i}"
+        q_key = f"final_quiz_final_q_{i}"
         st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{config["q"]}</span></div>', unsafe_allow_html=True)
         
         if config["type"] == "pos": opts = ["명사", "동사", "형용사", "부사"]
@@ -240,7 +245,7 @@ if st.session_state.analyzed_data:
             random.shuffle(opts)
             st.session_state[q_key] = opts
             
-        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_f_v5_{q_key}", label_visibility="collapsed")
+        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_f_final_{q_key}", label_visibility="collapsed")
         st.markdown("</div>", unsafe_allow_html=True)
         
         if ans:
@@ -248,21 +253,19 @@ if st.session_state.analyzed_data:
                 st.markdown(f'<div class="custom-result-box correct-box"><span class="result-title" style="color:#7d8dec;">🎉 정답입니다!</span></div>', unsafe_allow_html=True)
                 total_score += 20
             else:
-                st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#ff4b4b;">아쉬워요!</span><span style="color:white; opacity:0.8;">정답: {config["a"]}</span></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#8E2DE2;">아쉬워요!</span><span style="color:white; opacity:0.8;">정답: {config["a"]}</span></div>', unsafe_allow_html=True)
         else: all_answered = False
 
-    # --- ✨ 점수대별 맞춤 메시지 로직 ✨ ---
     if all_answered:
         st.divider()
         score_class = "score-pass-premium" if total_score >= 60 else "score-fail-premium"
         text_color_class = "score-text-pass" if total_score >= 60 else "score-text-fail"
         
-        # 메시지 조건 분기
         if total_score <= 20:
             status_msg = "기초부터 차근차근 시작해봐요!"
         elif 40 <= total_score <= 60:
             status_msg = "거의 다 왔어요! 조금만 더 집중해볼까요?"
-        else: # 80점 ~ 100점
+        else:
             status_msg = "완벽한 분석입니다! K-POP 가사 마스터네요!"
         
         st.markdown(f'''
