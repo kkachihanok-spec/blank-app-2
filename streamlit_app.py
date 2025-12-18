@@ -22,7 +22,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (프리미엄 다크 테마 및 합격 점수 컬러 보정)
+# 3. 커스텀 CSS (전체 앱 테마 및 컴포넌트 디자인)
 st.markdown("""
     <style>
     .stApp {
@@ -246,42 +246,58 @@ if st.session_state.analyzed_data:
             </div>
         ''', unsafe_allow_html=True)
 
-        # 🔥 [수정 포인트] 점수에 따른 가이드 테마색 동적 결정
+        # --- 커스텀 폴딩 가이드 섹션 (테마 색상 동적 변경) ---
+        st.divider()
+        
         if total_score >= 60:
-            theme_color = "#516df4"      # 블루/인디고 톤 (Pass)
-            theme_bg = "rgba(81, 109, 244, 0.05)"
-            theme_border = "rgba(81, 109, 244, 0.2)"
+            theme_color = "#516df4"  # 블루 (합격)
+            theme_bg = "rgba(81, 109, 244, 0.1)"
             guide_title = "🏆 K-POP 마스터를 위한 심화 조언"
-            advice = "이미 훌륭한 실력을 갖추고 계시네요! 이제 가사의 <b>'은유적 표현'</b>이나 <b>'신조어'</b>에 주목해 보세요."
+            advice = "이미 훌륭한 실력을 갖추고 계시네요! 이제 가사의 <b>'은유적 표현'</b>이나 <b>'신조어'</b>에 주목해 보세요. 한국의 문학 작품이나 에세이를 병행하면 표현의 깊이가 달라질 거예요."
         else:
-            theme_color = "#AF40FF"      # 퍼플/마젠타 톤 (Fail)
-            theme_bg = "rgba(175, 64, 255, 0.05)"
-            theme_border = "rgba(175, 64, 255, 0.2)"
+            theme_color = "#AF40FF"  # 퍼플 (불합격/재도전)
+            theme_bg = "rgba(175, 64, 255, 0.1)"
             guide_title = "🌱 기초를 탄탄하게 만드는 조언"
-            advice = "조급해하지 마세요! 좋아하는 가수의 인터뷰 영상을 자막과 함께 보며 발음을 익히는 것부터 시작해 보세요."
+            advice = "조급해하지 마세요! 가사 속의 <b>'명사'</b>부터 하나씩 수집해 보는 건 어떨까요? 좋아하는 가수의 인터뷰 영상을 자막과 함께 보며 발음을 익히는 것부터 시작해 보세요."
 
-        with st.expander(f"✨ {guide_title} (클릭하여 확인)", expanded=True):
-            st.markdown(f"""
-            <div style="background: {theme_bg}; padding: 25px; border-radius: 12px; border: 1px solid {theme_border};">
-                <h4 style="color: {theme_color}; margin-top: 0; font-weight: 800;">📝 학습 가이드</h4>
-                <p style="color: #FFFFFF; line-height: 1.7; font-size: 1.1rem; margin-bottom: 25px;">{advice}</p>
-                <hr style="border-color: rgba(255,255,255,0.1); margin-bottom: 25px;">
-                <h4 style="color: {theme_color}; font-weight: 800; margin-bottom: 15px;">🔗 추천 학습 레퍼런스</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <style>
-                        .guide-link-card-custom {{
-                            background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; 
-                            text-align: center; color: #8b92b2 !important; border: 1px solid rgba(255,255,255,0.1);
-                            text-decoration: none; display: block; transition: all 0.2s;
-                        }}
-                        .guide-link-card-custom:hover {{ 
-                            background: {theme_bg}; border-color: {theme_color}; color: white !important; 
-                        }}
-                    </style>
-                    <a href="https://dict.naver.com" target="_blank" class="guide-link-card-custom">🟢 네이버 국어사전</a>
-                    <a href="https://www.topik.go.kr" target="_blank" class="guide-link-card-custom">🎓 TOPIK 공식 홈페이지</a>
-                    <a href="https://www.sejonghakdang.org" target="_blank" class="guide-link-card-custom">🏫 세종학당재단</a>
-                    <a href="https://vlive.tv" target="_blank" class="guide-link-card-custom">📺 K-Contents 학습</a>
+        st.markdown(f"""
+            <style>
+                .custom-details {{
+                    background: {theme_bg}; border: 1px solid {theme_color}44;
+                    border-radius: 15px; overflow: hidden; margin-bottom: 50px; transition: all 0.3s ease;
+                }}
+                .custom-details[open] {{ border: 1px solid {theme_color}; box-shadow: 0 5px 20px {theme_color}22; }}
+                .custom-summary {{
+                    padding: 20px; font-size: 1.25rem; font-weight: 800; color: {theme_color};
+                    cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;
+                }}
+                .custom-summary:hover {{ background: {theme_color}11; }}
+                .custom-summary::after {{ content: '▼'; font-size: 0.8rem; transition: transform 0.3s; }}
+                .custom-details[open] .custom-summary::after {{ transform: rotate(180deg); }}
+                .guide-content {{ padding: 0 25px 25px 25px; animation: fadeIn 0.5s ease; }}
+                @keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(-10px); }} to {{ opacity: 1; transform: translateY(0); }} }}
+                
+                .guide-link-card-custom {{
+                    background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; 
+                    text-align: center; color: #8b92b2 !important; border: 1px solid rgba(255,255,255,0.1);
+                    text-decoration: none; display: block; transition: all 0.2s;
+                }}
+                .guide-link-card-custom:hover {{ background: {theme_bg}; border-color: {theme_color}; color: white !important; }}
+            </style>
+
+            <details class="custom-details" open>
+                <summary class="custom-summary"><span>✨ {guide_title}</span></summary>
+                <div class="guide-content">
+                    <h4 style="color: {theme_color}; margin-top: 10px; font-weight: 800;">📝 학습 가이드</h4>
+                    <p style="color: #FFFFFF; line-height: 1.7; font-size: 1.1rem; margin-bottom: 25px;">{advice}</p>
+                    <hr style="border-color: rgba(255,255,255,0.1); margin-bottom: 25px;">
+                    <h4 style="color: {theme_color}; font-weight: 800; margin-bottom: 15px;">🔗 추천 학습 레퍼런스</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <a href="https://dict.naver.com" target="_blank" class="guide-link-card-custom">🟢 네이버 국어사전</a>
+                        <a href="https://www.topik.go.kr" target="_blank" class="guide-link-card-custom">🎓 TOPIK 공식 홈페이지</a>
+                        <a href="https://www.sejonghakdang.org" target="_blank" class="guide-link-card-custom">🏫 세종학당재단</a>
+                        <a href="https://vlive.tv" target="_blank" class="guide-link-card-custom">📺 K-Contents 학습</a>
+                    </div>
                 </div>
-            </div>
-            """, unsafe_allow_html=True)
+            </details>
+        """, unsafe_allow_html=True)
