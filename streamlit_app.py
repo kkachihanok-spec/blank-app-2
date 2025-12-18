@@ -246,15 +246,15 @@ if st.session_state.analyzed_data:
             </div>
         ''', unsafe_allow_html=True)
 
-        # --- 커스텀 이중 폴딩 가이드 섹션 ---
+        # --- 커스텀 이중 폴딩 가이드 섹션 (최종 수정 사항 반영) ---
         st.divider()
         
         if total_score >= 60:
             theme_color = "#516df4"  # 블루
             theme_bg = "rgba(81, 109, 244, 0.1)"
-            advice_title = "🏆 [조언 1] 심화 학습 가이드"
+            advice_title = "[조언 1] 심화 학습 가이드"
             advice_text = "이미 훌륭한 실력을 갖추고 계시네요! 이제 가사의 <b>'은유적 표현'</b>이나 <b>'신조어'</b>에 주목해 보세요. 한국의 문학 작품이나 에세이를 병행하면 표현의 깊이가 달라질 거예요."
-            ref_title = "🔗 [조언 2] 심화 학습 레퍼런스"
+            ref_title = "[조언 2] 심화 학습 레퍼런스"
         else:
             theme_color = "#AF40FF"  # 퍼플
             theme_bg = "rgba(175, 64, 255, 0.1)"
@@ -278,14 +278,21 @@ if st.session_state.analyzed_data:
                 .custom-details[open] .custom-summary::after {{ transform: rotate(180deg); }}
                 
                 .guide-content {{ padding: 0 25px 20px 25px; animation: fadeIn 0.4s ease; }}
-                .guide-text {{ color: #FFFFFF; line-height: 1.7; font-size: 0.88rem !important; margin-top: 5px; }}
+                
+                /* 조언 가이드 텍스트 글자 크기 2pt 상향 (약 1.05rem) */
+                .guide-text {{ 
+                    color: #FFFFFF; 
+                    line-height: 1.7; 
+                    font-size: 1.05rem !important; 
+                    margin-top: 10px; 
+                }}
                 
                 @keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(-5px); }} to {{ opacity: 1; transform: translateY(0); }} }}
                 
                 .guide-link-card-custom {{
                     background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; 
                     text-align: center; color: #8b92b2 !important; border: 1px solid rgba(255,255,255,0.1);
-                    text-decoration: none; display: block; transition: all 0.2s; font-size: 0.8rem !important;
+                    text-decoration: none; display: block; transition: all 0.2s; font-size: 0.85rem !important;
                 }}
                 .guide-link-card-custom:hover {{ background: {theme_bg}; border-color: {theme_color}; color: white !important; }}
             </style>
