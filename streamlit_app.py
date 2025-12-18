@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (원본 100% 유지 + 메트릭 제목만 20% 확대 조정)
+# 3. 커스텀 CSS (원본 100% 유지 + 메트릭 제목 컬러 및 굵기 수정)
 st.markdown("""
     <style>
     .stApp {
@@ -92,14 +92,12 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     
-    /* --- [정밀 수정] 메트릭 제목 20% 확대 반영 --- */
-    /* 제목(Label): 0.96rem에서 20% 확대 -> 1.15rem */
+    /* --- [정밀 수정] 메트릭 제목 컬러 변경 및 볼드 제거 --- */
     [data-testid="stMetricLabel"] p { 
         font-size: 1.15rem !important; 
-        color: #FFFFFF !important; 
-        font-weight: 900 !important; 
+        color: #8c92af !important; /* 요청하신 컬러로 변경 */
+        font-weight: 400 !important; /* 볼드 해제 (Normal) */
     }
-    /* 값(Value): 시원하게 키운 1.92rem 유지 */
     [data-testid="stMetricValue"] { 
         font-size: 1.92rem !important; 
         color: #4a5fcc !important; 
@@ -260,7 +258,7 @@ if st.session_state.analyzed_data:
                 top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
                 st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span><a href="https://ko.dict.naver.com/#/search?query={top_w}" target="_blank" style="font-size:0.8rem; margin-left:auto; color:#7d8dec; text-decoration:none;">사전 보기 →</a></div></div>''', unsafe_allow_html=True)
 
-    # 5. 퀴즈 섹션 (3문항 유지 및 결과 텍스트 크기 고정)
+    # 5. 퀴즈 섹션 (3문항 및 결과 텍스트 크기 고정 유지)
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
