@@ -18,7 +18,7 @@ okt, translator = get_resources()
 if 'analyzed_data' not in st.session_state:
     st.session_state.analyzed_data = None
 
-# 3. 커스텀 CSS (원본 100% 유지 + 메트릭 크기만 정밀 수정)
+# 3. 커스텀 CSS (원본 100% 유지 + 메트릭 제목만 20% 확대 조정)
 st.markdown("""
     <style>
     .stApp {
@@ -92,14 +92,14 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     
-    /* --- [수정] 메트릭 제목 및 값 크기 조정 --- */
-    /* 제목(Label): 40% 축소 (1.6rem -> 0.96rem) */
+    /* --- [정밀 수정] 메트릭 제목 20% 확대 반영 --- */
+    /* 제목(Label): 0.96rem에서 20% 확대 -> 1.15rem */
     [data-testid="stMetricLabel"] p { 
-        font-size: 0.96rem !important; 
+        font-size: 1.15rem !important; 
         color: #FFFFFF !important; 
         font-weight: 900 !important; 
     }
-    /* 값(Value): 15% 확대 (1.67rem -> 1.92rem) */
+    /* 값(Value): 시원하게 키운 1.92rem 유지 */
     [data-testid="stMetricValue"] { 
         font-size: 1.92rem !important; 
         color: #4a5fcc !important; 
@@ -208,7 +208,7 @@ if st.session_state.analyzed_data:
     st.divider()
     st.markdown('<div style="font-size:1.7rem; font-weight:800; color:white; margin-bottom:25px;">📊 분석 결과</div>', unsafe_allow_html=True)
 
-    # 1. 요약 대시보드 (수정된 폰트 크기 적용)
+    # 1. 요약 대시보드
     m1, m2, m3, m4 = st.columns(4)
     w_arrow = "→ " 
     m1.metric("전체 단어", f"{w_arrow}{len(all_words)}")
