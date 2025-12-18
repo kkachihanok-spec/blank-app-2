@@ -5,6 +5,8 @@ from googletrans import Translator
 import plotly.express as px
 from datetime import datetime
 import random
+from fpdf import FPDF
+import base64
 
 # 1. 페이지 설정
 st.set_page_config(page_title="K-Lyric 101", layout="wide", page_icon="🎧")
@@ -22,7 +24,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (합격 점수 컬러만 #516df4로 변경)
+# 3. 커스텀 CSS
 st.markdown("""
     <style>
     .stApp {
@@ -45,12 +47,29 @@ st.markdown("""
     .stTextArea label p { font-size: 1.7rem !important; font-weight: 800 !important; color: #FFFFFF !important; margin-bottom: 25px !important; }
     .stTextArea textarea { background-color: rgba(20, 27, 45, 0.7) !important; color: #FFFFFF !important; border-radius: 12px !important; border: 1px solid #2d3548 !important; }
     
+    /* 공통 버튼 스타일 */
     .stButton>button {
         background-color: #4e5ec5 !important; border: none !important; border-radius: 2px !important; color: #FFFFFF !important;
         font-weight: 800 !important; font-size: 1.73rem !important; width: auto !important; min-width: 150px !important;
         height: 3.84rem !important; margin-top: 20px !important; display: flex !important; justify-content: center !important;
         padding-left: 30px !important; padding-right: 30px !important; align-items: center !important; transition: all 0.2s ease;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* PDF 다운로드 전용 버튼 스타일 (다운로드 시점에만 등장) */
+    div.stDownloadButton > button {
+        background: rgba(125, 141, 236, 0.1) !important;
+        border: 1px solid rgba(125, 141, 236, 0.3) !important;
+        color: #7d8dec !important;
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+        padding: 10px 20px !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+    }
+    div.stDownloadButton > button:hover {
+        background: rgba(125, 141, 236, 0.2) !important;
+        border-color: #7d8dec !important;
     }
     
     [data-testid="stMetricLabel"] p { font-size: 1.1rem !important; color: #4a5fcc !important; font-weight: 900 !important; margin-bottom: 6px !important; }
@@ -106,7 +125,6 @@ st.markdown("""
         margin: 10px 0 20px 0 !important; letter-spacing: -2px; 
     }
     
-    /* 🔥 [수정] 합격 점수 컬러를 #516df4로 변경 */
     .score-text-fail { color: #AF40FF !important; -webkit-text-fill-color: #AF40FF !important; background: none !important; }
     .score-text-pass { color: #516df4 !important; -webkit-text-fill-color: #516df4 !important; background: none !important; }
     
@@ -116,6 +134,26 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+# 4. PDF 생성 함수 (한글 폰트 지원은 실행 환경의 폰트 경로 설정이 필요하여 텍스트 위주 구성)
+def create_pdf(data, score):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(200, 10, txt="K-Lyric 101 Analysis Report", ln=True, align='C')
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt=f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}", ln=True, align='C')
+    pdf.ln(10)
+    pdf.cell(200, 10, txt=f"Total Score: {score} / 100", ln=True)
+    pdf.cell(200, 10, txt=f"Vocabulary Count: {len(data['all_words'])}", ln=True)
+    pdf.cell(200, 10, txt=f"Unique Words: {len(data['df_counts'])}", ln=True)
+    pdf.ln(5)
+    pdf.cell(200, 10, txt="Top 10 Frequent Words:", ln=True)
+    for idx, row in data['df_counts'].head(10).iterrows():
+        # 한글 깨짐 방지를 위해 PDF는 기본 영문/수치 정보를 위주로 생성하거나 
+        # 로컬 환경에서는 나눔고딕 등 .ttf 폰트를 pdf.add_font()로 등록해야 함
+        pdf.cell(200, 8, txt=f"- {row['단어']} ({row['품사']}): {row['횟수']} times", ln=True)
+    return pdf.output(dest='S').encode('latin-1')
+
 # --- 메인 실행 로직 ---
 st.markdown('<div class="main-title-kr">가사학개론</div>', unsafe_allow_html=True)
 st.markdown('<div class="brand-title-en">K-Lyric 101</div>', unsafe_allow_html=True)
@@ -124,7 +162,7 @@ st.divider()
 
 lyrics_input = st.text_area("📝 가사 입력", height=180, placeholder="분석할 가사를 입력하세요...", key="lyrics_main")
 
-col_btn, _ = st.columns([1, 4]) 
+col_btn, col_down = st.columns([1, 4]) 
 with col_btn:
     analyze_btn = st.button("🚀 분석을 실행해줘!")
 
@@ -216,7 +254,7 @@ if st.session_state.analyzed_data:
     all_answered = True
     
     for i, config in enumerate(quiz_configs):
-        q_key = f"final_quiz_v12_q_{i}"
+        q_key = f"final_quiz_v13_q_{i}"
         st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2; margin-bottom: 4px;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{config["q"]}</span></div>', unsafe_allow_html=True)
         
         if config["type"] == "pos": opts = ["명사", "동사", "형용사", "부사"]
@@ -231,7 +269,7 @@ if st.session_state.analyzed_data:
             random.shuffle(opts)
             st.session_state[q_key] = opts
             
-        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_f_v12_{q_key}", label_visibility="collapsed")
+        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_f_v13_{q_key}", label_visibility="collapsed")
         st.markdown("</div>", unsafe_allow_html=True)
         
         if ans:
@@ -258,3 +296,12 @@ if st.session_state.analyzed_data:
                 <div class="score-status-text">{status_msg}</div>
             </div>
         ''', unsafe_allow_html=True)
+        
+        # --- PDF 다운로드 버튼 배치 ---
+        pdf_bytes = create_pdf(data, total_score)
+        st.download_button(
+            label="📥 분석 리포트 PDF 다운로드",
+            data=pdf_bytes,
+            file_name=f"K-Lyric_Report_{datetime.now().strftime('%Y%m%d')}.pdf",
+            mime="application/pdf"
+        )
