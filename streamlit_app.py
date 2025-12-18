@@ -30,7 +30,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (화살표 디자인 및 전체 스타일 100% 복구)
+# 3. 커스텀 CSS (기존 디자인 100% 복구 + 반반 버튼 설정)
 st.markdown("""
     <style>
     .stApp {
@@ -61,17 +61,19 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     
-    /* 화살표 애니메이션 포함 다운로드 버튼 스타일 */
-    div.stDownloadButton > button {
+    /* 🔥 다운로드 버튼 반반 꽉 차게 설정 */
+    div[data-testid="column"] div.stDownloadButton > button {
+        width: 100% !important;
         background: rgba(81, 109, 244, 0.1) !important;
         border: 1px solid rgba(81, 109, 244, 0.4) !important;
-        color: #516df4 !important; font-size: 1rem !important; font-weight: 700 !important;
-        padding: 12px 24px !important; border-radius: 10px !important;
+        color: #516df4 !important; font-size: 1.2rem !important; font-weight: 700 !important;
+        padding: 20px 0 !important; border-radius: 12px !important;
         transition: all 0.3s ease;
     }
-    div.stDownloadButton > button:hover {
+    div[data-testid="column"] div.stDownloadButton > button:hover {
         background: rgba(81, 109, 244, 0.2) !important;
-        transform: translateY(-2px);
+        transform: translateY(-3px);
+        border-color: #516df4 !important;
     }
 
     [data-testid="stMetricLabel"] p { font-size: 1.1rem !important; color: #4a5fcc !important; font-weight: 900 !important; margin-bottom: 6px !important; }
@@ -93,7 +95,6 @@ st.markdown("""
     .card-word { font-weight: 700 !important; color: #FFFFFF; font-size: 1.1rem; } 
     .card-count { color: #4a5fcc; font-weight: 600; margin-left: 10px; } 
 
-    /* 퀴즈 박스 */
     .quiz-outer-box {
         background: rgba(45, 53, 72, 0.15); border: 1px solid rgba(74, 95, 204, 0.3);
         border-radius: 12px; padding: 12px 20px; margin-top: 5px; margin-bottom: 25px; 
@@ -110,7 +111,6 @@ st.markdown("""
     .wrong-box { background: rgba(157, 80, 187, 0.05); border-color: rgba(157, 80, 187, 0.5); }
     .result-title { font-size: 1.25rem !important; font-weight: 800 !important; margin-bottom: 2px !important; display: block; }
 
-    /* 점수판 디자인 복구 */
     .score-container-premium {
         padding: 40px 40px; border-radius: 24px; text-align: center; margin: 40px 0;
         backdrop-filter: blur(20px); box-shadow: 0 20px 40px rgba(0,0,0,0.4);
@@ -128,7 +128,6 @@ st.markdown("""
         margin: 10px 0 20px 0 !important; letter-spacing: -2px; 
     }
     
-    /* 🔥 합격 컬러 #516df4 고정 */
     .score-text-fail { color: #AF40FF !important; }
     .score-text-pass { color: #516df4 !important; }
     
@@ -156,7 +155,7 @@ def create_pdf_report(data, score):
     pdf.cell(200, 10, txt=f"Final Score: {score}/100", ln=True)
     return pdf.output(dest='S').encode('latin-1')
 
-# --- 메인 로직 시작 ---
+# --- 메인 실행 ---
 st.markdown('<div class="main-title-kr">가사학개론</div>', unsafe_allow_html=True)
 st.markdown('<div class="brand-title-en">K-Lyric 101</div>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">AI 기반 K-POP 가사 데이터 분석 및 언어 학습 엔진</p>', unsafe_allow_html=True)
@@ -193,7 +192,6 @@ if st.session_state.analyzed_data:
     data = st.session_state.analyzed_data
     df_counts = data['df_counts']
     
-    # 분석 결과 수치
     st.divider()
     st.markdown('<div style="font-size:1.7rem; font-weight:800; color:white; margin-bottom:25px;">📊 분석 결과</div>', unsafe_allow_html=True)
     m1, m2, m3, m4 = st.columns(4)
@@ -202,7 +200,6 @@ if st.session_state.analyzed_data:
     m3.metric("최빈 단어", f"{df_counts.iloc[0]['단어']}")
     m4.metric("주요 품사", f"{df_counts.iloc[0]['품사']}")
 
-    # 가사 대조 및 데이터 에디터
     st.divider()
     c_l, c_r = st.columns([1.2, 1])
     with c_l:
@@ -217,7 +214,6 @@ if st.session_state.analyzed_data:
         df_display['사전'] = df_display['단어'].apply(lambda x: f"https://ko.dict.naver.com/#/search?query={x}")
         st.data_editor(df_display, column_config={"사전": st.column_config.LinkColumn("링크", display_text="열기")}, hide_index=True, use_container_width=True, height=520)
 
-    # 시각화 차트
     st.divider()
     st.markdown("### 📈 단어 빈도 시각화")
     top_20 = df_counts.head(20)
@@ -225,7 +221,18 @@ if st.session_state.analyzed_data:
     fig.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     st.plotly_chart(fig, use_container_width=True)
 
-    # 퀴즈 섹션 (5개 원복)
+    st.divider()
+    st.markdown("### 📚 가사 속 문법 학습")
+    pos_info = {"명사": {"icon": "💎", "desc": "사물이나 개념의 이름입니다."}, "동사": {"icon": "⚡", "desc": "동작이나 움직임을 나타냅니다."}, "형용사": {"icon": "🎨", "desc": "상태나 성질을 묘사합니다."}, "부사": {"icon": "🎬", "desc": "행동을 더 세밀하게 꾸며줍니다."}}
+    p1, p2 = st.columns(2)
+    for i, (name, info) in enumerate(pos_info.items()):
+        target_col = p1 if i < 2 else p2
+        with target_col:
+            spec_df = df_counts[df_counts['품사'] == name]
+            if not spec_df.empty:
+                top_w, cnt = spec_df.iloc[0]['단어'], spec_df.iloc[0]['횟수']
+                st.markdown(f'''<div class="analysis-card"><div class="pos-title">{info['icon']} {name}</div><div class="pos-desc">{info['desc']}</div><div class="data-row"><span style="color:#8b92b2; margin-right:10px;">주요 단어:</span><span class="card-word">{top_w}</span><span class="card-count">{cnt}회</span></div></div>''', unsafe_allow_html=True)
+
     st.divider()
     st.markdown("### 📝 오늘의 가사 퀴즈")
     top_word, top_pos = df_counts.iloc[0]['단어'], df_counts.iloc[0]['품사']
@@ -244,18 +251,14 @@ if st.session_state.analyzed_data:
     total_score = 0
     all_answered = True
     for i, config in enumerate(quiz_configs):
-        q_key = f"quiz_v20_{i}"
+        q_key = f"quiz_vFinal_{i}"
         st.markdown(f'<div class="quiz-outer-box"><div style="line-height: 1.2;"><span style="color: #7d8dec; font-weight: 900; font-size: 1.2rem;">Q{i+1}.</span> <span style="color: white; font-size: 1.1rem; font-weight: 700;">{config["q"]}</span></div>', unsafe_allow_html=True)
-        
         opts = ["명사", "동사", "형용사", "부사"] if config["type"] == "pos" else ["데이터 확인", "감성적", "활기찬", "조용한"] if config["type"] == "fixed" else [f"{len(df_counts)}개", f"{len(df_counts)+5}개", f"{len(df_counts)-2}개", "10개"]
-        
         if q_key not in st.session_state:
             random.shuffle(opts)
             st.session_state[q_key] = opts
-            
-        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_v20_{q_key}", label_visibility="collapsed")
+        ans = st.radio(f"R_{q_key}", st.session_state[q_key], index=None, key=f"ans_vFinal_{q_key}", label_visibility="collapsed")
         st.markdown("</div>", unsafe_allow_html=True)
-        
         if ans:
             if ans == config["a"]:
                 st.markdown('<div class="custom-result-box correct-box"><span class="result-title" style="color:#7d8dec;">🎉 정답입니다!</span></div>', unsafe_allow_html=True)
@@ -264,7 +267,6 @@ if st.session_state.analyzed_data:
                 st.markdown(f'<div class="custom-result-box wrong-box"><span class="result-title" style="color:#9D50BB;">아쉬워요!</span><span style="color:white; opacity:0.8;">정답: {config["a"]}</span></div>', unsafe_allow_html=True)
         else: all_answered = False
 
-    # 최종 결과 및 다운로드 버튼
     if all_answered:
         st.divider()
         score_class = "score-pass-premium" if total_score >= 60 else "score-fail-premium"
@@ -274,18 +276,17 @@ if st.session_state.analyzed_data:
             <div class="score-container-premium {score_class}">
                 <div class="score-label-premium">LEARNING REPORT</div>
                 <div class="score-number-premium {text_color_class}">{total_score} / 100</div>
-                <div class="score-status-text">완벽한 분석입니다! 결과를 저장해 보세요.</div>
+                <div class="score-status-text">완벽한 분석입니다! 아래 버튼을 통해 리포트를 저장하세요.</div>
             </div>
         ''', unsafe_allow_html=True)
         
-        # 다운로드 버튼 영역
-        c1, c2, c3 = st.columns(3)
-        with c1:
+        # --- 반반 꽉 찬 다운로드 버튼 ---
+        col_pdf, col_txt = st.columns(2)
+        with col_pdf:
             if FPDF_AVAILABLE:
                 pdf_data = create_pdf_report(data, total_score)
-                st.download_button("📥 PDF 리포트", data=pdf_data, file_name="Lyric_Report.pdf", mime="application/pdf")
-        with c2:
+                st.download_button("📥 PDF 리포트 다운로드", data=pdf_data, file_name="Lyric_Report.pdf", mime="application/pdf")
+            else: st.info("PDF 모듈 미설치")
+        with col_txt:
             txt_data = create_txt_report(data, total_score, st.session_state.translated_lines)
-            st.download_button("📄 TXT 리포트", data=txt_data, file_name="Lyric_Report.txt", mime="text/plain")
-        with c3:
-            st.markdown("<div style='text-align:center; padding-top:10px;'><span style='color:#8b92b2; font-size:0.9rem;'>📸 PNG 저장은<br><b>Win+Shift+S</b> 캡처!</span></div>", unsafe_allow_html=True)
+            st.download_button("📄 TXT 리포트 다운로드", data=txt_data, file_name="Lyric_Report.txt", mime="text/plain")
