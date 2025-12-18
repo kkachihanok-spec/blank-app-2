@@ -22,7 +22,7 @@ if 'analyzed_data' not in st.session_state:
 if 'translated_lines' not in st.session_state:
     st.session_state.translated_lines = []
 
-# 3. 커스텀 CSS (합격 점수 컬러만 #516df4로 변경)
+# 3. 커스텀 CSS (프리미엄 다크 테마 및 합격 점수 컬러 보정)
 st.markdown("""
     <style>
     .stApp {
@@ -106,11 +106,18 @@ st.markdown("""
         margin: 10px 0 20px 0 !important; letter-spacing: -2px; 
     }
     
-    /* 🔥 [수정] 합격 점수 컬러를 #516df4로 변경 */
     .score-text-fail { color: #AF40FF !important; -webkit-text-fill-color: #AF40FF !important; background: none !important; }
     .score-text-pass { color: #516df4 !important; -webkit-text-fill-color: #516df4 !important; background: none !important; }
     
     .score-status-text { font-size: 1.28rem !important; font-weight: 700; color: white; opacity: 1.0; margin-top: 5px !important; }
+
+    /* 가이드 카드 스타일 */
+    .guide-link-card {
+        background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; 
+        text-align: center; color: #8b92b2 !important; border: 1px solid rgba(255,255,255,0.1);
+        text-decoration: none; display: block; transition: all 0.2s;
+    }
+    .guide-link-card:hover { background: rgba(81, 109, 244, 0.15); border-color: #516df4; color: white !important; }
 
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -258,3 +265,32 @@ if st.session_state.analyzed_data:
                 <div class="score-status-text">{status_msg}</div>
             </div>
         ''', unsafe_allow_html=True)
+
+        # --- [추가된 섹션] Master's Guide: 조언 및 레퍼런스 ---
+        st.divider()
+        
+        if total_score >= 80:
+            guide_title = "🏆 K-POP 마스터를 위한 심화 조언"
+            advice = "이미 훌륭한 실력을 갖추고 계시네요! 이제 가사의 <b>'은유적 표현'</b>이나 <b>'신조어'</b>에 주목해 보세요. 한국의 문학 작품이나 에세이를 병행하면 표현의 깊이가 달라질 거예요."
+        elif total_score >= 40:
+            guide_title = "📚 실력 향상을 위한 단계별 조언"
+            advice = "가장 많이 쓰인 '최빈 단어'들을 활용해 직접 문장을 만들어 보세요. 노래의 멜로디와 함께 단어를 외우면 기억에 훨씬 오래 남습니다. 드라마 대본(스크립트) 공부를 추천해요!"
+        else:
+            guide_title = "🌱 기초를 탄탄하게 만드는 조언"
+            advice = "조급해하지 마세요! 가사 속의 <b>'명사'</b>부터 하나씩 수집해 보는 건 어떨까요? 좋아하는 가수의 인터뷰 영상을 자막과 함께 보며 발음을 익히는 것부터 시작해 보세요."
+
+        with st.expander(f"✨ {guide_title} (클릭하여 확인)", expanded=True):
+            st.markdown(f"""
+            <div style="background: rgba(81, 109, 244, 0.05); padding: 25px; border-radius: 12px; border: 1px solid rgba(81, 109, 244, 0.2);">
+                <h4 style="color: #7d8dec; margin-top: 0; font-weight: 800;">📝 학습 가이드</h4>
+                <p style="color: #FFFFFF; line-height: 1.7; font-size: 1.1rem; margin-bottom: 25px;">{advice}</p>
+                <hr style="border-color: rgba(255,255,255,0.1); margin-bottom: 25px;">
+                <h4 style="color: #7d8dec; font-weight: 800; margin-bottom: 15px;">🔗 추천 학습 레퍼런스</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <a href="https://dict.naver.com" target="_blank" class="guide-link-card">🟢 네이버 국어사전</a>
+                    <a href="https://www.topik.go.kr" target="_blank" class="guide-link-card">🎓 TOPIK 공식 홈페이지</a>
+                    <a href="https://www.sejonghakdang.org" target="_blank" class="guide-link-card">🏫 세종학당재단</a>
+                    <a href="https://vlive.tv" target="_blank" class="guide-link-card">📺 K-Contents 학습</a>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
